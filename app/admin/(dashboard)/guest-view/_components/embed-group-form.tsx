@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   createEmbedGroupSection,
   updateEmbedGroupSection,
@@ -32,6 +32,12 @@ export function EmbedGroupForm({
 }) {
   const action = section ? updateEmbedGroupSection.bind(null, section.id) : createEmbedGroupSection;
   const [state, formAction, isPending] = useActionState(action, initialState);
+
+  useEffect(() => {
+    if (state?.message === "Section added." || state?.message === "Section updated.") {
+      onDone?.();
+    }
+  }, [state, onDone]);
 
   const [rows, setRows] = useState<EmbedRow[]>(
     section && section.embeds.length > 0

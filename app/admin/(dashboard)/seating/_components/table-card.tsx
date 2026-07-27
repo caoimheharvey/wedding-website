@@ -27,6 +27,14 @@ export function TableCard({
   const [selectedGuestId, setSelectedGuestId] = useState("");
   const [isPending, startTransition] = useTransition();
 
+  // Adjust state during render (React's recommended alternative to an
+  // effect here) rather than after commit, avoiding an extra render tick.
+  const [handledState, setHandledState] = useState(state);
+  if (state !== handledState) {
+    setHandledState(state);
+    if (state?.message === "Table updated.") setIsEditing(false);
+  }
+
   function handleAssign() {
     if (!selectedGuestId) return;
     startTransition(async () => {

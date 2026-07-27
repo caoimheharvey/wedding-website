@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { createTextSection, updateTextSection, type GuestViewSectionActionState } from "@/lib/guest-view/actions";
 import { aiRewriteSection, aiTranslateSection } from "@/lib/guest-view/ai-actions";
 import { WEDDING_PARTY_ROLE_LABELS, WEDDING_PARTY_ROLES } from "@/lib/guests/types";
@@ -23,6 +23,12 @@ export function TextSectionForm({
   const [bodyZh, setBodyZh] = useState(section?.body.zh ?? "");
   const [aiPending, startAiTransition] = useTransition();
   const [aiMessage, setAiMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (state?.message === "Section added." || state?.message === "Section updated.") {
+      onDone?.();
+    }
+  }, [state, onDone]);
 
   function handleTranslate(target: "fr" | "zh") {
     if (!bodyEn.trim()) {

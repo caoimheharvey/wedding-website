@@ -1,37 +1,104 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { PREFERRED_LANGUAGE_LABELS, type PreferredLanguage } from "@/lib/guests/types";
+import { getGuestById, listGuests } from "@/lib/guests/queries";
 import { getSiteSettings } from "@/lib/rsvp/queries";
+import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { isLocalTestMode } from "@/lib/local-test";
+import { getGuestSession } from "@/lib/guest-auth/session";
+import { signOutGuest } from "@/lib/guest-auth/actions";
 import { PREVIEW_PERSONAS, getPreviewPersona } from "@/lib/guest-site/preview-personas";
+import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { GuestSiteView } from "./_components/guest-site-view";
+import { GuestViewSections } from "./_components/guest-view-sections";
+import { RsvpForm } from "./_components/rsvp-form";
 import { LanguageTabs, isPreferredLanguage } from "./_components/language-tabs";
 
-export default async function GuestSignInPage({
+export default async function GuestHomePage({
   searchParams,
 }: {
   searchParams: Promise<{ role?: string; lang?: string }>;
 }) {
-  if (!isLocalTestMode()) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-sm tracking-[0.3em] text-aegean uppercase">Guests</p>
-        <h1 className="font-display text-4xl text-ink">Caoimhe &amp; Alexandre</h1>
-        <p className="max-w-sm text-foreground/70">
-          Guest sign-in is coming soon. Check back closer to the wedding.
-        </p>
-      </main>
-    );
+  const { role, lang } = await searchParams;
+  const session = await getGuestSession();
+
+  if (session) {
+    const guest = await getGuestById(session.guestId);
+    if (guest) {
+      const [siteSettings, allSections, allGuests] = await Promise.all([
+        getSiteSettings(),
+        listGuestViewSections(),
+        listGuests(),
+      ]);
+
+      const language = isPreferredLanguage(lang) ? lang : guest.preferredLanguage;
+      const effectiveDeadline = guest.rsvpDeadlineOverride ?? siteSettings.defaultRsvpDeadline;
+      const effectiveStatus = getEffectiveRsvpStatus(guest.rsvpStatus, effectiveDeadline);
+      const sections = visibleSectionsFor(allSections, guest.partyRoles);
+      const delegateFor = allGuests.filter((candidate) => candidate.rsvpDelegateOf === guest.id);
+      const delegateHolder = guest.rsvpDelegateOf
+        ? allGuests.find((candidate) => candidate.id === guest.rsvpDelegateOf)
+        : undefined;
+
+      return (
+        <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
+          <form action={signOutGuest} className="flex w-full justify-end">
+            <button
+              type="submit"
+              className="text-xs font-medium text-foreground/40 hover:text-aegean"
+            >
+              Sign out
+            </button>
+          </form>
+
+          <LanguageTabs currentLanguage={language} hrefFor={(code) => `/guest?lang=${code}`} />
+
+          <GuestSiteView
+            firstName={guest.firstName}
+            language={language}
+            effectiveStatus={effectiveStatus}
+            effectiveDeadline={effectiveDeadline}
+          />
+
+          <RsvpForm
+            guest={guest}
+            delegateFor={delegateFor}
+            language={language}
+            deadlinePassed={effectiveStatus === "deadline_missed"}
+            delegateName={
+              delegateHolder ? `${delegateHolder.firstName} ${delegateHolder.lastName}` : undefined
+            }
+          />
+
+          <GuestViewSections sections={sections} language={language} />
+        </main>
+      );
+    }
   }
 
-  const { role, lang } = await searchParams;
+  if (!isLocalTestMode()) {
+    redirect("/guest/sign-in");
+  }
+
+  // Local test mode, no session: keep the role/language persona picker so
+  // the couple can quickly check "what does role X see" without needing to
+  // complete a real sign-in for every check.
   const language: PreferredLanguage = isPreferredLanguage(lang) ? lang : "en";
   const persona = role ? getPreviewPersona(role) : null;
-  const siteSettings = await getSiteSettings();
+  const [siteSettings, allSections] = await Promise.all([
+    getSiteSettings(),
+    listGuestViewSections(),
+  ]);
+  const sections = persona ? visibleSectionsFor(allSections, persona.partyRoles) : [];
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
       <div className="w-full rounded-lg bg-terracotta px-4 py-2 text-center text-xs font-medium text-whitewash">
-        Local test mode — real guest sign-in isn&apos;t built yet
+        Local test mode. Real guests sign in at{" "}
+        <Link href="/guest/sign-in" className="underline">
+          /guest/sign-in
+        </Link>
+        .
       </div>
 
       <h1 className="font-display text-2xl text-ink">Preview the guest view</h1>
@@ -93,6 +160,7 @@ export default async function GuestSignInPage({
             effectiveDeadline={siteSettings.defaultRsvpDeadline}
             delegateFor={persona.delegateFor}
           />
+          <GuestViewSections sections={sections} language={language} />
         </>
       )}
     </main>

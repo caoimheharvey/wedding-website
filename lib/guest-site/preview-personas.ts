@@ -13,6 +13,8 @@ export interface PreviewPersona {
   firstName: string;
   lastName: string;
   rsvpStatus: EffectiveRsvpStatus;
+  /** Drives which role-restricted guest-view sections this persona sees. */
+  partyRoles: WeddingPartyRole[];
   /** Sample names, only set for the RSVP-delegate persona. */
   delegateFor?: string[];
 }
@@ -23,6 +25,7 @@ const rolePersonas: PreviewPersona[] = WEDDING_PARTY_ROLES.map((role) => ({
   firstName: "Sample",
   lastName: WEDDING_PARTY_ROLE_LABELS[role],
   rsvpStatus: "invited",
+  partyRoles: [role],
 }));
 
 export const PREVIEW_PERSONAS: PreviewPersona[] = [
@@ -32,6 +35,7 @@ export const PREVIEW_PERSONAS: PreviewPersona[] = [
     firstName: "Alex",
     lastName: "Guest",
     rsvpStatus: "invited",
+    partyRoles: [],
   },
   ...rolePersonas,
   {
@@ -40,6 +44,7 @@ export const PREVIEW_PERSONAS: PreviewPersona[] = [
     firstName: "Jane",
     lastName: "Doe",
     rsvpStatus: "yes",
+    partyRoles: [],
     delegateFor: ["Jack", "John", "Mary Doe"],
   },
 ];

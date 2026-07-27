@@ -13,6 +13,14 @@ export function BudgetItemRow({ item }: { item: BudgetItem }) {
   const [state, formAction, isSaving] = useActionState(updateAction, initialState);
   const [isPending, startTransition] = useTransition();
 
+  // Adjust state during render (React's recommended alternative to an
+  // effect here) rather than after commit, avoiding an extra render tick.
+  const [handledState, setHandledState] = useState(state);
+  if (state !== handledState) {
+    setHandledState(state);
+    if (state?.message === "Item updated.") setIsEditing(false);
+  }
+
   function handleDelete() {
     if (!window.confirm(`Delete "${item.name}"?`)) return;
     startTransition(async () => {

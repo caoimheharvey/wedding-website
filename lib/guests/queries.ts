@@ -1,7 +1,12 @@
 import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
-import { mockCountLinkedPlusOnes, mockGetGuestById, mockListGuests } from "./mock-store";
+import {
+  mockCountLinkedPlusOnes,
+  mockGetGuestByEmail,
+  mockGetGuestById,
+  mockListGuests,
+} from "./mock-store";
 import type { Guest, GuestWithPlusOnes, RelationshipPriority } from "./types";
 
 interface GuestRow {
@@ -109,6 +114,61 @@ export async function getGuestById(guestId: string): Promise<Guest | null> {
 
   if (error) throw new Error(`Failed to load guest: ${error.message}`);
   return data ? mapRow(data as GuestRow) : null;
+}
+
+export async function getGuestByEmail(email: string): Promise<Guest | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
+
+  if (isLocalTestMode()) return mockGetGuestByEmail(normalized);
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guests")
+    .select("*")
+    .ilike("email", normalized)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to look up guest: ${error.message}`);
+  return data ? mapRow(data as GuestRow) : null;
+}
+
+function normalizePhone(phone: string): string {
+  return phone.replace(/[^\d]/g, "");
+}
+
+/**
+ * Matches a guest by full name plus either their email or phone on file —
+ * used for the "quick sign-in" flow so guests without easy email access
+ * (e.g. checking on a shared family device) can get in without a mailed
+ * link. Requires both the name AND a contact detail to match, since name
+ * alone is guessable within a family that shares a surname.
+ */
+export async function findGuestByNameAndContact(
+  fullName: string,
+  contact: string,
+): Promise<Guest | null> {
+  const normalizedName = fullName.trim().toLowerCase().replace(/\s+/g, " ");
+  const normalizedContact = contact.trim().toLowerCase();
+  if (!normalizedName || !normalizedContact) return null;
+
+  const normalizedContactPhone = normalizePhone(contact);
+  const guests = await listGuests();
+
+  return (
+    guests.find((guest) => {
+      const guestName = `${guest.firstName} ${guest.lastName}`.trim().toLowerCase();
+      if (guestName !== normalizedName) return false;
+
+      const emailMatches = guest.email && guest.email.toLowerCase() === normalizedContact;
+      const phoneMatches =
+        normalizedContactPhone.length >= 4 &&
+        guest.phone &&
+        normalizePhone(guest.phone) === normalizedContactPhone;
+
+      return Boolean(emailMatches || phoneMatches);
+    }) ?? null
+  );
 }
 
 export async function countLinkedPlusOnes(guestId: string): Promise<number> {

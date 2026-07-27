@@ -270,6 +270,10 @@ export function mockGetGuestById(id: string): Guest | null {
   return guests.find((guest) => guest.id === id) ?? null;
 }
 
+export function mockGetGuestByEmail(email: string): Guest | null {
+  return guests.find((guest) => guest.email?.toLowerCase() === email) ?? null;
+}
+
 export function mockCountLinkedPlusOnes(id: string): number {
   return guests.filter((guest) => guest.isPlusOneOf === id).length;
 }
