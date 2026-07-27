@@ -20,6 +20,7 @@ interface GuestRow {
   invited_by: Guest["invitedBy"];
   rsvp_deadline_override: string | null;
   rsvp_status: Guest["rsvpStatus"];
+  seating_table_id: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -42,6 +43,7 @@ function mapRow(row: GuestRow): Guest {
     invitedBy: row.invited_by,
     rsvpDeadlineOverride: row.rsvp_deadline_override,
     rsvpStatus: row.rsvp_status,
+    seatingTableId: row.seating_table_id,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

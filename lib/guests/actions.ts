@@ -42,7 +42,7 @@ function toGuestRow(values: z.infer<typeof guestFormSchema>) {
 
 function toGuestFields(
   values: z.infer<typeof guestFormSchema>,
-): Omit<Guest, "id" | "createdAt" | "updatedAt"> {
+): Omit<Guest, "id" | "createdAt" | "updatedAt" | "seatingTableId"> {
   return {
     firstName: values.firstName,
     lastName: values.lastName,

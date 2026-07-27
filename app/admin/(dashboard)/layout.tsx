@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/admin/vendors", label: "Vendors" },
   { href: "/admin/messaging", label: "Messaging" },
   { href: "/admin/seating", label: "Seating" },
+  { href: "/admin/guest-view", label: "Guest View" },
 ];
 
 export default async function AdminLayout({

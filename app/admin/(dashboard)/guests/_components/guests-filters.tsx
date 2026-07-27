@@ -31,6 +31,7 @@ export function GuestsFilters({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
+      <span className="text-sm font-medium text-ink">Filter:</span>
       <select
         value={priority}
         onChange={(event) =>

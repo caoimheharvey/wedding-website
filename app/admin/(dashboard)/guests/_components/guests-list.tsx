@@ -4,6 +4,7 @@ import { GuestRow, GuestCard } from "./guest-list-items";
 
 export function GuestsList({
   guests,
+  nestedIds,
   nameById,
   effectiveStatusById,
   selected,
@@ -11,6 +12,7 @@ export function GuestsList({
   showPreviewLink,
 }: {
   guests: GuestWithPlusOnes[];
+  nestedIds: Set<string>;
   nameById: Record<string, string>;
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
   selected: Set<string>;
@@ -46,6 +48,7 @@ export function GuestsList({
               delegateName={nameFor(guest.rsvpDelegateOf)}
               plusOneOfName={nameFor(guest.isPlusOneOf)}
               effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
+              isNested={nestedIds.has(guest.id)}
               selected={selected.has(guest.id)}
               onToggleSelect={onToggleSelect}
               showPreviewLink={showPreviewLink}
@@ -55,19 +58,30 @@ export function GuestsList({
       </table>
 
       <div className="flex flex-col gap-3 sm:hidden">
-        {guests.map((guest) => (
-          <GuestCard
-            key={guest.id}
-            guest={guest}
-            linkedPlusOneCount={guest.plusOnes.length}
-            delegateName={nameFor(guest.rsvpDelegateOf)}
-            plusOneOfName={nameFor(guest.isPlusOneOf)}
-            effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
-            selected={selected.has(guest.id)}
-            onToggleSelect={onToggleSelect}
-            showPreviewLink={showPreviewLink}
-          />
-        ))}
+        {guests.map((guest) => {
+          const isNested = nestedIds.has(guest.id);
+          const card = (
+            <GuestCard
+              key={guest.id}
+              guest={guest}
+              linkedPlusOneCount={guest.plusOnes.length}
+              delegateName={nameFor(guest.rsvpDelegateOf)}
+              plusOneOfName={nameFor(guest.isPlusOneOf)}
+              effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
+              isNested={isNested}
+              selected={selected.has(guest.id)}
+              onToggleSelect={onToggleSelect}
+              showPreviewLink={showPreviewLink}
+            />
+          );
+          return isNested ? (
+            <div key={guest.id} className="ml-4 border-l-2 border-sand pl-3">
+              {card}
+            </div>
+          ) : (
+            card
+          );
+        })}
       </div>
     </div>
   );

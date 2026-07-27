@@ -15,10 +15,12 @@ function GuestMeta({
   guest,
   delegateName,
   plusOneOfName,
+  isNested,
 }: {
   guest: GuestWithPlusOnes;
   delegateName?: string;
   plusOneOfName?: string;
+  isNested?: boolean;
 }) {
   return (
     <>
@@ -29,7 +31,8 @@ function GuestMeta({
           ))}
         </div>
       )}
-      {guest.isPlusOneOf && plusOneOfName && (
+      {/* When nested under their primary, indentation already conveys this. */}
+      {!isNested && guest.isPlusOneOf && plusOneOfName && (
         <div className="mt-1 text-xs text-foreground/50">Plus-one of {plusOneOfName}</div>
       )}
       {guest.rsvpDelegateFor.length > 0 && (
@@ -79,6 +82,7 @@ export function GuestRow({
   delegateName,
   plusOneOfName,
   effectiveStatus,
+  isNested = false,
   selected,
   onToggleSelect,
   showPreviewLink,
@@ -88,6 +92,7 @@ export function GuestRow({
   delegateName?: string;
   plusOneOfName?: string;
   effectiveStatus: EffectiveRsvpStatus;
+  isNested?: boolean;
   selected?: boolean;
   onToggleSelect?: (guestId: string) => void;
   showPreviewLink?: boolean;
@@ -104,8 +109,16 @@ export function GuestRow({
         </td>
       )}
       <td className="py-3 pr-4">
-        <span className="font-medium text-ink">{guestName(guest)}</span>
-        <GuestMeta guest={guest} delegateName={delegateName} plusOneOfName={plusOneOfName} />
+        <span className={isNested ? "pl-4 text-foreground/80" : "font-medium text-ink"}>
+          {isNested && "↳ "}
+          {guestName(guest)}
+        </span>
+        <GuestMeta
+          guest={guest}
+          delegateName={delegateName}
+          plusOneOfName={plusOneOfName}
+          isNested={isNested}
+        />
       </td>
       <td className="py-3 pr-4">
         <div className="flex flex-col items-start gap-1">
@@ -159,6 +172,7 @@ export function GuestCard({
   delegateName,
   plusOneOfName,
   effectiveStatus,
+  isNested = false,
   selected,
   onToggleSelect,
   showPreviewLink,
@@ -168,6 +182,7 @@ export function GuestCard({
   delegateName?: string;
   plusOneOfName?: string;
   effectiveStatus: EffectiveRsvpStatus;
+  isNested?: boolean;
   selected?: boolean;
   onToggleSelect?: (guestId: string) => void;
   showPreviewLink?: boolean;
@@ -179,7 +194,12 @@ export function GuestCard({
           <SelectCheckbox guestId={guest.id} selected={selected} onToggleSelect={onToggleSelect} />
           <div>
             <p className="font-medium text-ink">{guestName(guest)}</p>
-            <GuestMeta guest={guest} delegateName={delegateName} plusOneOfName={plusOneOfName} />
+            <GuestMeta
+              guest={guest}
+              delegateName={delegateName}
+              plusOneOfName={plusOneOfName}
+              isNested={isNested}
+            />
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">

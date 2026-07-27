@@ -96,6 +96,7 @@ export interface Guest {
   /** ISO date (YYYY-MM-DD). Overrides the site-wide default RSVP deadline for this guest only. */
   rsvpDeadlineOverride: string | null;
   rsvpStatus: RsvpStatus;
+  seatingTableId: string | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
