@@ -2,10 +2,15 @@ import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import {
+  canDelegateRsvpFor,
+  type RsvpDelegatePair,
+} from "@/lib/guests/rsvp-delegates";
+import {
   mockCountLinkedPlusOnes,
   mockGetGuestByEmail,
   mockGetGuestById,
   mockListGuests,
+  mockListRsvpDelegatePairs,
 } from "./mock-store";
 import type { Guest, GuestWithPlusOnes, RelationshipPriority } from "./types";
 
@@ -19,7 +24,6 @@ interface GuestRow {
   preferred_language: Guest["preferredLanguage"];
   party_roles: Guest["partyRoles"] | null;
   is_plus_one_of: string | null;
-  rsvp_delegate_of: string | null;
   plus_one_status: Guest["plusOneStatus"];
   plus_one_requested_relationship: string | null;
   invited_by: Guest["invitedBy"];
@@ -42,7 +46,6 @@ function mapRow(row: GuestRow): Guest {
     preferredLanguage: row.preferred_language,
     partyRoles: row.party_roles ?? [],
     isPlusOneOf: row.is_plus_one_of,
-    rsvpDelegateOf: row.rsvp_delegate_of,
     plusOneStatus: row.plus_one_status,
     plusOneRequestedRelationship: row.plus_one_requested_relationship,
     invitedBy: row.invited_by,
@@ -53,6 +56,22 @@ function mapRow(row: GuestRow): Guest {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+export async function listRsvpDelegatePairs(): Promise<RsvpDelegatePair[]> {
+  if (isLocalTestMode()) return mockListRsvpDelegatePairs();
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("guest_rsvp_delegates")
+    .select("guest_id, delegate_id");
+
+  if (error) throw new Error(`Failed to load RSVP delegates: ${error.message}`);
+
+  return ((data as { guest_id: string; delegate_id: string }[]) ?? []).map((row) => ({
+    guestId: row.guest_id,
+    delegateId: row.delegate_id,
+  }));
 }
 
 export async function listGuests(): Promise<Guest[]> {
@@ -72,22 +91,30 @@ export async function listGuests(): Promise<Guest[]> {
 
 /**
  * Guests grouped with their linked plus-ones nested underneath them, plus
- * (independently) who each guest RSVPs on behalf of.
+ * who each guest may RSVP for and who may RSVP for them.
  */
 export async function listGuestsWithPlusOnes(): Promise<GuestWithPlusOnes[]> {
-  const guests = await listGuests();
+  const [guests, pairs] = await Promise.all([listGuests(), listRsvpDelegatePairs()]);
   const guestIds = new Set(guests.map((guest) => guest.id));
 
   const withExtras: GuestWithPlusOnes[] = guests.map((guest) => ({
     ...guest,
     plusOnes: [],
     rsvpDelegateFor: [],
+    rsvpDelegatedBy: [],
   }));
   const byId = new Map(withExtras.map((guest) => [guest.id, guest]));
 
-  for (const guest of guests) {
-    const holder = guest.rsvpDelegateOf && byId.get(guest.rsvpDelegateOf);
-    if (holder) holder.rsvpDelegateFor.push(guest);
+  for (const guest of withExtras) {
+    for (const other of guests) {
+      if (other.id === guest.id) continue;
+      if (canDelegateRsvpFor(guest.id, other.id, guests, pairs)) {
+        guest.rsvpDelegateFor.push(other);
+      }
+      if (canDelegateRsvpFor(other.id, guest.id, guests, pairs)) {
+        guest.rsvpDelegatedBy.push(other);
+      }
+    }
   }
 
   const primaries = withExtras.filter(

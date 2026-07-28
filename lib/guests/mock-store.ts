@@ -1,5 +1,6 @@
 import "server-only";
 import { SEATING_SEED_TABLE_IDS } from "@/lib/seating/mock-store";
+import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import type { Guest } from "./types";
 
 /**
@@ -7,7 +8,7 @@ import type { Guest } from "./types";
  * the admin UI can be exercised without a real Supabase project. Resets on
  * every dev server restart — intentional, no persistence needed here.
  */
-let guests: Guest[] = seed();
+let rsvpDelegatePairs: RsvpDelegatePair[] = [];
 
 type GuestOverrides = Partial<Guest> & Pick<Guest, "firstName">;
 
@@ -22,7 +23,6 @@ function makeGuest(overrides: GuestOverrides): Guest {
     preferredLanguage: "en",
     partyRoles: [],
     isPlusOneOf: null,
-    rsvpDelegateOf: null,
     plusOneStatus: null,
     plusOneRequestedRelationship: null,
     invitedBy: "joint",
@@ -68,7 +68,6 @@ function seed(): Guest[] {
     relationshipPriority: 5,
     preferredLanguage: "fr",
     isPlusOneOf: julien.id,
-    rsvpDelegateOf: julien.id, // Julien RSVPs for his own plus-one.
     invitedBy: "alexandre",
   });
   const mei = makeGuest({
@@ -77,7 +76,6 @@ function seed(): Guest[] {
     phone: "+86 138 0000 0000",
     relationshipPriority: 3,
     preferredLanguage: "zh",
-    rsvpDelegateOf: mom.id, // Not a plus-one — Fionnuala just handles her RSVP.
     invitedBy: "joint",
     // In the past relative to today, and she never responded — demonstrates
     // the "Deadline missed" derived status.
@@ -99,12 +97,11 @@ function seed(): Guest[] {
     relationshipPriority: 5,
     preferredLanguage: "zh",
     isPlusOneOf: chenWei.id,
-    rsvpDelegateOf: chenWei.id,
     invitedBy: "joint",
     rsvpStatus: "yes",
   });
 
-  return [
+  const seeded = [
     mom,
     julien,
     amelie,
@@ -256,7 +253,13 @@ function seed(): Guest[] {
       rsvpStatus: "yes",
     }),
   ];
+
+  rsvpDelegatePairs = [{ guestId: mei.id, delegateId: mom.id }];
+
+  return seeded;
 }
+
+let guests: Guest[] = seed();
 
 export function mockListGuests(): Guest[] {
   return [...guests].sort(
@@ -330,15 +333,27 @@ export function mockSetGuestRsvpStatus(id: string, status: Guest["rsvpStatus"]):
   guests = guests.map((guest) => (guest.id === id ? { ...guest, rsvpStatus: status } : guest));
 }
 
-/** Deletes a guest and unlinks any plus-ones/RSVP delegations, mirroring the DB's ON DELETE SET NULL. */
+/** Deletes a guest and unlinks plus-ones plus explicit RSVP delegate rows. */
 export function mockDeleteGuest(id: string): void {
   guests = guests
     .filter((guest) => guest.id !== id)
-    .map((guest) => {
-      const isPlusOneOf = guest.isPlusOneOf === id ? null : guest.isPlusOneOf;
-      const rsvpDelegateOf = guest.rsvpDelegateOf === id ? null : guest.rsvpDelegateOf;
-      return isPlusOneOf !== guest.isPlusOneOf || rsvpDelegateOf !== guest.rsvpDelegateOf
-        ? { ...guest, isPlusOneOf, rsvpDelegateOf }
-        : guest;
-    });
+    .map((guest) =>
+      guest.isPlusOneOf === id ? { ...guest, isPlusOneOf: null } : guest,
+    );
+  rsvpDelegatePairs = rsvpDelegatePairs.filter(
+    (pair) => pair.guestId !== id && pair.delegateId !== id,
+  );
+}
+
+export function mockListRsvpDelegatePairs(): RsvpDelegatePair[] {
+  return [...rsvpDelegatePairs];
+}
+
+export function mockSetGuestRsvpDelegates(guestId: string, delegateIds: string[]): void {
+  rsvpDelegatePairs = [
+    ...rsvpDelegatePairs.filter((pair) => pair.guestId !== guestId),
+    ...delegateIds
+      .filter((delegateId) => delegateId !== guestId)
+      .map((delegateId) => ({ guestId, delegateId })),
+  ];
 }

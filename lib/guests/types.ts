@@ -88,8 +88,6 @@ export interface Guest {
   preferredLanguage: PreferredLanguage;
   partyRoles: WeddingPartyRole[];
   isPlusOneOf: string | null;
-  /** Guest id who submits this guest's RSVP. Null means they RSVP for themselves. */
-  rsvpDelegateOf: string | null;
   plusOneStatus: PlusOneStatus | null;
   plusOneRequestedRelationship: string | null;
   invitedBy: InvitedBy;
@@ -104,6 +102,8 @@ export interface Guest {
 
 export interface GuestWithPlusOnes extends Guest {
   plusOnes: GuestWithPlusOnes[];
-  /** Other guests whose RSVP this guest submits on behalf of. */
+  /** Other guests whose RSVP this guest may submit. */
   rsvpDelegateFor: Guest[];
+  /** Other guests who may submit this guest's RSVP. */
+  rsvpDelegatedBy: Guest[];
 }

@@ -9,6 +9,7 @@ import {
 import { submitContactInfo } from "@/lib/guests/guest-actions";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
 import { contactEditableGuests } from "@/lib/guest-site/contact-editable-guests";
+import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 
@@ -29,20 +30,22 @@ function fieldsFromGuest(guest: Guest): ContactFields {
 export function ContactInfoForm({
   guest,
   allGuests,
+  delegatePairs,
   language,
   previewGuestId,
   title,
 }: {
   guest: Guest;
   allGuests: Guest[];
+  delegatePairs: RsvpDelegatePair[];
   language: PreferredLanguage;
   previewGuestId?: string;
   title?: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language].contactInfoForm;
   const people = useMemo(
-    () => contactEditableGuests(guest, allGuests),
-    [guest, allGuests],
+    () => contactEditableGuests(guest, allGuests, delegatePairs),
+    [guest, allGuests, delegatePairs],
   );
   const peopleSignature = people
     .map((person) => `${person.id}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`)
@@ -89,13 +92,15 @@ export function ContactInfoForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-lg border border-border bg-surface p-4 text-left"
+      className="w-full rounded-lg border border-border bg-surface p-4 text-center"
     >
-      <h2 className="mb-1 font-display text-lg text-ink">{title || strings.heading}</h2>
-      <p className="mb-3 text-sm text-foreground/60">{strings.description}</p>
-      {showLinkedNote && (
-        <p className="mb-4 text-xs text-foreground/50">{strings.linkedGuestsNote}</p>
-      )}
+      <div className="mb-4">
+        <h2 className="mb-1 font-display text-lg text-ink">{title || strings.heading}</h2>
+        <p className="text-sm text-foreground/60">{strings.description}</p>
+        {showLinkedNote && (
+          <p className="mt-3 text-xs text-foreground/50">{strings.linkedGuestsNote}</p>
+        )}
+      </div>
 
       <div className="flex flex-col gap-5">
         {people.map((person) => (
@@ -109,21 +114,21 @@ export function ContactInfoForm({
               value={fieldsByGuestId[person.id]?.lastName ?? ""}
               onChange={(event) => updateField(person.id, "lastName", event.target.value)}
               placeholder={strings.lastNamePlaceholder}
-              className="input"
+              className="input text-center"
             />
             <input
               type="email"
               value={fieldsByGuestId[person.id]?.email ?? ""}
               onChange={(event) => updateField(person.id, "email", event.target.value)}
               placeholder={strings.emailPlaceholder}
-              className="input"
+              className="input text-center"
             />
             <input
               type="tel"
               value={fieldsByGuestId[person.id]?.phone ?? ""}
               onChange={(event) => updateField(person.id, "phone", event.target.value)}
               placeholder={strings.phonePlaceholder}
-              className="input"
+              className="input text-center"
             />
           </div>
         ))}

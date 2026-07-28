@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { PreferredLanguage } from "@/lib/guests/types";
-import { getGuestById, listGuests } from "@/lib/guests/queries";
+import { getGuestById, listGuests, listRsvpDelegatePairs } from "@/lib/guests/queries";
+import {
+  rsvpDelegatesForGuest,
+  rsvpSubmitteesFor,
+} from "@/lib/guests/rsvp-delegates";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { isLocalTestMode } from "@/lib/local-test";
@@ -27,20 +31,19 @@ export default async function Home({
   if (session) {
     const guest = await getGuestById(session.guestId);
     if (guest) {
-      const [siteSettings, allSections, allGuests] = await Promise.all([
+      const [siteSettings, allSections, allGuests, delegatePairs] = await Promise.all([
         getSiteSettings(),
         listGuestViewSections(),
         listGuests(),
+        listRsvpDelegatePairs(),
       ]);
 
       const language = isPreferredLanguage(lang) ? lang : guest.preferredLanguage;
       const effectiveDeadline = guest.rsvpDeadlineOverride ?? siteSettings.defaultRsvpDeadline;
       const effectiveStatus = getEffectiveRsvpStatus(guest.rsvpStatus, effectiveDeadline);
       const sections = visibleSectionsFor(allSections, guest.partyRoles);
-      const delegateFor = allGuests.filter((candidate) => candidate.rsvpDelegateOf === guest.id);
-      const delegateHolder = guest.rsvpDelegateOf
-        ? allGuests.find((candidate) => candidate.id === guest.rsvpDelegateOf)
-        : undefined;
+      const rsvpSubmittees = rsvpSubmitteesFor(guest, allGuests, delegatePairs);
+      const rsvpDelegatedBy = rsvpDelegatesForGuest(guest, allGuests, delegatePairs);
 
       return (
         <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
@@ -66,13 +69,12 @@ export default async function Home({
             rsvp={{
               guest,
               allGuests,
-              delegateFor,
+              delegatePairs,
+              rsvpSubmittees,
+              rsvpDelegatedBy,
               deadlinePassed: effectiveStatus === "deadline_missed",
               effectiveStatus,
               effectiveDeadline,
-              delegateName: delegateHolder
-                ? `${delegateHolder.firstName} ${delegateHolder.lastName}`
-                : undefined,
             }}
           />
         </main>

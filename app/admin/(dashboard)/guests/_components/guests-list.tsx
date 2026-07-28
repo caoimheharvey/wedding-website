@@ -43,7 +43,6 @@ export function GuestsList({
               key={guest.id}
               guest={guest}
               linkedPlusOneCount={guest.plusOnes.length}
-              delegateName={nameFor(guest.rsvpDelegateOf)}
               plusOneOfName={nameFor(guest.isPlusOneOf)}
               effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
               isNested={nestedIds.has(guest.id)}
@@ -62,7 +61,6 @@ export function GuestsList({
               key={guest.id}
               guest={guest}
               linkedPlusOneCount={guest.plusOnes.length}
-              delegateName={nameFor(guest.rsvpDelegateOf)}
               plusOneOfName={nameFor(guest.isPlusOneOf)}
               effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
               isNested={isNested}

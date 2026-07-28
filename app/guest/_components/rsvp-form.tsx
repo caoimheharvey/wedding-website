@@ -8,26 +8,24 @@ import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 
 export function RsvpForm({
-  guest,
-  delegateFor,
+  rsvpSubmittees,
+  rsvpDelegatedBy,
   language,
   deadlinePassed,
-  delegateName,
   previewGuestId,
   title,
 }: {
-  guest: Guest;
-  delegateFor: Guest[];
+  rsvpSubmittees: Guest[];
+  rsvpDelegatedBy: Guest[];
   language: PreferredLanguage;
   deadlinePassed: boolean;
-  delegateName?: string;
   /** Local-test-only: lets the admin preview route submit without a real session. */
   previewGuestId?: string;
   /** Overrides the default heading — set from the Guest View section's title. */
   title?: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language].rsvpForm;
-  const people = [guest, ...delegateFor];
+  const people = rsvpSubmittees;
   const router = useRouter();
 
   const [statuses, setStatuses] = useState<Record<string, RsvpStatus>>(
@@ -57,14 +55,16 @@ export function RsvpForm({
     });
   }
 
+  const delegateNames = rsvpDelegatedBy.map((person) => guestDisplayName(person));
+
   return (
     <form
       onSubmit={handleSubmit}
       className="w-full rounded-lg border border-border bg-surface p-4 text-left"
     >
       <h2 className="mb-3 font-display text-lg text-ink">{title || strings.heading}</h2>
-      {guest.rsvpDelegateOf && delegateName && (
-        <p className="mb-3 text-xs text-foreground/50">{strings.delegateNote(delegateName)}</p>
+      {delegateNames.length > 0 && (
+        <p className="mb-3 text-xs text-foreground/50">{strings.delegateNote(delegateNames)}</p>
       )}
       {people.length > 1 && (
         <div className="mb-3 flex gap-3">

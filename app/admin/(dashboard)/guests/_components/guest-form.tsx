@@ -13,6 +13,7 @@ import {
   type Guest,
 } from "@/lib/guests/types";
 import { GuestPicker } from "./guest-picker";
+import { GuestDelegatesPicker } from "./guest-delegates-picker";
 import { PartyRolesPicker } from "./party-roles-picker";
 
 const initialState: GuestActionState = undefined;
@@ -21,10 +22,12 @@ export function GuestForm({
   guest,
   otherGuests,
   defaultRsvpDeadline,
+  defaultRsvpDelegateIds = [],
 }: {
   guest?: Guest;
   otherGuests: Guest[];
   defaultRsvpDeadline?: string | null;
+  defaultRsvpDelegateIds?: string[];
 }) {
   const action = guest ? updateGuest.bind(null, guest.id) : createGuest;
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -134,16 +137,15 @@ export function GuestForm({
         <GuestPicker name="isPlusOneOf" guests={otherGuests} defaultGuestId={guest?.isPlusOneOf} />
       </Field>
 
-      <Field label="RSVP handled by (default)" error={state?.errors?.rsvpDelegateOf?.[0]}>
-        <GuestPicker
-          name="rsvpDelegateOf"
+      <Field label="RSVP handled by" error={state?.errors?.rsvpDelegateIds?.[0]}>
+        <GuestDelegatesPicker
           guests={otherGuests}
-          defaultGuestId={guest?.rsvpDelegateOf}
-          placeholder="Leave blank if they RSVP for themselves…"
+          defaultDelegateIds={defaultRsvpDelegateIds}
         />
         <span className="text-xs font-normal text-foreground/50">
-          Just a starting point — the guest can always log in and submit their
-          own RSVP directly, whatever this is set to.
+          Optional — guests who may submit this person&apos;s RSVP. Plus-one
+          links grant delegation automatically. The guest can always log in and
+          submit their own RSVP.
         </span>
       </Field>
 

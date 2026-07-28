@@ -14,12 +14,10 @@ function guestName(guest: { firstName: string; lastName: string | null }) {
 
 function GuestMeta({
   guest,
-  delegateName,
   plusOneOfName,
   isNested,
 }: {
   guest: GuestWithPlusOnes;
-  delegateName?: string;
   plusOneOfName?: string;
   isNested?: boolean;
 }) {
@@ -41,8 +39,10 @@ function GuestMeta({
           RSVPs for: {guest.rsvpDelegateFor.map(guestName).join(", ")}
         </div>
       )}
-      {guest.rsvpDelegateOf && delegateName && (
-        <div className="mt-1 text-xs text-foreground/50">RSVP via {delegateName}</div>
+      {guest.rsvpDelegatedBy.length > 0 && (
+        <div className="mt-1 text-xs text-foreground/50">
+          RSVP via {guest.rsvpDelegatedBy.map(guestName).join(", ")}
+        </div>
       )}
       {guest.rsvpDeadlineOverride && (
         <div className="mt-1 text-xs text-gold">
@@ -80,7 +80,6 @@ function SelectCheckbox({
 export function GuestRow({
   guest,
   linkedPlusOneCount,
-  delegateName,
   plusOneOfName,
   effectiveStatus,
   isNested = false,
@@ -89,7 +88,6 @@ export function GuestRow({
 }: {
   guest: GuestWithPlusOnes;
   linkedPlusOneCount: number;
-  delegateName?: string;
   plusOneOfName?: string;
   effectiveStatus: EffectiveRsvpStatus;
   isNested?: boolean;
@@ -114,7 +112,6 @@ export function GuestRow({
         </span>
         <GuestMeta
           guest={guest}
-          delegateName={delegateName}
           plusOneOfName={plusOneOfName}
           isNested={isNested}
         />
@@ -159,7 +156,6 @@ export function GuestRow({
 export function GuestCard({
   guest,
   linkedPlusOneCount,
-  delegateName,
   plusOneOfName,
   effectiveStatus,
   isNested = false,
@@ -168,7 +164,6 @@ export function GuestCard({
 }: {
   guest: GuestWithPlusOnes;
   linkedPlusOneCount: number;
-  delegateName?: string;
   plusOneOfName?: string;
   effectiveStatus: EffectiveRsvpStatus;
   isNested?: boolean;
@@ -184,7 +179,6 @@ export function GuestCard({
             <p className="font-medium text-ink">{guestName(guest)}</p>
             <GuestMeta
               guest={guest}
-              delegateName={delegateName}
               plusOneOfName={plusOneOfName}
               isNested={isNested}
             />

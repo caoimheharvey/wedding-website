@@ -18,7 +18,7 @@ export const guestFormSchema = z.object({
   }),
   partyRoles: z.array(z.enum(WEDDING_PARTY_ROLES)).default([]),
   isPlusOneOf: z.union([z.uuid(), z.literal("")]).optional(),
-  rsvpDelegateOf: z.union([z.uuid(), z.literal("")]).optional(),
+  rsvpDelegateIds: z.array(z.uuid()).default([]),
   invitedBy: z.enum(INVITED_BY_OPTIONS, { error: "Choose who invited this guest" }),
   rsvpDeadlineOverride: z.union([z.iso.date(), z.literal("")]).optional(),
   rsvpStatus: z.enum(RSVP_STATUS_OPTIONS).optional().default("invited"),

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGuestById, listGuests } from "@/lib/guests/queries";
+import { getGuestById, listGuests, listRsvpDelegatePairs } from "@/lib/guests/queries";
+import {
+  rsvpDelegatesForGuest,
+  rsvpSubmitteesFor,
+} from "@/lib/guests/rsvp-delegates";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { canPreviewGuestView } from "@/lib/guest-preview";
@@ -22,11 +26,12 @@ export default async function GuestPreviewPage({
   const { guestId } = await params;
   const { lang } = await searchParams;
 
-  const [guest, siteSettings, allSections, allGuests] = await Promise.all([
+  const [guest, siteSettings, allSections, allGuests, delegatePairs] = await Promise.all([
     getGuestById(guestId),
     getSiteSettings(),
     listGuestViewSections(),
     listGuests(),
+    listRsvpDelegatePairs(),
   ]);
   if (!guest) notFound();
 
@@ -34,10 +39,8 @@ export default async function GuestPreviewPage({
   const effectiveDeadline = guest.rsvpDeadlineOverride ?? siteSettings.defaultRsvpDeadline;
   const effectiveStatus = getEffectiveRsvpStatus(guest.rsvpStatus, effectiveDeadline);
   const sections = visibleSectionsFor(allSections, guest.partyRoles);
-  const delegateFor = allGuests.filter((candidate) => candidate.rsvpDelegateOf === guest.id);
-  const delegateName = guest.rsvpDelegateOf
-    ? allGuests.find((candidate) => candidate.id === guest.rsvpDelegateOf)
-    : undefined;
+  const rsvpSubmittees = rsvpSubmitteesFor(guest, allGuests, delegatePairs);
+  const rsvpDelegatedBy = rsvpDelegatesForGuest(guest, allGuests, delegatePairs);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
@@ -69,13 +72,12 @@ export default async function GuestPreviewPage({
         rsvp={{
           guest,
           allGuests,
-          delegateFor,
+          delegatePairs,
+          rsvpSubmittees,
+          rsvpDelegatedBy,
           deadlinePassed: effectiveStatus === "deadline_missed",
           effectiveStatus,
           effectiveDeadline,
-          delegateName: delegateName
-            ? `${delegateName.firstName} ${delegateName.lastName}`
-            : undefined,
           previewGuestId: guest.id,
         }}
       />

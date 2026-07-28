@@ -11,7 +11,6 @@ function formatNameList(names: string[], conjunction: string): string {
 interface GuestSiteStrings {
   phaseLabel: string;
   greeting: (names: string[]) => string;
-  intro: string;
   yourRsvp: string;
   rsvpDeadlineLabel: (date: string) => string;
   rsvpStatusLabels: Record<EffectiveRsvpStatus, string>;
@@ -21,7 +20,7 @@ interface GuestSiteStrings {
     yesToAll: string;
     noToAll: string;
     submit: string;
-    delegateNote: (name: string) => string;
+    delegateNote: (names: string[]) => string;
   };
   contactInfoForm: {
     heading: string;
@@ -38,8 +37,6 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   en: {
     phaseLabel: "Save the date",
     greeting: (names) => `Hello, ${formatNameList(names, "and")}!`,
-    intro:
-      "We can't wait to celebrate with you. More details will be posted here as the big day gets closer.",
     yourRsvp: "Your RSVP status",
     rsvpDeadlineLabel: (date) => `Please respond by ${date}.`,
     rsvpStatusLabels: {
@@ -58,8 +55,10 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       yesToAll: "Yes to all",
       noToAll: "No to all",
       submit: "Submit RSVP",
-      delegateNote: (name) =>
-        `${name} normally handles this for you, but you can submit it yourself too.`,
+      delegateNote: (names: string[]) =>
+      names.length === 1
+        ? `${names[0]} can also handle this for you, but you can submit it yourself too.`
+        : `${formatNameList(names, "or")} can also handle this for you, but you can submit it yourself too.`,
     },
     contactInfoForm: {
       heading: "Stay in the loop",
@@ -76,8 +75,6 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   fr: {
     phaseLabel: "Réservez la date",
     greeting: (names) => `Bonjour, ${formatNameList(names, "et")} !`,
-    intro:
-      "Nous avons hâte de célébrer avec vous. Plus de détails seront publiés ici à l'approche du grand jour.",
     yourRsvp: "Votre statut de réponse",
     rsvpDeadlineLabel: (date) => `Merci de répondre avant le ${date}.`,
     rsvpStatusLabels: {
@@ -96,8 +93,10 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       yesToAll: "Oui pour tous",
       noToAll: "Non pour tous",
       submit: "Envoyer la réponse",
-      delegateNote: (name) =>
-        `${name} s'en occupe habituellement pour vous, mais vous pouvez aussi répondre vous-même.`,
+    delegateNote: (names: string[]) =>
+      names.length === 1
+        ? `${names[0]} peut aussi s'en occuper pour vous, mais vous pouvez répondre vous-même.`
+        : `${formatNameList(names, "ou")} peuvent aussi s'en occuper pour vous, mais vous pouvez répondre vous-même.`,
     },
     contactInfoForm: {
       heading: "Restez informé·e",
@@ -114,7 +113,6 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   zh: {
     phaseLabel: "预留日期",
     greeting: (names) => `你好，${formatNameList(names, "和")}！`,
-    intro: "我们迫不及待想与你一起庆祝。随着大喜之日临近，更多详情将在此公布。",
     yourRsvp: "您的回复状态",
     rsvpDeadlineLabel: (date) => `请在 ${date} 前回复。`,
     rsvpStatusLabels: {
@@ -133,7 +131,10 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       yesToAll: "全部出席",
       noToAll: "全部无法出席",
       submit: "提交回复",
-      delegateNote: (name) => `通常由 ${name} 为您处理，但您也可以自己提交。`,
+    delegateNote: (names: string[]) =>
+      names.length === 1
+        ? `通常由 ${names[0]} 代为处理，但您也可以自己提交。`
+        : `通常由 ${formatNameList(names, "或")} 代为处理，但您也可以自己提交。`,
     },
     contactInfoForm: {
       heading: "保持联系",

@@ -1,5 +1,6 @@
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
+import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
@@ -22,9 +23,10 @@ const TEXT_COLS: Record<number, string> = {
 export interface RsvpSectionContext {
   guest: Guest;
   allGuests: Guest[];
-  delegateFor: Guest[];
+  delegatePairs: RsvpDelegatePair[];
+  rsvpSubmittees: Guest[];
+  rsvpDelegatedBy: Guest[];
   deadlinePassed: boolean;
-  delegateName?: string;
   effectiveStatus: EffectiveRsvpStatus;
   effectiveDeadline?: string | null;
   /** Local-test-only: lets the admin preview route submit without a real session. */
@@ -60,11 +62,10 @@ export function GuestViewSections({
           return (
             <RsvpForm
               key={section.id}
-              guest={rsvp.guest}
-              delegateFor={rsvp.delegateFor}
+              rsvpSubmittees={rsvp.rsvpSubmittees}
+              rsvpDelegatedBy={rsvp.rsvpDelegatedBy}
               language={language}
               deadlinePassed={rsvp.deadlinePassed}
-              delegateName={rsvp.delegateName}
               previewGuestId={rsvp.previewGuestId}
               title={section.title}
             />
@@ -87,6 +88,7 @@ export function GuestViewSections({
               key={section.id}
               guest={rsvp.guest}
               allGuests={rsvp.allGuests}
+              delegatePairs={rsvp.delegatePairs}
               language={language}
               previewGuestId={rsvp.previewGuestId}
               title={section.title}

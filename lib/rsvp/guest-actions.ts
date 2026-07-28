@@ -5,8 +5,9 @@ import { getGuestSession } from "@/lib/guest-auth/session";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { canPreviewGuestView } from "@/lib/guest-preview";
+import { canDelegateRsvpFor } from "@/lib/guests/rsvp-delegates";
 import { mockSetGuestRsvpStatus } from "@/lib/guests/mock-store";
-import { listGuests } from "@/lib/guests/queries";
+import { listGuests, listRsvpDelegatePairs } from "@/lib/guests/queries";
 import { RSVP_STATUS_OPTIONS, type RsvpStatus } from "@/lib/guests/types";
 
 export interface RsvpEntry {
@@ -17,9 +18,8 @@ export interface RsvpEntry {
 /**
  * Guest-facing RSVP submission. Authorization is derived entirely from the
  * signed session — never from anything the client claims — and a guest may
- * only set status for themselves or for guests whose rsvp_delegate_of points
- * at them (a default the guest being spoken for can always override, but a
- * delegate can't submit for someone unrelated to them).
+ * only set status for themselves or for guests they are allowed to delegate
+ * for (explicit delegates plus automatic plus-one links).
  *
  * `previewGuestId` lets an admin preview route exercise this without a real
  * guest session. It's ignored unless the caller is in local test mode or
@@ -42,11 +42,12 @@ export async function submitRsvp(
     }
   }
 
-  const allGuests = await listGuests();
-  const allowedGuestIds = new Set<string>([actingGuestId]);
-  for (const guest of allGuests) {
-    if (guest.rsvpDelegateOf === actingGuestId) allowedGuestIds.add(guest.id);
-  }
+  const [allGuests, pairs] = await Promise.all([listGuests(), listRsvpDelegatePairs()]);
+  const allowedGuestIds = new Set(
+    allGuests
+      .filter((guest) => canDelegateRsvpFor(actingGuestId, guest.id, allGuests, pairs))
+      .map((guest) => guest.id),
+  );
 
   for (const entry of entries) {
     if (!allowedGuestIds.has(entry.guestId)) {

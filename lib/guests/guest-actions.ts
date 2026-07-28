@@ -12,7 +12,7 @@ import {
   type ContactInfoEntry,
 } from "./contact-info";
 import { mockUpdateGuest } from "./mock-store";
-import { getGuestById, listGuests } from "./queries";
+import { getGuestById, listGuests, listRsvpDelegatePairs } from "./queries";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,9 +35,9 @@ export async function submitContactInfo(
   const actingGuest = await getGuestById(actingGuestId);
   if (!actingGuest) return { message: "Your session has expired — please sign in again." };
 
-  const allGuests = await listGuests();
+  const [allGuests, pairs] = await Promise.all([listGuests(), listRsvpDelegatePairs()]);
   const allowedGuestIds = new Set(
-    contactEditableGuests(actingGuest, allGuests).map((guest) => guest.id),
+    contactEditableGuests(actingGuest, allGuests, pairs).map((guest) => guest.id),
   );
 
   for (const entry of entries) {

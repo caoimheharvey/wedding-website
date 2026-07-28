@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGuestById, listGuests } from "@/lib/guests/queries";
+import { getGuestById, listGuests, listRsvpDelegatePairs } from "@/lib/guests/queries";
+import { explicitDelegateIdsForGuest } from "@/lib/guests/rsvp-delegates";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { GuestForm } from "../../_components/guest-form";
 
@@ -10,10 +11,11 @@ export default async function EditGuestPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [guest, guests, siteSettings] = await Promise.all([
+  const [guest, guests, siteSettings, delegatePairs] = await Promise.all([
     getGuestById(id),
     listGuests(),
     getSiteSettings(),
+    listRsvpDelegatePairs(),
   ]);
 
   if (!guest) notFound();
@@ -32,6 +34,7 @@ export default async function EditGuestPage({
         guest={guest}
         otherGuests={guests.filter((g) => g.id !== guest.id)}
         defaultRsvpDeadline={siteSettings.defaultRsvpDeadline}
+        defaultRsvpDelegateIds={explicitDelegateIdsForGuest(guest.id, delegatePairs)}
       />
     </div>
   );

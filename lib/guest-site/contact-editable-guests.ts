@@ -1,4 +1,8 @@
 import type { Guest } from "@/lib/guests/types";
+import {
+  canDelegateRsvpFor,
+  type RsvpDelegatePair,
+} from "@/lib/guests/rsvp-delegates";
 import { guestDisplayName } from "./party-names";
 
 function plusOnePartyGuests(guest: Guest, allGuests: Guest[]): Guest[] {
@@ -14,14 +18,20 @@ function plusOnePartyGuests(guest: Guest, allGuests: Guest[]): Guest[] {
 }
 
 /** Guests whose contact details the signed-in guest may view and update. */
-export function contactEditableGuests(actingGuest: Guest, allGuests: Guest[]): Guest[] {
+export function contactEditableGuests(
+  actingGuest: Guest,
+  allGuests: Guest[],
+  pairs: RsvpDelegatePair[],
+): Guest[] {
   const byId = new Map<string, Guest>();
 
   for (const guest of plusOnePartyGuests(actingGuest, allGuests)) {
     byId.set(guest.id, guest);
   }
-  for (const guest of allGuests.filter((candidate) => candidate.rsvpDelegateOf === actingGuest.id)) {
-    byId.set(guest.id, guest);
+  for (const guest of allGuests) {
+    if (canDelegateRsvpFor(actingGuest.id, guest.id, allGuests, pairs)) {
+      byId.set(guest.id, guest);
+    }
   }
 
   return [...byId.values()].sort((a, b) => {
