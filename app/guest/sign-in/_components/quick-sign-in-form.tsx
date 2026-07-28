@@ -10,18 +10,29 @@ export function QuickSignInForm() {
 
   return (
     <form action={formAction} className="flex w-full flex-col gap-3">
-      <input
-        type="text"
-        name="name"
-        required
-        placeholder="Full name (e.g. Jane Doe)"
-        className="input"
-      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input
+          type="text"
+          name="firstName"
+          required
+          autoComplete="given-name"
+          placeholder="First name"
+          className="input"
+        />
+        <input
+          type="text"
+          name="lastName"
+          required
+          autoComplete="family-name"
+          placeholder="Last name"
+          className="input"
+        />
+      </div>
       <input
         type="text"
         name="contact"
-        required
-        placeholder="Email or phone number on your invitation"
+        autoComplete="email tel"
+        placeholder="Email or phone (if we have it on file)"
         className="input"
       />
       <button

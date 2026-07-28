@@ -14,8 +14,8 @@ export function GuestSignInContent({ error }: { error?: string }) {
 
       <div className="w-full rounded-lg border border-border bg-surface p-4 text-left">
         <p className="mb-3 text-sm text-foreground/70">
-          Enter the name and the email or phone number your invitation was sent to — no need to
-          check your email.
+          Enter your first and last name as shown on your invitation. If we already have your email
+          or phone number, enter that too — otherwise you&apos;ll be asked for contact details next.
         </p>
         <QuickSignInForm />
       </div>

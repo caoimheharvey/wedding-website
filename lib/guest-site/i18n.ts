@@ -31,6 +31,14 @@ interface GuestSiteStrings {
     phonePlaceholder: string;
     submit: string;
   };
+  contactOnboarding: {
+    heading: string;
+    description: string;
+    lastNamePlaceholder: string;
+    emailPlaceholder: string;
+    phonePlaceholder: string;
+    submit: string;
+  };
 }
 
 export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
@@ -71,6 +79,15 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       phonePlaceholder: "Phone number",
       submit: "Save details",
     },
+    contactOnboarding: {
+      heading: "One more step",
+      description:
+        "We don't have an email or phone number for you yet. Add at least one so we can reach you — then you'll see everything else.",
+      lastNamePlaceholder: "Last name",
+      emailPlaceholder: "Email address",
+      phonePlaceholder: "Phone number",
+      submit: "Continue",
+    },
   },
   fr: {
     phaseLabel: "Réservez la date",
@@ -109,6 +126,15 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       phonePlaceholder: "Numéro de téléphone",
       submit: "Enregistrer",
     },
+    contactOnboarding: {
+      heading: "Encore une étape",
+      description:
+        "Nous n'avons pas encore votre email ou numéro de téléphone. Ajoutez-en au moins un pour que nous puissions vous joindre — vous verrez ensuite le reste du site.",
+      lastNamePlaceholder: "Nom de famille",
+      emailPlaceholder: "Adresse email",
+      phonePlaceholder: "Numéro de téléphone",
+      submit: "Continuer",
+    },
   },
   zh: {
     phaseLabel: "预留日期",
@@ -144,6 +170,14 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",
       submit: "保存信息",
+    },
+    contactOnboarding: {
+      heading: "还差一步",
+      description: "我们还没有您的电子邮件或电话号码。请至少填写一项以便我们与您联系，之后您即可查看其余内容。",
+      lastNamePlaceholder: "姓氏",
+      emailPlaceholder: "电子邮件地址",
+      phonePlaceholder: "电话号码",
+      submit: "继续",
     },
   },
 };

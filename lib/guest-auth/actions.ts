@@ -2,7 +2,8 @@
 
 import crypto from "node:crypto";
 import { redirect } from "next/navigation";
-import { findGuestByNameAndContact, getGuestByEmail } from "@/lib/guests/queries";
+import { getGuestByEmail, listGuests } from "@/lib/guests/queries";
+import { resolveGuestForQuickSignIn } from "@/lib/guests/guest-lookup";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { sendMagicLinkEmail } from "@/lib/email/resend";
@@ -15,7 +16,10 @@ const QUICK_SIGN_IN_SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
 // Deliberately vague — don't confirm whether the name or the contact detail
 // was the part that didn't match.
 const QUICK_SIGN_IN_ERROR =
-  "We couldn't find a match for that name and email/phone. Double-check the spelling, or ask whoever sent your invitation.";
+  "We couldn't find a match for those details. Double-check your first and last name, or ask whoever sent your invitation.";
+
+const CONTACT_REQUIRED_ERROR =
+  "Enter the email or phone number we have on file for you.";
 
 // Always the same response whether or not the email matched a guest —
 // otherwise this endpoint could be used to probe who's on the guest list.
@@ -106,24 +110,30 @@ export type QuickSignInState = { message?: string } | undefined;
 
 /**
  * Sign-in for guests who won't reliably check email for a link — matches
- * name + a contact detail already on file and starts a session immediately,
- * no email/SMS round trip. Session is short (12h) rather than the 30-day
- * magic-link session, since matching is weaker (guessable name + a detail a
- * family member might also know) and this is meant for a quick check-in on
- * a shared device, not a long-lived sign-in.
+ * first and last name (case-insensitive). When we already have an email or
+ * phone on file, that detail must match too. Guests with no contact info on
+ * file can sign in by name alone and are prompted to add details before
+ * viewing the rest of the site.
  */
 export async function quickGuestSignIn(
   _prevState: QuickSignInState,
   formData: FormData,
 ): Promise<QuickSignInState> {
-  const name = String(formData.get("name") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
   const contact = String(formData.get("contact") ?? "").trim();
-  if (!name || !contact) return { message: "Enter your name and your email or phone number." };
 
-  const guest = await findGuestByNameAndContact(name, contact);
-  if (!guest) return { message: QUICK_SIGN_IN_ERROR };
+  if (!firstName || !lastName) {
+    return { message: "Enter your first and last name as shown on your invitation." };
+  }
 
-  await createGuestSession(guest.id, QUICK_SIGN_IN_SESSION_MS);
+  const guests = await listGuests();
+  const result = resolveGuestForQuickSignIn(guests, firstName, lastName, contact);
+
+  if (result === "contact_required") return { message: CONTACT_REQUIRED_ERROR };
+  if (result === "contact_mismatch" || result === null) return { message: QUICK_SIGN_IN_ERROR };
+
+  await createGuestSession(result.id, QUICK_SIGN_IN_SESSION_MS);
   redirect("/");
 }
 

@@ -34,6 +34,7 @@ export function ContactInfoForm({
   language,
   previewGuestId,
   title,
+  onboarding = false,
 }: {
   guest: Guest;
   allGuests: Guest[];
@@ -41,12 +42,16 @@ export function ContactInfoForm({
   language: PreferredLanguage;
   previewGuestId?: string;
   title?: string | null;
+  /** When true, only collects this guest's details before they can view the site. */
+  onboarding?: boolean;
 }) {
-  const strings = GUEST_SITE_STRINGS[language].contactInfoForm;
-  const people = useMemo(
-    () => contactEditableGuests(guest, allGuests, delegatePairs),
-    [guest, allGuests, delegatePairs],
-  );
+  const strings = onboarding
+    ? GUEST_SITE_STRINGS[language].contactOnboarding
+    : GUEST_SITE_STRINGS[language].contactInfoForm;
+  const people = useMemo(() => {
+    if (onboarding) return [guest];
+    return contactEditableGuests(guest, allGuests, delegatePairs);
+  }, [onboarding, guest, allGuests, delegatePairs]);
   const peopleSignature = people
     .map((person) => `${person.id}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`)
     .join("|");
@@ -63,7 +68,7 @@ export function ContactInfoForm({
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
 
-  const showLinkedNote = people.length > 1;
+  const showLinkedNote = !onboarding && people.length > 1;
 
   function updateField(guestId: string, key: keyof ContactFields, value: string) {
     setFieldsByGuestId((current) => ({
@@ -98,7 +103,9 @@ export function ContactInfoForm({
         <h2 className="mb-1 font-display text-lg text-ink">{title || strings.heading}</h2>
         <p className="text-sm text-foreground/60">{strings.description}</p>
         {showLinkedNote && (
-          <p className="mt-3 text-xs text-foreground/50">{strings.linkedGuestsNote}</p>
+          <p className="mt-3 text-xs text-foreground/50">
+            {GUEST_SITE_STRINGS[language].contactInfoForm.linkedGuestsNote}
+          </p>
         )}
       </div>
 

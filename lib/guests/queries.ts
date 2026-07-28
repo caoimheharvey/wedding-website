@@ -13,6 +13,13 @@ import {
   mockListRsvpDelegatePairs,
 } from "./mock-store";
 import type { Guest, GuestWithPlusOnes, RelationshipPriority } from "./types";
+import {
+  findGuestsByName,
+  guestContactMatches,
+  guestHasContactOnFile,
+  guestMatchesName,
+  resolveGuestForQuickSignIn,
+} from "./guest-lookup";
 
 interface GuestRow {
   id: string;
@@ -160,43 +167,21 @@ export async function getGuestByEmail(email: string): Promise<Guest | null> {
   return data ? mapRow(data as GuestRow) : null;
 }
 
-function normalizePhone(phone: string): string {
-  return phone.replace(/[^\d]/g, "");
-}
-
 /**
- * Matches a guest by full name plus either their email or phone on file —
- * used for the "quick sign-in" flow so guests without easy email access
- * (e.g. checking on a shared family device) can get in without a mailed
- * link. Requires both the name AND a contact detail to match, since name
- * alone is guessable within a family that shares a surname.
+ * @deprecated Use resolveGuestForQuickSignIn via guest-lookup instead.
+ * Kept for any external callers — matches first + last name and contact.
  */
 export async function findGuestByNameAndContact(
-  fullName: string,
+  firstName: string,
+  lastName: string,
   contact: string,
 ): Promise<Guest | null> {
-  const normalizedName = fullName.trim().toLowerCase().replace(/\s+/g, " ");
-  const normalizedContact = contact.trim().toLowerCase();
-  if (!normalizedName || !normalizedContact) return null;
-
-  const normalizedContactPhone = normalizePhone(contact);
   const guests = await listGuests();
-
-  return (
-    guests.find((guest) => {
-      const guestName = `${guest.firstName} ${guest.lastName}`.trim().toLowerCase();
-      if (guestName !== normalizedName) return false;
-
-      const emailMatches = guest.email && guest.email.toLowerCase() === normalizedContact;
-      const phoneMatches =
-        normalizedContactPhone.length >= 4 &&
-        guest.phone &&
-        normalizePhone(guest.phone) === normalizedContactPhone;
-
-      return Boolean(emailMatches || phoneMatches);
-    }) ?? null
-  );
+  const result = resolveGuestForQuickSignIn(guests, firstName, lastName, contact);
+  return result && typeof result === "object" ? result : null;
 }
+
+export { findGuestsByName, guestContactMatches, guestHasContactOnFile, guestMatchesName };
 
 export async function countLinkedPlusOnes(guestId: string): Promise<number> {
   if (isLocalTestMode()) return mockCountLinkedPlusOnes(guestId);

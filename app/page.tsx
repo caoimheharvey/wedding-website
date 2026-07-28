@@ -14,8 +14,10 @@ import { signOutGuest } from "@/lib/guest-auth/actions";
 import { getPreviewPersona } from "@/lib/guest-site/preview-personas";
 import { plusOnePartyNames } from "@/lib/guest-site/party-names";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
+import { guestNeedsContactOnboarding } from "@/lib/guests/contact-info";
 import { AdminViewLink } from "./guest/_components/admin-view-link";
 import { GuestSignInContent } from "./guest/_components/guest-sign-in-content";
+import { ContactInfoForm } from "./guest/_components/contact-info-form";
 import { GuestSiteView } from "./guest/_components/guest-site-view";
 import { GuestViewSections } from "./guest/_components/guest-view-sections";
 import { LanguageTabs, isPreferredLanguage } from "./guest/_components/language-tabs";
@@ -44,6 +46,7 @@ export default async function Home({
       const sections = visibleSectionsFor(allSections, guest.partyRoles);
       const rsvpSubmittees = rsvpSubmitteesFor(guest, allGuests, delegatePairs);
       const rsvpDelegatedBy = rsvpDelegatesForGuest(guest, allGuests, delegatePairs);
+      const needsContactOnboarding = guestNeedsContactOnboarding(guest);
 
       return (
         <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
@@ -63,20 +66,30 @@ export default async function Home({
             language={language}
           />
 
-          <GuestViewSections
-            sections={sections}
-            language={language}
-            rsvp={{
-              guest,
-              allGuests,
-              delegatePairs,
-              rsvpSubmittees,
-              rsvpDelegatedBy,
-              deadlinePassed: effectiveStatus === "deadline_missed",
-              effectiveStatus,
-              effectiveDeadline,
-            }}
-          />
+          {needsContactOnboarding ? (
+            <ContactInfoForm
+              guest={guest}
+              allGuests={allGuests}
+              delegatePairs={delegatePairs}
+              language={language}
+              onboarding
+            />
+          ) : (
+            <GuestViewSections
+              sections={sections}
+              language={language}
+              rsvp={{
+                guest,
+                allGuests,
+                delegatePairs,
+                rsvpSubmittees,
+                rsvpDelegatedBy,
+                deadlinePassed: effectiveStatus === "deadline_missed",
+                effectiveStatus,
+                effectiveDeadline,
+              }}
+            />
+          )}
         </main>
       );
     }
