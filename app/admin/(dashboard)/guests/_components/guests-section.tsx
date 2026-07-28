@@ -19,7 +19,7 @@ function guestMatchesSearch(guest: GuestWithPlusOnes, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
 
-  const haystack = [guestDisplayName(guest), guest.email, guest.phone]
+  const haystack = [guestDisplayName(guest), guest.email, guest.phone, guest.wechatHandle]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();

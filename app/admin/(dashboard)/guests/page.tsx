@@ -36,7 +36,8 @@ export default async function GuestsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl text-ink">Guests</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <BulkAddGuestsForm />
           <Link
             href="/admin/guests/new"
             className="rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
@@ -45,8 +46,6 @@ export default async function GuestsPage() {
           </Link>
         </div>
       </div>
-
-      <BulkAddGuestsForm />
 
       <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
 

@@ -46,18 +46,24 @@ interface GuestSiteStrings {
     linkedGuestsNote: string;
     firstNamePlaceholder: string;
     lastNamePlaceholder: string;
+    preferredLanguageLabel: string;
     emailPlaceholder: string;
     phonePlaceholder: string;
     submit: string;
+    edit: string;
+    cancel: string;
   };
   contactOnboarding: {
     heading: string;
     description: string;
     firstNamePlaceholder: string;
     lastNamePlaceholder: string;
+    preferredLanguageLabel: string;
     emailPlaceholder: string;
     phonePlaceholder: string;
     submit: string;
+    edit: string;
+    cancel: string;
   };
   countdownSection: {
     heading: string;
@@ -137,9 +143,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "These are guests linked to you as a plus-one or whose RSVP you handle.",
       firstNamePlaceholder: "First name",
       lastNamePlaceholder: "Last name",
+      preferredLanguageLabel: "Preferred language",
       emailPlaceholder: "Email address",
       phonePlaceholder: "Mobile number",
       submit: "Save details",
+      edit: "Edit guest details",
+      cancel: "Cancel",
     },
     contactOnboarding: {
       heading: "One more step",
@@ -147,9 +156,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "We're missing a few details for you. Fill these in so we can reach you — then you'll see everything else.",
       firstNamePlaceholder: "First name",
       lastNamePlaceholder: "Last name",
+      preferredLanguageLabel: "Preferred language",
       emailPlaceholder: "Email address",
       phonePlaceholder: "Mobile number",
       submit: "Continue",
+      edit: "Edit guest details",
+      cancel: "Cancel",
     },
     countdownSection: {
       heading: "Countdown",
@@ -227,9 +239,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "Ces invités sont liés à vous en tant qu'accompagnant·e ou dont vous gérez la réponse.",
       firstNamePlaceholder: "Prénom",
       lastNamePlaceholder: "Nom de famille",
+      preferredLanguageLabel: "Langue préférée",
       emailPlaceholder: "Adresse email",
       phonePlaceholder: "Numéro de téléphone",
       submit: "Enregistrer",
+      edit: "Modifier les coordonnées",
+      cancel: "Annuler",
     },
     contactOnboarding: {
       heading: "Encore une étape",
@@ -237,9 +252,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "Il nous manque quelques informations vous concernant. Complétez-les pour que nous puissions vous joindre — vous verrez ensuite le reste du site.",
       firstNamePlaceholder: "Prénom",
       lastNamePlaceholder: "Nom de famille",
+      preferredLanguageLabel: "Langue préférée",
       emailPlaceholder: "Adresse email",
       phonePlaceholder: "Numéro de téléphone",
       submit: "Continuer",
+      edit: "Modifier les coordonnées",
+      cancel: "Annuler",
     },
     countdownSection: {
       heading: "Compte à rebours",
@@ -313,18 +331,24 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       linkedGuestsNote: "这些是与您关联的陪同嘉宾或您代为回复的宾客。",
       firstNamePlaceholder: "名字",
       lastNamePlaceholder: "姓氏",
+      preferredLanguageLabel: "首选语言",
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",
       submit: "保存信息",
+      edit: "编辑联系方式",
+      cancel: "取消",
     },
     contactOnboarding: {
       heading: "还差一步",
       description: "我们还缺少您的一些信息。请填写以便我们与您联系，之后您即可查看其余内容。",
       firstNamePlaceholder: "名字",
       lastNamePlaceholder: "姓氏",
+      preferredLanguageLabel: "首选语言",
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",
       submit: "继续",
+      edit: "编辑联系方式",
+      cancel: "取消",
     },
     countdownSection: {
       heading: "倒计时",

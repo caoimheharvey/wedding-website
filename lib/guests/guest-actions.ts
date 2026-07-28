@@ -91,6 +91,9 @@ export async function submitContactInfo(
         lastName: guestNeedsLastName(existing ?? { lastName: null })
           ? entry.lastName.trim() || null
           : existing?.lastName ?? null,
+        preferredLanguage: guestNeedsFirstName(existing ?? { firstName: null })
+          ? entry.preferredLanguage
+          : existing?.preferredLanguage ?? entry.preferredLanguage,
         email: entry.email.trim() || null,
         phone: formattedPhone,
       });
@@ -111,6 +114,9 @@ export async function submitContactInfo(
           last_name: guestNeedsLastName(existing ?? { lastName: null })
             ? entry.lastName.trim() || null
             : existing?.lastName ?? null,
+          preferred_language: guestNeedsFirstName(existing ?? { firstName: null })
+            ? entry.preferredLanguage
+            : existing?.preferredLanguage ?? entry.preferredLanguage,
           email: entry.email.trim() || null,
           phone: formattedPhone,
         })
