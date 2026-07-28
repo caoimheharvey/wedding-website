@@ -1,3 +1,4 @@
+import { phoneDigitsOnly } from "@/lib/phone/countries";
 import type { Guest } from "./types";
 
 /** Apostrophe-like characters seen in names (straight, curly, modifier, backtick). */
@@ -10,10 +11,6 @@ export function normalizeNamePart(value: string): string {
     .normalize("NFKC")
     .replace(APOSTROPHE_LIKE, "'")
     .replace(/\s+/g, " ");
-}
-
-export function normalizePhone(phone: string): string {
-  return phone.replace(/[^\d]/g, "");
 }
 
 /** Case-insensitive first/last name match. Guests without a last name on file match on first name only. */
@@ -39,10 +36,10 @@ export function guestContactMatches(guest: Guest, contact: string): boolean {
   if (!normalizedContact) return false;
 
   const emailMatches = Boolean(guest.email && guest.email.trim().toLowerCase() === normalizedContact);
-  const normalizedContactPhone = normalizePhone(contact);
+  const normalizedContactPhone = phoneDigitsOnly(contact);
   const phoneMatches =
     normalizedContactPhone.length >= 4 &&
-    Boolean(guest.phone && normalizePhone(guest.phone) === normalizedContactPhone);
+    Boolean(guest.phone && phoneDigitsOnly(guest.phone) === normalizedContactPhone);
 
   return emailMatches || phoneMatches;
 }

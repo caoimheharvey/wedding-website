@@ -76,7 +76,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "These are guests linked to you as a plus-one or whose RSVP you handle.",
       lastNamePlaceholder: "Last name",
       emailPlaceholder: "Email address",
-      phonePlaceholder: "Phone number",
+      phonePlaceholder: "Mobile number",
       submit: "Save details",
     },
     contactOnboarding: {
@@ -85,7 +85,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "We don't have an email or phone number for you yet. Add at least one so we can reach you — then you'll see everything else.",
       lastNamePlaceholder: "Last name",
       emailPlaceholder: "Email address",
-      phonePlaceholder: "Phone number",
+      phonePlaceholder: "Mobile number",
       submit: "Continue",
     },
   },

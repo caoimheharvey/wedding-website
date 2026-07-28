@@ -15,5 +15,6 @@ export interface ContactInfoEntry {
   guestId: string;
   lastName: string;
   email: string;
-  phone: string;
+  phoneCountryId: string;
+  phoneNational: string;
 }

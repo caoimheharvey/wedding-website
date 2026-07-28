@@ -12,19 +12,26 @@ import type { Guest, PreferredLanguage } from "@/lib/guests/types";
 import { contactEditableGuests } from "@/lib/guest-site/contact-editable-guests";
 import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
+import { defaultPhoneCountryId } from "@/lib/phone/countries";
+import { formatStoredPhoneForCountry, parseStoredPhone } from "@/lib/phone/format";
+import { PhoneInput } from "./phone-input";
+
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 
 interface ContactFields {
   lastName: string;
   email: string;
-  phone: string;
+  phoneCountryId: string;
+  phoneNational: string;
 }
 
-function fieldsFromGuest(guest: Guest): ContactFields {
+function fieldsFromGuest(guest: Guest, language: PreferredLanguage): ContactFields {
+  const parsed = parseStoredPhone(guest.phone, defaultPhoneCountryId(language));
   return {
     lastName: guest.lastName ?? "",
     email: guest.email ?? "",
-    phone: guest.phone ?? "",
+    phoneCountryId: parsed.countryId,
+    phoneNational: parsed.national,
   };
 }
 
@@ -58,14 +65,14 @@ export function ContactInfoForm({
     .map((person) => `${person.id}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`)
     .join("|");
   const [fieldsByGuestId, setFieldsByGuestId] = useState<Record<string, ContactFields>>(() =>
-    Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person)])),
+    Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person, language)])),
   );
 
   useEffect(() => {
     setFieldsByGuestId(
-      Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person)])),
+      Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person, language)])),
     );
-  }, [peopleSignature, people]);
+  }, [peopleSignature, people, language]);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -90,7 +97,8 @@ export function ContactInfoForm({
           ? (fieldsByGuestId[person.id]?.lastName ?? "")
           : (person.lastName ?? ""),
         email: fieldsByGuestId[person.id]?.email ?? "",
-        phone: fieldsByGuestId[person.id]?.phone ?? "",
+        phoneCountryId: fieldsByGuestId[person.id]?.phoneCountryId ?? defaultPhoneCountryId(language),
+        phoneNational: fieldsByGuestId[person.id]?.phoneNational ?? "",
       }));
       const result = await submitContactInfo(entries, previewGuestId);
       setMessage(result.message ?? null);
@@ -138,12 +146,16 @@ export function ContactInfoForm({
               placeholder={strings.emailPlaceholder}
               className="input text-center"
             />
-            <input
-              type="tel"
-              value={fieldsByGuestId[person.id]?.phone ?? ""}
-              onChange={(event) => updateField(person.id, "phone", event.target.value)}
+            <PhoneInput
+              countryId={fieldsByGuestId[person.id]?.phoneCountryId ?? defaultPhoneCountryId(language)}
+              national={fieldsByGuestId[person.id]?.phoneNational ?? ""}
+              onCountryChange={(phoneCountryId) =>
+                updateField(person.id, "phoneCountryId", phoneCountryId)
+              }
+              onNationalChange={(phoneNational) =>
+                updateField(person.id, "phoneNational", phoneNational)
+              }
               placeholder={strings.phonePlaceholder}
-              className="input text-center"
             />
           </div>
         ))}

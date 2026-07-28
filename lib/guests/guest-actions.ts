@@ -12,6 +12,7 @@ import {
   guestNeedsLastName,
   type ContactInfoEntry,
 } from "./contact-info";
+import { formatStoredPhoneForCountry } from "@/lib/phone/format";
 import { mockUpdateGuest } from "./mock-store";
 import { getGuestById, listGuests, listRsvpDelegatePairs } from "./queries";
 
@@ -47,14 +48,21 @@ export async function submitContactInfo(
     }
 
     const trimmedEmail = entry.email.trim();
-    const trimmedPhone = entry.phone.trim();
+    const trimmedPhoneNational = entry.phoneNational.trim();
+    const formattedPhone = trimmedPhoneNational
+      ? formatStoredPhoneForCountry(entry.phoneCountryId, entry.phoneNational)
+      : null;
     const existing = allGuests.find((guest) => guest.id === entry.guestId);
 
-    if (!trimmedEmail && !trimmedPhone) {
+    if (!trimmedEmail && !formattedPhone) {
       if (!existing?.email && !existing?.phone) {
         const label = existing ? guestDisplayName(existing) : "each guest";
         return { message: `Please add an email or phone number for ${label}.` };
       }
+    }
+
+    if (trimmedPhoneNational && !formattedPhone) {
+      return { message: "Enter a valid phone number for your selected country." };
     }
 
     if (trimmedEmail && !EMAIL_PATTERN.test(trimmedEmail)) {
@@ -65,18 +73,24 @@ export async function submitContactInfo(
   if (isLocalTestMode()) {
     for (const entry of entries) {
       const existing = allGuests.find((guest) => guest.id === entry.guestId);
+      const formattedPhone = entry.phoneNational.trim()
+        ? formatStoredPhoneForCountry(entry.phoneCountryId, entry.phoneNational)
+        : null;
       mockUpdateGuest(entry.guestId, {
         lastName: guestNeedsLastName(existing ?? { lastName: null })
           ? entry.lastName.trim() || null
           : existing?.lastName ?? null,
         email: entry.email.trim() || null,
-        phone: entry.phone.trim() || null,
+        phone: formattedPhone,
       });
     }
   } else {
     const supabase = getSupabaseAdmin();
     for (const entry of entries) {
       const existing = allGuests.find((guest) => guest.id === entry.guestId);
+      const formattedPhone = entry.phoneNational.trim()
+        ? formatStoredPhoneForCountry(entry.phoneCountryId, entry.phoneNational)
+        : null;
       const { error } = await supabase
         .from("guests")
         .update({
@@ -84,7 +98,7 @@ export async function submitContactInfo(
             ? entry.lastName.trim() || null
             : existing?.lastName ?? null,
           email: entry.email.trim() || null,
-          phone: entry.phone.trim() || null,
+          phone: formattedPhone,
         })
         .eq("id", entry.guestId);
       if (error) return { message: `Could not save your details: ${error.message}` };
