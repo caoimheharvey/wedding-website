@@ -21,6 +21,7 @@ interface EmbedRow {
   provider: EmbedProvider;
   url: string;
   caption: string;
+  columnIndex: number;
 }
 
 export function EmbedGroupForm({
@@ -39,14 +40,17 @@ export function EmbedGroupForm({
     }
   }, [state, onDone]);
 
+  const [columnCount, setColumnCount] = useState(section?.columnCount ?? 2);
+
   const [rows, setRows] = useState<EmbedRow[]>(
     section && section.embeds.length > 0
       ? section.embeds.map((embed) => ({
           provider: embed.provider,
           url: embed.url,
           caption: embed.caption ?? "",
+          columnIndex: embed.columnIndex,
         }))
-      : [{ provider: "google_maps", url: "", caption: "" }],
+      : [{ provider: "google_maps", url: "", caption: "", columnIndex: 0 }],
   );
 
   function updateRow(index: number, patch: Partial<EmbedRow>) {
@@ -89,13 +93,21 @@ export function EmbedGroupForm({
 
       <label className="flex flex-col gap-1 text-sm text-ink">
         Columns
-        <select name="columnCount" defaultValue={section?.columnCount ?? 2} className="input w-auto">
+        <select
+          name="columnCount"
+          value={columnCount}
+          onChange={(event) => setColumnCount(Number(event.target.value))}
+          className="input w-auto"
+        >
           {[1, 2, 3, 4].map((count) => (
             <option key={count} value={count}>
               {count}
             </option>
           ))}
         </select>
+        <span className="text-xs font-normal text-foreground/50">
+          {columnCount > 1 ? "Choose which column each embed appears in." : "Single column layout."}
+        </span>
       </label>
 
       <div className="flex flex-col gap-3">
@@ -141,6 +153,25 @@ export function EmbedGroupForm({
                 placeholder="Optional"
               />
             </label>
+            {columnCount > 1 && (
+              <label className="flex flex-col gap-1 text-xs text-ink">
+                Column
+                <select
+                  name="embedColumnIndex"
+                  value={row.columnIndex}
+                  onChange={(event) =>
+                    updateRow(index, { columnIndex: Number(event.target.value) })
+                  }
+                  className="input w-auto"
+                >
+                  {Array.from({ length: columnCount }, (_, columnIndex) => (
+                    <option key={columnIndex} value={columnIndex}>
+                      {columnIndex + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             {rows.length > 1 && (
               <button
                 type="button"
@@ -155,7 +186,7 @@ export function EmbedGroupForm({
         <button
           type="button"
           onClick={() =>
-            setRows((prev) => [...prev, { provider: "google_maps", url: "", caption: "" }])
+            setRows((prev) => [...prev, { provider: "google_maps", url: "", caption: "", columnIndex: 0 }])
           }
           className="self-start text-xs font-medium text-aegean hover:underline"
         >

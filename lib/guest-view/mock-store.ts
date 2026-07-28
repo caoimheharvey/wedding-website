@@ -12,17 +12,24 @@ import type {
   textSectionFormSchema,
   builtinSectionFormSchema,
 } from "./schema";
+import { textSectionMockBody } from "./text-section-persist";
 import type { GuestViewSectionType } from "./types";
 
 export interface MockImageInput {
   url: string;
   caption: string;
+  columnIndex: number;
 }
 
 /**
  * In-memory guest-view sections used only when LOCAL_TEST_BYPASS_AUTH is set.
  * Resets on every dev server restart — intentional, no persistence needed.
  */
+const emptyLocalizedBody = {
+  body: { en: null, fr: null, zh: null },
+  bodyColumns: { en: null, fr: null, zh: null },
+} as const;
+
 let sections: GuestViewSection[] = seed();
 
 function englishTitle(title: string | null | undefined) {
@@ -41,7 +48,7 @@ function seed(): GuestViewSection[] {
       titles: englishTitle(null),
       orderIndex: 0,
       visibleToRoles: [],
-      body: { en: null, fr: null, zh: null },
+      ...emptyLocalizedBody,
       columnCount: null,
       embeds: [],
       images: [],
@@ -54,7 +61,7 @@ function seed(): GuestViewSection[] {
       titles: englishTitle(null),
       orderIndex: 1,
       visibleToRoles: [],
-      body: { en: null, fr: null, zh: null },
+      ...emptyLocalizedBody,
       columnCount: null,
       embeds: [],
       images: [],
@@ -72,6 +79,7 @@ function seed(): GuestViewSection[] {
         fr: null,
         zh: null,
       },
+      bodyColumns: { en: null, fr: null, zh: null },
       columnCount: null,
       embeds: [],
       images: [],
@@ -89,6 +97,7 @@ function seed(): GuestViewSection[] {
         fr: null,
         zh: null,
       },
+      bodyColumns: { en: null, fr: null, zh: null },
       columnCount: null,
       embeds: [],
       images: [],
@@ -117,7 +126,7 @@ export function mockCreateTextSection(
     },
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: data.bodyEn, fr: data.bodyFr || null, zh: data.bodyZh || null },
+    ...textSectionMockBody(data),
     columnCount: data.columnCount,
     embeds: [],
     images: [],
@@ -139,7 +148,7 @@ export function mockUpdateTextSection(id: string, data: z.infer<typeof textSecti
       zh: data.titleZh || null,
     },
           visibleToRoles: data.visibleToRoles,
-          body: { en: data.bodyEn, fr: data.bodyFr || null, zh: data.bodyZh || null },
+          ...textSectionMockBody(data),
           columnCount: data.columnCount,
           updatedAt: new Date().toISOString(),
         }
@@ -158,7 +167,7 @@ export function mockCreateRsvpSection(
     titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: null, fr: null, zh: null },
+    ...emptyLocalizedBody,
     columnCount: null,
     embeds: [],
     images: [],
@@ -193,7 +202,7 @@ export function mockCreateRsvpStatusSection(
     titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: null, fr: null, zh: null },
+    ...emptyLocalizedBody,
     columnCount: null,
     embeds: [],
     images: [],
@@ -231,7 +240,7 @@ export function mockCreateContactInfoSection(
     titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: null, fr: null, zh: null },
+    ...emptyLocalizedBody,
     columnCount: null,
     embeds: [],
     images: [],
@@ -270,7 +279,7 @@ export function mockCreateEmbedGroupSection(
     titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: null, fr: null, zh: null },
+    ...emptyLocalizedBody,
     columnCount: data.columnCount,
     embeds: embeds.map((embed, index) => ({
       id: crypto.randomUUID(),
@@ -278,6 +287,7 @@ export function mockCreateEmbedGroupSection(
       url: embed.url,
       caption: embed.caption || null,
       orderIndex: index,
+      columnIndex: embed.columnIndex,
     })),
     images: [],
     createdAt: now,
@@ -305,6 +315,7 @@ export function mockUpdateEmbedGroupSection(
             url: embed.url,
             caption: embed.caption || null,
             orderIndex: index,
+            columnIndex: embed.columnIndex,
           })),
           updatedAt: new Date().toISOString(),
         }
@@ -324,7 +335,7 @@ export function mockCreateImageGroupSection(
     titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: null, fr: null, zh: null },
+    ...emptyLocalizedBody,
     columnCount: data.columnCount,
     embeds: [],
     images: toMockImages(images),
@@ -360,6 +371,7 @@ function toMockImages(images: MockImageInput[]): GuestViewImage[] {
     url: image.url,
     caption: image.caption || null,
     orderIndex: index,
+    columnIndex: image.columnIndex,
   }));
 }
 
@@ -375,7 +387,7 @@ export function mockCreateBuiltinSection(
     titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
-    body: { en: null, fr: null, zh: null },
+    ...emptyLocalizedBody,
     columnCount: null,
     embeds: [],
     images: [],

@@ -4,6 +4,7 @@ import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import type { SiteSettings } from "@/lib/rsvp/types";
 import { localizedSectionTitle } from "@/lib/guest-view/section-title";
+import { groupItemsByColumn, textSectionColumns } from "@/lib/guest-view/columns";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
@@ -19,10 +20,10 @@ const GRID_COLS: Record<number, string> = {
 };
 
 const TEXT_COLS: Record<number, string> = {
-  1: "",
-  2: "sm:columns-2 sm:gap-6",
-  3: "sm:columns-2 lg:columns-3 sm:gap-6",
-  4: "sm:columns-2 lg:columns-4 sm:gap-6",
+  1: "grid-cols-1",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
 };
 
 export interface RsvpSectionContext {
@@ -156,22 +157,27 @@ function TextSectionView({
   language: PreferredLanguage;
   title: string | null;
 }) {
-  const body = section.body[language] || section.body.en;
-  if (!body) return null;
-  const columns = TEXT_COLS[section.columnCount ?? 1] ?? "";
+  const columnCount = section.columnCount ?? 1;
+  const columns = textSectionColumns(section, language);
+  if (columns.every((column) => !column.trim())) return null;
+  const gridClass = TEXT_COLS[columnCount] ?? TEXT_COLS[1];
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4 text-center">
       {title && <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>}
-      <div className={columns}>
-        {body
-          .split("\n")
-          .filter(Boolean)
-          .map((paragraph, index) => (
-            <p key={index} className="mt-1 text-sm text-foreground/70 first:mt-0">
-              {paragraph}
-            </p>
-          ))}
+      <div className={`grid gap-4 ${gridClass}`}>
+        {columns.map((columnText, columnIndex) => (
+          <div key={columnIndex} className="text-left">
+            {columnText
+              .split("\n")
+              .filter(Boolean)
+              .map((paragraph, index) => (
+                <p key={index} className="mt-1 text-sm text-foreground/70 first:mt-0">
+                  {paragraph}
+                </p>
+              ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -179,21 +185,27 @@ function TextSectionView({
 
 function ImageGroupView({ section, title }: { section: GuestViewSection; title: string | null }) {
   if (section.images.length === 0) return null;
-  const columns = GRID_COLS[section.columnCount ?? 2] ?? GRID_COLS[2];
+  const columnCount = section.columnCount ?? 2;
+  const gridClass = GRID_COLS[columnCount] ?? GRID_COLS[2];
+  const columns = groupItemsByColumn(section.images, columnCount);
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
       {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
-      <div className={`grid gap-4 ${columns}`}>
-        {section.images.map((image) => (
-          <div key={image.id} className="flex flex-col gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary uploaded/hosted images, not a known-optimizable set */}
-            <img
-              src={image.url}
-              alt={image.caption ?? ""}
-              className="aspect-square w-full rounded-md border border-border object-cover"
-            />
-            {image.caption && <p className="text-xs text-foreground/60">{image.caption}</p>}
+      <div className={`grid gap-4 ${gridClass}`}>
+        {columns.map((items, columnIndex) => (
+          <div key={columnIndex} className="flex flex-col gap-4">
+            {items.map((image) => (
+              <div key={image.id} className="flex flex-col gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary uploaded/hosted images, not a known-optimizable set */}
+                <img
+                  src={image.url}
+                  alt={image.caption ?? ""}
+                  className="aspect-square w-full rounded-md border border-border object-cover"
+                />
+                {image.caption && <p className="text-xs text-foreground/60">{image.caption}</p>}
+              </div>
+            ))}
           </div>
         ))}
       </div>
@@ -203,32 +215,38 @@ function ImageGroupView({ section, title }: { section: GuestViewSection; title: 
 
 function EmbedGroupView({ section, title }: { section: GuestViewSection; title: string | null }) {
   if (section.embeds.length === 0) return null;
-  const columns = GRID_COLS[section.columnCount ?? 2] ?? GRID_COLS[2];
+  const columnCount = section.columnCount ?? 2;
+  const gridClass = GRID_COLS[columnCount] ?? GRID_COLS[2];
+  const columns = groupItemsByColumn(section.embeds, columnCount);
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
       {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
-      <div className={`grid gap-4 ${columns}`}>
-        {section.embeds.map((embed) => (
-          <div key={embed.id} className="flex flex-col gap-2">
-            {embed.provider === "pinterest" ? (
-              <a
-                href={embed.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-40 items-center justify-center rounded-md border border-border bg-sand/40 text-sm font-medium text-aegean hover:underline"
-              >
-                View on Pinterest
-              </a>
-            ) : (
-              <iframe
-                src={embed.url}
-                className="h-52 w-full rounded-md border border-border"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            )}
-            {embed.caption && <p className="text-xs text-foreground/60">{embed.caption}</p>}
+      <div className={`grid gap-4 ${gridClass}`}>
+        {columns.map((items, columnIndex) => (
+          <div key={columnIndex} className="flex flex-col gap-4">
+            {items.map((embed) => (
+              <div key={embed.id} className="flex flex-col gap-2">
+                {embed.provider === "pinterest" ? (
+                  <a
+                    href={embed.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-40 items-center justify-center rounded-md border border-border bg-sand/40 text-sm font-medium text-aegean hover:underline"
+                  >
+                    View on Pinterest
+                  </a>
+                ) : (
+                  <iframe
+                    src={embed.url}
+                    className="h-52 w-full rounded-md border border-border"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                )}
+                {embed.caption && <p className="text-xs text-foreground/60">{embed.caption}</p>}
+              </div>
+            ))}
           </div>
         ))}
       </div>

@@ -16,10 +16,11 @@ interface ImageRow {
   existingUrl: string;
   caption: string;
   previewUrl: string;
+  columnIndex: number;
 }
 
 function emptyRow(): ImageRow {
-  return { file: null, existingUrl: "", caption: "", previewUrl: "" };
+  return { file: null, existingUrl: "", caption: "", previewUrl: "", columnIndex: 0 };
 }
 
 export function ImageGroupForm({
@@ -38,6 +39,8 @@ export function ImageGroupForm({
     }
   }, [state, onDone]);
 
+  const [columnCount, setColumnCount] = useState(section?.columnCount ?? 2);
+
   const [rows, setRows] = useState<ImageRow[]>(
     section && section.images.length > 0
       ? section.images.map((image) => ({
@@ -45,6 +48,7 @@ export function ImageGroupForm({
           existingUrl: image.url,
           caption: image.caption ?? "",
           previewUrl: image.url,
+          columnIndex: image.columnIndex,
         }))
       : [emptyRow()],
   );
@@ -93,13 +97,21 @@ export function ImageGroupForm({
 
       <label className="flex flex-col gap-1 text-sm text-ink">
         Columns
-        <select name="columnCount" defaultValue={section?.columnCount ?? 2} className="input w-auto">
+        <select
+          name="columnCount"
+          value={columnCount}
+          onChange={(event) => setColumnCount(Number(event.target.value))}
+          className="input w-auto"
+        >
           {[1, 2, 3, 4].map((count) => (
             <option key={count} value={count}>
               {count}
             </option>
           ))}
         </select>
+        <span className="text-xs font-normal text-foreground/50">
+          {columnCount > 1 ? "Choose which column each image appears in." : "Single column layout."}
+        </span>
       </label>
 
       <div className="flex flex-col gap-3">
@@ -137,6 +149,25 @@ export function ImageGroupForm({
                 placeholder="Optional"
               />
             </label>
+            {columnCount > 1 && (
+              <label className="flex flex-col gap-1 text-xs text-ink">
+                Column
+                <select
+                  name="imageColumnIndex"
+                  value={row.columnIndex}
+                  onChange={(event) =>
+                    updateRow(index, { columnIndex: Number(event.target.value) })
+                  }
+                  className="input w-auto"
+                >
+                  {Array.from({ length: columnCount }, (_, columnIndex) => (
+                    <option key={columnIndex} value={columnIndex}>
+                      {columnIndex + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             {rows.length > 1 && (
               <button
                 type="button"

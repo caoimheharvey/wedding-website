@@ -35,6 +35,7 @@ import {
   textSectionFormSchema,
   builtinSectionFormSchema,
 } from "./schema";
+import { textSectionDbFields } from "./text-section-persist";
 import type { GuestViewSectionType } from "./types";
 
 export type GuestViewSectionActionState =
@@ -46,10 +47,38 @@ function parseVisibleToRoles(formData: FormData) {
   return formData.getAll("visibleToRoles");
 }
 
+function parseTextSectionForm(formData: FormData) {
+  const columnCount = Number(formData.get("columnCount") ?? 1);
+  const common = {
+    titleEn: formData.get("titleEn"),
+    titleFr: formData.get("titleFr"),
+    titleZh: formData.get("titleZh"),
+    visibleToRoles: parseVisibleToRoles(formData),
+    columnCount,
+  };
+
+  if (columnCount === 1) {
+    return textSectionFormSchema.safeParse({
+      ...common,
+      bodyEn: formData.get("bodyEn"),
+      bodyFr: formData.get("bodyFr"),
+      bodyZh: formData.get("bodyZh"),
+    });
+  }
+
+  return textSectionFormSchema.safeParse({
+    ...common,
+    bodyEnColumns: formData.getAll("bodyEnColumn").map((value) => String(value)),
+    bodyFrColumns: formData.getAll("bodyFrColumn").map((value) => String(value)),
+    bodyZhColumns: formData.getAll("bodyZhColumn").map((value) => String(value)),
+  });
+}
+
 function parseEmbeds(formData: FormData): z.infer<typeof embedItemSchema>[] {
   const providers = formData.getAll("embedProvider");
   const urls = formData.getAll("embedUrl");
   const captions = formData.getAll("embedCaption");
+  const columnIndexes = formData.getAll("embedColumnIndex");
   const embeds: z.infer<typeof embedItemSchema>[] = [];
 
   for (let i = 0; i < urls.length; i++) {
@@ -58,6 +87,7 @@ function parseEmbeds(formData: FormData): z.infer<typeof embedItemSchema>[] {
       provider: providers[i],
       url: urls[i],
       caption: captions[i],
+      columnIndex: columnIndexes[i] ?? 0,
     });
     if (parsed.success) embeds.push(parsed.data);
   }
@@ -68,12 +98,14 @@ interface ImageRowInput {
   file: File | null;
   existingUrl: string;
   caption: string;
+  columnIndex: number;
 }
 
 function parseImageRows(formData: FormData): ImageRowInput[] {
   const files = formData.getAll("imageFile");
   const existingUrls = formData.getAll("imageExistingUrl");
   const captions = formData.getAll("imageCaption");
+  const columnIndexes = formData.getAll("imageColumnIndex");
 
   return captions.map((caption, i) => {
     const fileEntry = files[i];
@@ -81,6 +113,7 @@ function parseImageRows(formData: FormData): ImageRowInput[] {
       file: fileEntry instanceof File && fileEntry.size > 0 ? fileEntry : null,
       existingUrl: String(existingUrls[i] ?? ""),
       caption: String(caption),
+      columnIndex: Number(columnIndexes[i] ?? 0),
     };
   });
 }
@@ -115,7 +148,7 @@ async function resolveImages(
   const resolved = await Promise.all(
     rows.map(async (row) => {
       const url = await resolveImageUrl(uploadFolder, row);
-      return url ? { url, caption: row.caption } : null;
+      return url ? { url, caption: row.caption, columnIndex: row.columnIndex } : null;
     }),
   );
   return resolved.filter((image): image is MockImageInput => image !== null);
@@ -167,6 +200,7 @@ export async function createImageGroupSection(
           url: image.url,
           caption: image.caption || null,
           order_index: index,
+          column_index: image.columnIndex,
         })),
       );
       if (imagesError) return { message: `Could not save images: ${imagesError.message}` };
@@ -224,6 +258,7 @@ export async function updateImageGroupSection(
           url: image.url,
           caption: image.caption || null,
           order_index: index,
+          column_index: image.columnIndex,
         })),
       );
       if (insertError) return { message: `Could not save images: ${insertError.message}` };
@@ -240,14 +275,12 @@ export async function createTextSection(
 ): Promise<GuestViewSectionActionState> {
   await requireAdmin();
 
-  const parsed = textSectionFormSchema.safeParse({
-    ...Object.fromEntries(formData),
-    visibleToRoles: parseVisibleToRoles(formData),
-  });
+  const parsed = parseTextSectionForm(formData);
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
 
   const existing = await listGuestViewSections();
   const orderIndex = existing.length;
+  const bodyFields = textSectionDbFields(parsed.data);
 
   if (isLocalTestMode()) {
     mockCreateTextSection(parsed.data, orderIndex);
@@ -260,9 +293,7 @@ export async function createTextSection(
       title_zh: parsed.data.titleZh || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
-      body_en: parsed.data.bodyEn,
-      body_fr: parsed.data.bodyFr || null,
-      body_zh: parsed.data.bodyZh || null,
+      ...bodyFields,
       column_count: parsed.data.columnCount,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
@@ -279,11 +310,9 @@ export async function updateTextSection(
 ): Promise<GuestViewSectionActionState> {
   await requireAdmin();
 
-  const parsed = textSectionFormSchema.safeParse({
-    ...Object.fromEntries(formData),
-    visibleToRoles: parseVisibleToRoles(formData),
-  });
+  const parsed = parseTextSectionForm(formData);
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+  const bodyFields = textSectionDbFields(parsed.data);
 
   if (isLocalTestMode()) {
     mockUpdateTextSection(sectionId, parsed.data);
@@ -296,9 +325,7 @@ export async function updateTextSection(
         title_fr: parsed.data.titleFr || null,
         title_zh: parsed.data.titleZh || null,
         visible_to_roles: parsed.data.visibleToRoles,
-        body_en: parsed.data.bodyEn,
-        body_fr: parsed.data.bodyFr || null,
-        body_zh: parsed.data.bodyZh || null,
+        ...bodyFields,
         column_count: parsed.data.columnCount,
       })
       .eq("id", sectionId);
@@ -539,6 +566,7 @@ export async function createEmbedGroupSection(
           url: embed.url,
           caption: embed.caption || null,
           order_index: index,
+          column_index: embed.columnIndex,
         })),
       );
       if (embedsError) return { message: `Could not save embeds: ${embedsError.message}` };
@@ -593,6 +621,7 @@ export async function updateEmbedGroupSection(
           url: embed.url,
           caption: embed.caption || null,
           order_index: index,
+          column_index: embed.columnIndex,
         })),
       );
       if (insertError) return { message: `Could not save embeds: ${insertError.message}` };

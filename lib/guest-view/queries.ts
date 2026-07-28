@@ -5,6 +5,12 @@ import type { WeddingPartyRole } from "@/lib/guests/types";
 import { mockListGuestViewSections } from "./mock-store";
 import type { EmbedProvider, GuestViewImage, GuestViewSection } from "./types";
 
+function parseBodyColumns(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  const columns = value.map((entry) => (typeof entry === "string" ? entry : String(entry ?? "")));
+  return columns.length > 0 ? columns : null;
+}
+
 interface SectionRow {
   id: string;
   type: GuestViewSection["type"];
@@ -16,6 +22,9 @@ interface SectionRow {
   body_en: string | null;
   body_fr: string | null;
   body_zh: string | null;
+  body_en_columns: unknown;
+  body_fr_columns: unknown;
+  body_zh_columns: unknown;
   column_count: number | null;
   created_at: string;
   updated_at: string;
@@ -28,6 +37,7 @@ interface EmbedRow {
   url: string;
   caption: string | null;
   order_index: number;
+  column_index: number;
 }
 
 interface ImageRow {
@@ -36,6 +46,7 @@ interface ImageRow {
   url: string;
   caption: string | null;
   order_index: number;
+  column_index: number;
 }
 
 export async function listGuestViewSections(): Promise<GuestViewSection[]> {
@@ -67,6 +78,7 @@ export async function listGuestViewSections(): Promise<GuestViewSection[]> {
       url: row.url,
       caption: row.caption,
       orderIndex: row.order_index,
+      columnIndex: row.column_index ?? 0,
     });
     embedsBySection.set(row.section_id, list);
   }
@@ -79,6 +91,7 @@ export async function listGuestViewSections(): Promise<GuestViewSection[]> {
       url: row.url,
       caption: row.caption,
       orderIndex: row.order_index,
+      columnIndex: row.column_index ?? 0,
     });
     imagesBySection.set(row.section_id, list);
   }
@@ -90,6 +103,11 @@ export async function listGuestViewSections(): Promise<GuestViewSection[]> {
     orderIndex: row.order_index,
     visibleToRoles: row.visible_to_roles ?? [],
     body: { en: row.body_en, fr: row.body_fr, zh: row.body_zh },
+    bodyColumns: {
+      en: parseBodyColumns(row.body_en_columns),
+      fr: parseBodyColumns(row.body_fr_columns),
+      zh: parseBodyColumns(row.body_zh_columns),
+    },
     columnCount: row.column_count,
     embeds: embedsBySection.get(row.id) ?? [],
     images: imagesBySection.get(row.id) ?? [],

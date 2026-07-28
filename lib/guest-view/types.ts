@@ -18,6 +18,7 @@ export interface GuestViewEmbed {
   url: string;
   caption: string | null;
   orderIndex: number;
+  columnIndex: number;
 }
 
 export interface GuestViewImage {
@@ -25,6 +26,7 @@ export interface GuestViewImage {
   url: string;
   caption: string | null;
   orderIndex: number;
+  columnIndex: number;
 }
 
 export interface GuestViewSection {
@@ -34,8 +36,10 @@ export interface GuestViewSection {
   orderIndex: number;
   /** Empty = visible to everyone; otherwise only guests holding one of these roles. */
   visibleToRoles: WeddingPartyRole[];
-  /** Only used by 'text' sections. */
+  /** Only used by 'text' sections. Legacy single-block body per language. */
   body: Record<PreferredLanguage, string | null>;
+  /** Per-column text bodies when columnCount > 1. */
+  bodyColumns: Record<PreferredLanguage, string[] | null>;
   /** Used by 'text' (1 = normal flow, >1 = CSS multi-column), 'embed_group', and 'image_group' sections. */
   columnCount: number | null;
   embeds: GuestViewEmbed[];
