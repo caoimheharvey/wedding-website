@@ -8,12 +8,12 @@ export interface PhoneCountry {
 
 export const PHONE_COUNTRIES: PhoneCountry[] = [
   { id: "IE", label: "Ireland (+353)", dialCode: "353" },
-  { id: "GB", label: "United Kingdom (+44)", dialCode: "44" },
   { id: "FR", label: "France (+33)", dialCode: "33" },
   { id: "CN", label: "China (+86)", dialCode: "86" },
   { id: "US", label: "United States (+1)", dialCode: "1" },
-  { id: "AU", label: "Australia (+61)", dialCode: "61" },
   { id: "DE", label: "Germany (+49)", dialCode: "49" },
+  { id: "ES", label: "Spain (+34)", dialCode: "34" },
+  { id: "NL", label: "Netherlands (+31)", dialCode: "31" }
 ];
 
 const byId = new Map(PHONE_COUNTRIES.map((country) => [country.id, country]));

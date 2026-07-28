@@ -4,8 +4,10 @@ import { isLocalTestMode, LOCAL_TEST_USER } from "@/lib/local-test";
 import { NavLink } from "./_components/nav-link";
 
 const NAV_ITEMS = [
-  { href: "/admin/guests", label: "Guests" },
+  { href: "/admin/overview", label: "Overview" },
   { href: "/admin/planning", label: "Planning" },
+  { href: "/admin/guests", label: "Guests" },
+  { href: "/admin/budget", label: "Budget" },
   { href: "/admin/destination", label: "Destination" },
   { href: "/admin/vendors", label: "Vendors" },
   { href: "/admin/messaging", label: "Messaging" },

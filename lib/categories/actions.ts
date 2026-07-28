@@ -43,7 +43,7 @@ export async function createCategory(
     if (error) return { message: `Could not save category: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
   revalidatePath("/admin/vendors");
   return { message: "Category added." };
 }

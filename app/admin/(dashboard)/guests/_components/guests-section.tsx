@@ -6,7 +6,6 @@ import type { GuestWithPlusOnes } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { DefaultDeadlineEditor } from "./default-deadline-editor";
-import { GuestStats } from "./guest-stats";
 import {
   GuestsFilters,
   type InvitedByFilter,
@@ -186,8 +185,6 @@ export function GuestsSection({
         </div>
       )}
       {message && <p className="text-sm text-foreground/60">{message}</p>}
-
-      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
 
       <GuestsFilters
         priority={priorityFilter}

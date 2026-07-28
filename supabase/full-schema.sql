@@ -524,3 +524,47 @@ alter table guest_rsvp_delegates enable row level security;
 alter table guest_view_sections add column title_fr text;
 alter table guest_view_sections add column title_zh text;
 
+
+-- >>> supabase/migrations/0019_overview_and_checklist.sql
+alter table site_settings add column wedding_date date;
+
+create table planning_checklist_items (
+  id uuid primary key default gen_random_uuid(),
+  phase_id text not null,
+  title text not null,
+  description text,
+  order_index int not null default 0,
+  is_complete boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create trigger planning_checklist_items_set_updated_at
+  before update on planning_checklist_items
+  for each row
+  execute function set_updated_at();
+
+alter table planning_checklist_items enable row level security;
+
+
+-- >>> supabase/migrations/0020_drop_guest_login_tokens.sql
+drop table if exists guest_login_tokens;
+
+
+-- >>> supabase/migrations/0021_wedding_ideas.sql
+create table wedding_ideas (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  order_index int not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create trigger wedding_ideas_set_updated_at
+  before update on wedding_ideas
+  for each row
+  execute function set_updated_at();
+
+alter table wedding_ideas enable row level security;
+

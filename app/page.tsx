@@ -25,9 +25,9 @@ import { LanguageTabs, isPreferredLanguage } from "./guest/_components/language-
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string; lang?: string; error?: string }>;
+  searchParams: Promise<{ role?: string; lang?: string }>;
 }) {
-  const { role, lang, error } = await searchParams;
+  const { role, lang } = await searchParams;
   const session = await getGuestSession();
 
   if (session) {
@@ -136,9 +136,6 @@ export default async function Home({
     );
   }
 
-  const invalidTokenError =
-    error === "invalid-token" || error === "missing-token" ? error : undefined;
-
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
       <AdminViewLink />
@@ -165,7 +162,7 @@ export default async function Home({
           </p>
         </>
       ) : (
-        <GuestSignInContent error={invalidTokenError} />
+        <GuestSignInContent />
       )}
     </main>
   );

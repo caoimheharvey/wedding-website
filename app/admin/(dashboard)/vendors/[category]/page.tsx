@@ -60,15 +60,15 @@ export default async function VendorCategoryPage({
           >
             {overBudget ? `${formatCurrency(budget.actual - budget.budgeted)} over` : "In budget"}
           </span>
-          <Link href="/admin/planning" className="ml-auto text-xs text-aegean hover:underline">
-            View in Planning →
+          <Link href="/admin/budget" className="ml-auto text-xs text-aegean hover:underline">
+            View in Budget →
           </Link>
         </div>
       ) : (
         <p className="text-sm text-foreground/50">
           No budget line item for this category yet —{" "}
-          <Link href="/admin/planning" className="text-aegean hover:underline">
-            add one in Planning
+          <Link href="/admin/budget" className="text-aegean hover:underline">
+            add one in Budget
           </Link>{" "}
           to track spend here.
         </p>

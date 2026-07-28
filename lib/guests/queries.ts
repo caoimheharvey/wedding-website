@@ -7,7 +7,6 @@ import {
 } from "@/lib/guests/rsvp-delegates";
 import {
   mockCountLinkedPlusOnes,
-  mockGetGuestByEmail,
   mockGetGuestById,
   mockListGuests,
   mockListRsvpDelegatePairs,
@@ -147,23 +146,6 @@ export async function getGuestById(guestId: string): Promise<Guest | null> {
     .maybeSingle();
 
   if (error) throw new Error(`Failed to load guest: ${error.message}`);
-  return data ? mapRow(data as GuestRow) : null;
-}
-
-export async function getGuestByEmail(email: string): Promise<Guest | null> {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized) return null;
-
-  if (isLocalTestMode()) return mockGetGuestByEmail(normalized);
-
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("guests")
-    .select("*")
-    .ilike("email", normalized)
-    .maybeSingle();
-
-  if (error) throw new Error(`Failed to look up guest: ${error.message}`);
   return data ? mapRow(data as GuestRow) : null;
 }
 

@@ -65,7 +65,8 @@ export async function updateTotalBudget(amount: number | null): Promise<{ messag
     if (error) return { message: `Could not save: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
+  revalidatePath("/admin/overview");
   return {};
 }
 
@@ -86,7 +87,7 @@ export async function createBudgetItem(
     if (error) return { message: `Could not save item: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
   return { message: "Item added." };
 }
 
@@ -111,7 +112,7 @@ export async function updateBudgetItem(
     if (error) return { message: `Could not save item: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
   return { message: "Item updated." };
 }
 
@@ -126,7 +127,8 @@ export async function deleteBudgetItem(itemId: string): Promise<{ message?: stri
     if (error) return { message: `Could not delete item: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
+  revalidatePath("/admin/overview");
   return {};
 }
 
@@ -169,7 +171,7 @@ export async function createContribution(
     if (error) return { message: `Could not save contribution: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
   return { message: "Contribution added." };
 }
 
@@ -194,7 +196,7 @@ export async function updateContribution(
     if (error) return { message: `Could not save contribution: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
   return { message: "Contribution updated." };
 }
 
@@ -212,6 +214,7 @@ export async function deleteContribution(contributionId: string): Promise<{ mess
     if (error) return { message: `Could not delete contribution: ${error.message}` };
   }
 
-  revalidatePath("/admin/planning");
+  revalidatePath("/admin/budget");
+  revalidatePath("/admin/overview");
   return {};
 }

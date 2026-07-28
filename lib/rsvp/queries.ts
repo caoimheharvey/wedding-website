@@ -10,10 +10,13 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("site_settings")
-    .select("default_rsvp_deadline")
+    .select("default_rsvp_deadline, wedding_date")
     .eq("id", 1)
     .single();
 
   if (error) throw new Error(`Failed to load site settings: ${error.message}`);
-  return { defaultRsvpDeadline: data.default_rsvp_deadline };
+  return {
+    defaultRsvpDeadline: data.default_rsvp_deadline,
+    weddingDate: data.wedding_date,
+  };
 }

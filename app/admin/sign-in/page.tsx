@@ -20,7 +20,7 @@ export default async function SignInPage({
         action={async () => {
           "use server";
           await signIn("google", {
-            redirectTo: callbackUrl ?? "/admin/guests",
+            redirectTo: callbackUrl ?? "/admin/overview",
           });
         }}
       >
