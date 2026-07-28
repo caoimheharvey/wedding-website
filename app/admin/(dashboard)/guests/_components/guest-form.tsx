@@ -40,11 +40,10 @@ export function GuestForm({
             className="input"
           />
         </Field>
-        <Field label="Last name" error={state?.errors?.lastName?.[0]}>
+        <Field label="Last name (optional)" error={state?.errors?.lastName?.[0]}>
           <input
             name="lastName"
-            defaultValue={guest?.lastName}
-            required
+            defaultValue={guest?.lastName ?? ""}
             className="input"
           />
         </Field>

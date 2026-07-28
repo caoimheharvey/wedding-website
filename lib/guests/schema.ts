@@ -3,7 +3,7 @@ import { INVITED_BY_OPTIONS, RSVP_STATUS_OPTIONS, WEDDING_PARTY_ROLES } from "./
 
 export const guestFormSchema = z.object({
   firstName: z.string().trim().min(1, { error: "First name is required" }),
-  lastName: z.string().trim().min(1, { error: "Last name is required" }),
+  lastName: z.string().trim().optional(),
   email: z
     .union([z.email({ error: "Enter a valid email" }), z.literal("")])
     .optional(),

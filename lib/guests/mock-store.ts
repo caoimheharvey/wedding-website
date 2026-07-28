@@ -9,12 +9,13 @@ import type { Guest } from "./types";
  */
 let guests: Guest[] = seed();
 
-type GuestOverrides = Partial<Guest> & Pick<Guest, "firstName" | "lastName">;
+type GuestOverrides = Partial<Guest> & Pick<Guest, "firstName">;
 
 function makeGuest(overrides: GuestOverrides): Guest {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
+    lastName: null,
     email: null,
     phone: null,
     relationshipPriority: 4,
@@ -261,7 +262,7 @@ export function mockListGuests(): Guest[] {
   return [...guests].sort(
     (a, b) =>
       a.relationshipPriority - b.relationshipPriority ||
-      a.lastName.localeCompare(b.lastName) ||
+      (a.lastName ?? "").localeCompare(b.lastName ?? "") ||
       a.firstName.localeCompare(b.firstName),
   );
 }

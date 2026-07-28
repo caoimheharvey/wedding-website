@@ -81,7 +81,7 @@ export const RSVP_STATUS_OPTIONS = ["invited", "yes", "no"] as const satisfies r
 export interface Guest {
   id: string;
   firstName: string;
-  lastName: string;
+  lastName: string | null;
   email: string | null;
   phone: string | null;
   relationshipPriority: RelationshipPriority;

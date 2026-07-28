@@ -24,8 +24,11 @@ function mapRow(row: SeatingTableRow): SeatingTable {
   };
 }
 
-function byName(a: { firstName: string; lastName: string }, b: { firstName: string; lastName: string }) {
-  return a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
+function byName(
+  a: { firstName: string; lastName: string | null },
+  b: { firstName: string; lastName: string | null },
+) {
+  return (a.lastName ?? "").localeCompare(b.lastName ?? "") || a.firstName.localeCompare(b.firstName);
 }
 
 export async function listSeatingTables(): Promise<SeatingTable[]> {

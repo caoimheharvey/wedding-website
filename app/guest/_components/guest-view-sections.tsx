@@ -21,6 +21,7 @@ const TEXT_COLS: Record<number, string> = {
 
 export interface RsvpSectionContext {
   guest: Guest;
+  allGuests: Guest[];
   delegateFor: Guest[];
   deadlinePassed: boolean;
   delegateName?: string;
@@ -85,6 +86,7 @@ export function GuestViewSections({
             <ContactInfoForm
               key={section.id}
               guest={rsvp.guest}
+              allGuests={rsvp.allGuests}
               language={language}
               previewGuestId={rsvp.previewGuestId}
               title={section.title}

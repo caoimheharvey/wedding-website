@@ -1,7 +1,7 @@
 import type { Guest } from "@/lib/guests/types";
 
 export function guestDisplayName(guest: Pick<Guest, "firstName" | "lastName">): string {
-  return `${guest.firstName} ${guest.lastName}`;
+  return [guest.firstName, guest.lastName].filter(Boolean).join(" ");
 }
 
 /** Full names for the logged-in guest and anyone linked as their plus-one party. */

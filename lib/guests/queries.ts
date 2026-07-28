@@ -12,7 +12,7 @@ import type { Guest, GuestWithPlusOnes, RelationshipPriority } from "./types";
 interface GuestRow {
   id: string;
   first_name: string;
-  last_name: string;
+  last_name: string | null;
   email: string | null;
   phone: string | null;
   relationship_priority: number;

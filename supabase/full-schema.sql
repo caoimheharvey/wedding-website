@@ -489,3 +489,9 @@ alter table guest_view_sections drop constraint guest_view_sections_type_check;
 alter table guest_view_sections add constraint guest_view_sections_type_check
   check (type in ('text', 'embed_group', 'rsvp', 'image_group', 'contact_info', 'rsvp_status'));
 
+
+-- >>> supabase/migrations/0016_guest_optional_last_name.sql
+-- Plus-ones and other guests may not have a last name on file yet; guests can
+-- supply one through the Contact Info section on the guest site.
+alter table guests alter column last_name drop not null;
+

@@ -83,7 +83,7 @@ export function SectionListItem({
               : section.type === "image_group"
                 ? `${section.images.length} image(s), ${section.columnCount ?? 1} column(s)`
                 : section.type === "contact_info"
-                  ? "Only shown to guests with no email or phone on file."
+                  ? "Guests can verify and update contact details for themselves and linked guests."
                   : section.type === "rsvp_status"
                     ? "Shows each guest their current RSVP status and deadline."
                     : "Guests submit or update their RSVP here."}

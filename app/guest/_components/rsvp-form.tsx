@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { submitRsvp } from "@/lib/rsvp/guest-actions";
 import { RSVP_STATUS_OPTIONS, type Guest, type PreferredLanguage, type RsvpStatus } from "@/lib/guests/types";
+import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 
 export function RsvpForm({
@@ -89,9 +90,7 @@ export function RsvpForm({
             key={person.id}
             className="flex items-center justify-between gap-3 text-sm text-ink"
           >
-            <span>
-              {person.firstName} {person.lastName}
-            </span>
+            <span>{guestDisplayName(person)}</span>
             <select
               value={statuses[person.id]}
               onChange={(event) =>

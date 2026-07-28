@@ -68,6 +68,7 @@ export default async function GuestPreviewPage({
         language={language}
         rsvp={{
           guest,
+          allGuests,
           delegateFor,
           deadlinePassed: effectiveStatus === "deadline_missed",
           effectiveStatus,

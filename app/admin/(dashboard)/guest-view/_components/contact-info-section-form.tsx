@@ -35,9 +35,8 @@ export function ContactInfoSectionForm({
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
     >
       <p className="text-sm text-foreground/60">
-        Places a &quot;give us your email or phone&quot; prompt here — but only for a guest who has
-        neither on file yet (e.g. you handed them the site link directly instead of emailing or
-        texting it). Guests who already have contact info on file never see it.
+        Lets guests verify and update their name, email, and phone — including for a plus-one or
+        anyone whose RSVP they handle. Shown to everyone with a Contact Info section on their view.
       </p>
 
       <label className="flex flex-col gap-1 text-sm text-ink">

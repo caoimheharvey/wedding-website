@@ -5,27 +5,24 @@ import { getGuestSession } from "@/lib/guest-auth/session";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { canPreviewGuestView } from "@/lib/guest-preview";
+import { contactEditableGuests } from "@/lib/guest-site/contact-editable-guests";
+import { guestDisplayName } from "@/lib/guest-site/party-names";
+import {
+  CONTACT_INFO_SUCCESS_MESSAGE,
+  type ContactInfoEntry,
+} from "./contact-info";
 import { mockUpdateGuest } from "./mock-store";
-import { getGuestById } from "./queries";
+import { getGuestById, listGuests } from "./queries";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Guest-facing "give us your contact info" submission — for a guest who was
- * handed the site link directly instead of being emailed/texted it, and so
- * has neither an email nor phone on file yet. Lets them self-report either
- * or both so future updates can reach them normally.
- *
- * Only fills gaps: refuses if the guest already has an email or phone on
- * file, since this exists for guests missing *all* contact info, not as a
- * general self-service edit form.
- *
- * `previewGuestId` mirrors lib/rsvp/guest-actions.ts's submitRsvp — admin-
- * preview-only, lets the preview route exercise this without a real session.
+ * Guest-facing contact details form — verify or update name, email, and phone
+ * for the signed-in guest plus anyone linked as their plus-one or RSVP
+ * delegatee.
  */
 export async function submitContactInfo(
-  email: string,
-  phone: string,
+  entries: ContactInfoEntry[],
   previewGuestId?: string,
 ): Promise<{ message?: string }> {
   const session = await getGuestSession();
@@ -33,32 +30,63 @@ export async function submitContactInfo(
   const actingGuestId = canPreview && previewGuestId ? previewGuestId : session?.guestId;
   if (!actingGuestId) return { message: "Your session has expired — please sign in again." };
 
-  const trimmedEmail = email.trim();
-  const trimmedPhone = phone.trim();
-  if (!trimmedEmail && !trimmedPhone) {
-    return { message: "Enter an email or phone number." };
-  }
-  if (trimmedEmail && !EMAIL_PATTERN.test(trimmedEmail)) {
-    return { message: "Enter a valid email address." };
-  }
+  if (entries.length === 0) return {};
 
-  const guest = await getGuestById(actingGuestId);
-  if (!guest) return { message: "Your session has expired — please sign in again." };
-  if (guest.email || guest.phone) {
-    return { message: "You're already set up to receive updates." };
-  }
+  const actingGuest = await getGuestById(actingGuestId);
+  if (!actingGuest) return { message: "Your session has expired — please sign in again." };
 
-  const update = { email: trimmedEmail || null, phone: trimmedPhone || null };
+  const allGuests = await listGuests();
+  const allowedGuestIds = new Set(
+    contactEditableGuests(actingGuest, allGuests).map((guest) => guest.id),
+  );
+
+  for (const entry of entries) {
+    if (!allowedGuestIds.has(entry.guestId)) {
+      return { message: "You're not able to update that guest's details." };
+    }
+
+    const trimmedEmail = entry.email.trim();
+    const trimmedPhone = entry.phone.trim();
+    const trimmedLastName = entry.lastName.trim();
+
+    if (!trimmedEmail && !trimmedPhone) {
+      const existing = allGuests.find((guest) => guest.id === entry.guestId);
+      if (!existing?.email && !existing?.phone) {
+        const label = existing ? guestDisplayName(existing) : "each guest";
+        return { message: `Please add an email or phone number for ${label}.` };
+      }
+    }
+
+    if (trimmedEmail && !EMAIL_PATTERN.test(trimmedEmail)) {
+      return { message: "Enter a valid email address." };
+    }
+  }
 
   if (isLocalTestMode()) {
-    mockUpdateGuest(actingGuestId, update);
+    for (const entry of entries) {
+      mockUpdateGuest(entry.guestId, {
+        lastName: entry.lastName.trim() || null,
+        email: entry.email.trim() || null,
+        phone: entry.phone.trim() || null,
+      });
+    }
   } else {
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("guests").update(update).eq("id", actingGuestId);
-    if (error) return { message: `Could not save your details: ${error.message}` };
+    for (const entry of entries) {
+      const { error } = await supabase
+        .from("guests")
+        .update({
+          last_name: entry.lastName.trim() || null,
+          email: entry.email.trim() || null,
+          phone: entry.phone.trim() || null,
+        })
+        .eq("id", entry.guestId);
+      if (error) return { message: `Could not save your details: ${error.message}` };
+    }
   }
 
+  revalidatePath("/");
   revalidatePath("/guest");
   revalidatePath("/admin/guests");
-  return { message: "Thanks — we'll keep you posted!" };
+  return { message: CONTACT_INFO_SUCCESS_MESSAGE };
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PREFERRED_LANGUAGE_LABELS, type GuestWithPlusOnes } from "@/lib/guests/types";
+import { guestDisplayName } from "@/lib/guest-site/party-names";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { PriorityBadge } from "./priority-badge";
 import { RoleBadge } from "./role-badge";
@@ -7,8 +8,8 @@ import { InvitedByBadge } from "./invited-by-badge";
 import { RsvpStatusSelect } from "./rsvp-status-select";
 import { DeleteGuestButton } from "./delete-guest-button";
 
-function guestName(guest: { firstName: string; lastName: string }) {
-  return `${guest.firstName} ${guest.lastName}`;
+function guestName(guest: { firstName: string; lastName: string | null }) {
+  return guestDisplayName(guest);
 }
 
 function GuestMeta({

@@ -26,7 +26,7 @@ function parseGuestForm(formData: FormData) {
 function toGuestRow(values: z.infer<typeof guestFormSchema>) {
   return {
     first_name: values.firstName,
-    last_name: values.lastName,
+    last_name: values.lastName?.trim() || null,
     email: values.email || null,
     phone: values.phone || null,
     relationship_priority: values.relationshipPriority,
@@ -46,7 +46,7 @@ function toGuestFields(
 ): Omit<Guest, "id" | "createdAt" | "updatedAt" | "seatingTableId"> {
   return {
     firstName: values.firstName,
-    lastName: values.lastName,
+    lastName: values.lastName?.trim() || null,
     email: values.email || null,
     phone: values.phone || null,
     relationshipPriority: values.relationshipPriority as Guest["relationshipPriority"],

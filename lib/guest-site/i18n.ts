@@ -26,6 +26,8 @@ interface GuestSiteStrings {
   contactInfoForm: {
     heading: string;
     description: string;
+    linkedGuestsNote: string;
+    lastNamePlaceholder: string;
     emailPlaceholder: string;
     phonePlaceholder: string;
     submit: string;
@@ -62,10 +64,13 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     contactInfoForm: {
       heading: "Stay in the loop",
       description:
-        "We don't have your email or phone on file yet — add one (or both) so we can send you updates.",
+        "Please check the details below and update anything that's missing or incorrect so we can reach you with updates.",
+      linkedGuestsNote:
+        "You can also update contact details for your plus-one or anyone whose RSVP you handle.",
+      lastNamePlaceholder: "Last name",
       emailPlaceholder: "Email address",
       phonePlaceholder: "Phone number",
-      submit: "Save my details",
+      submit: "Save details",
     },
   },
   fr: {
@@ -97,10 +102,13 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     contactInfoForm: {
       heading: "Restez informé·e",
       description:
-        "Nous n'avons pas encore votre email ou votre téléphone — ajoutez l'un ou l'autre pour recevoir nos prochaines nouvelles.",
+        "Vérifiez les informations ci-dessous et corrigez ce qui manque ou n'est plus exact, afin que nous puissions vous envoyer nos nouvelles.",
+      linkedGuestsNote:
+        "Vous pouvez aussi mettre à jour les coordonnées de votre accompagnant·e ou de toute personne dont vous gérez la réponse.",
+      lastNamePlaceholder: "Nom de famille",
       emailPlaceholder: "Adresse email",
       phonePlaceholder: "Numéro de téléphone",
-      submit: "Enregistrer mes coordonnées",
+      submit: "Enregistrer",
     },
   },
   zh: {
@@ -129,10 +137,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
     contactInfoForm: {
       heading: "保持联系",
-      description: "我们目前没有您的电子邮件或电话号码 — 请填写其中一项（或两项），以便我们向您发送最新消息。",
+      description: "请核对以下信息，补充或更正任何缺失或过时的内容，以便我们向您发送最新消息。",
+      linkedGuestsNote: "您也可以更新您的陪同嘉宾或您代为回复的宾客的联系方式。",
+      lastNamePlaceholder: "姓氏",
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",
-      submit: "保存我的联系方式",
+      submit: "保存信息",
     },
   },
 };
