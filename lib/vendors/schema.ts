@@ -1,8 +1,7 @@
 import * as z from "zod";
-import { VENDOR_CATEGORIES } from "./types";
 
 export const vendorFormSchema = z.object({
-  category: z.enum(VENDOR_CATEGORIES),
+  category: z.string().trim().min(1, { error: "Category is required" }),
   name: z.string().trim().min(1, { error: "Vendor name is required" }),
   contactName: z.string().trim().optional(),
   email: z.email({ error: "Enter a valid email" }).optional().or(z.literal("")),

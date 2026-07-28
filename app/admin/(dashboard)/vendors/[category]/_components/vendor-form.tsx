@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { createVendor, updateVendor, type VendorActionState } from "@/lib/vendors/actions";
-import type { Vendor, VendorCategory } from "@/lib/vendors/types";
+import type { Vendor } from "@/lib/vendors/types";
 
 const initialState: VendorActionState = undefined;
 
@@ -10,7 +10,7 @@ export function VendorForm({
   category,
   vendor,
 }: {
-  category: VendorCategory;
+  category: string;
   vendor?: Vendor;
 }) {
   const action = vendor

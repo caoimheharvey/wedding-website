@@ -1,9 +1,7 @@
-import type { WeddingCategory } from "@/lib/categories";
-
 export interface BudgetItem {
   id: string;
   name: string;
-  category: WeddingCategory;
+  category: string;
   budgetedAmount: number;
   actualAmount: number;
   /** DIY items still count toward the category's actual spend, just with no vendor behind them. */
@@ -14,7 +12,8 @@ export interface BudgetItem {
 }
 
 export interface BudgetCategorySummary {
-  category: WeddingCategory;
+  category: string;
+  categoryLabel: string;
   budgeted: number;
   actual: number;
 }

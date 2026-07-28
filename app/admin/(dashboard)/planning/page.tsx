@@ -1,18 +1,20 @@
 import { getBudgetSummary, listBudgetItems, listContributions } from "@/lib/budget/queries";
+import { listCategories } from "@/lib/categories/queries";
 import { formatCurrency } from "@/lib/budget/format";
 import { TotalBudgetEditor } from "./_components/total-budget-editor";
 import { BudgetProgressBar } from "./_components/budget-progress-bar";
 import { CategorySummary } from "./_components/category-summary";
-import { BudgetItemForm } from "./_components/budget-item-form";
+import { AddBudgetItemSection } from "./_components/add-budget-item-section";
 import { BudgetItemRow } from "./_components/budget-item-row";
 import { AddContributionSection } from "./_components/add-contribution-section";
 import { ContributionRow } from "./_components/contribution-row";
 
 export default async function PlanningPage() {
-  const [summary, items, contributions] = await Promise.all([
+  const [summary, items, contributions, categories] = await Promise.all([
     getBudgetSummary(),
     listBudgetItems(),
     listContributions(),
+    listCategories(),
   ]);
 
   return (
@@ -65,7 +67,7 @@ export default async function PlanningPage() {
         <AddContributionSection />
       </div>
 
-      <BudgetItemForm />
+      <AddBudgetItemSection categories={categories} />
 
       {items.length === 0 ? (
         <p className="text-sm text-foreground/60">No budget items yet. Add one above.</p>
@@ -82,7 +84,7 @@ export default async function PlanningPage() {
           </thead>
           <tbody>
             {items.map((item) => (
-              <BudgetItemRow key={item.id} item={item} />
+              <BudgetItemRow key={item.id} item={item} categories={categories} />
             ))}
           </tbody>
         </table>

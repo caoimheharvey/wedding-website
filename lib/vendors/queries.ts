@@ -2,11 +2,11 @@ import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { mockGetVendorById, mockListVendors } from "./mock-store";
-import type { Vendor, VendorCategory } from "./types";
+import type { Vendor } from "./types";
 
 interface VendorRow {
   id: string;
-  category: VendorCategory;
+  category: string;
   name: string;
   contact_name: string | null;
   email: string | null;
@@ -61,7 +61,7 @@ export async function listVendors(): Promise<Vendor[]> {
   return (data as VendorRow[]).map(mapRow);
 }
 
-export async function listVendorsByCategory(category: VendorCategory): Promise<Vendor[]> {
+export async function listVendorsByCategory(category: string): Promise<Vendor[]> {
   const vendors = await listVendors();
   return vendors.filter((vendor) => vendor.category === category);
 }
@@ -81,10 +81,10 @@ export async function getVendorById(vendorId: string): Promise<Vendor | null> {
 }
 
 export async function countVendorsByCategory(): Promise<
-  Record<VendorCategory, { total: number; selectedName: string | null }>
+  Record<string, { total: number; selectedName: string | null }>
 > {
   const vendors = await listVendors();
-  const counts = {} as Record<VendorCategory, { total: number; selectedName: string | null }>;
+  const counts = {} as Record<string, { total: number; selectedName: string | null }>;
 
   for (const vendor of vendors) {
     const entry = counts[vendor.category] ?? { total: 0, selectedName: null };

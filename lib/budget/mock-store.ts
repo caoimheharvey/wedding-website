@@ -1,5 +1,6 @@
 import "server-only";
-import type { WeddingCategory } from "@/lib/categories";
+// Category ids are plain strings (see lib/categories).
+type WeddingCategory = string;
 import type { BudgetContribution, BudgetItem } from "./types";
 
 /**

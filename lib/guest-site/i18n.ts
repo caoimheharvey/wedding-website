@@ -1,9 +1,16 @@
 import type { PreferredLanguage, RsvpStatus } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 
+function formatNameList(names: string[], conjunction: string): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} ${conjunction} ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, ${conjunction} ${names[names.length - 1]}`;
+}
+
 interface GuestSiteStrings {
   phaseLabel: string;
-  greeting: (firstName: string) => string;
+  greeting: (names: string[]) => string;
   intro: string;
   yourRsvp: string;
   rsvpDeadlineLabel: (date: string) => string;
@@ -28,7 +35,7 @@ interface GuestSiteStrings {
 export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   en: {
     phaseLabel: "Save the date",
-    greeting: (firstName) => `Hello, ${firstName}!`,
+    greeting: (names) => `Hello, ${formatNameList(names, "and")}!`,
     intro:
       "We can't wait to celebrate with you. More details will be posted here as the big day gets closer.",
     yourRsvp: "Your RSVP status",
@@ -63,7 +70,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   },
   fr: {
     phaseLabel: "Réservez la date",
-    greeting: (firstName) => `Bonjour, ${firstName} !`,
+    greeting: (names) => `Bonjour, ${formatNameList(names, "et")} !`,
     intro:
       "Nous avons hâte de célébrer avec vous. Plus de détails seront publiés ici à l'approche du grand jour.",
     yourRsvp: "Votre statut de réponse",
@@ -98,7 +105,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   },
   zh: {
     phaseLabel: "预留日期",
-    greeting: (firstName) => `你好，${firstName}！`,
+    greeting: (names) => `你好，${formatNameList(names, "和")}！`,
     intro: "我们迫不及待想与你一起庆祝。随着大喜之日临近，更多详情将在此公布。",
     yourRsvp: "您的回复状态",
     rsvpDeadlineLabel: (date) => `请在 ${date} 前回复。`,

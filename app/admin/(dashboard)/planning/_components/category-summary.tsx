@@ -1,17 +1,22 @@
 import Link from "next/link";
 import { formatCurrency } from "@/lib/budget/format";
 import type { BudgetCategorySummary } from "@/lib/budget/types";
-import { WEDDING_CATEGORY_LABELS } from "@/lib/categories";
+import { AddCategorySection } from "./add-category-section";
 
 export function CategorySummary({ categories }: { categories: BudgetCategorySummary[] }) {
-  if (categories.length === 0) return null;
-
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="mb-1 font-display text-lg text-ink">By category</h2>
+      <div className="mb-1 flex items-center justify-between">
+        <h2 className="font-display text-lg text-ink">By category</h2>
+        <AddCategorySection />
+      </div>
       <p className="mb-2 text-xs text-foreground/50">
         Click a category for the vendors you&apos;re considering (or booked) for it.
       </p>
+      {categories.length === 0 && (
+        <p className="text-sm text-foreground/60">No categories yet — add one above.</p>
+      )}
+      {categories.length > 0 && (
       <table className="w-full text-left text-sm">
         <thead className="text-xs tracking-wide text-foreground/50 uppercase">
           <tr>
@@ -31,7 +36,7 @@ export function CategorySummary({ categories }: { categories: BudgetCategorySumm
                     href={`/admin/vendors/${category.category}`}
                     className="font-medium text-aegean hover:underline"
                   >
-                    {WEDDING_CATEGORY_LABELS[category.category]}
+                    {category.categoryLabel}
                   </Link>
                 </td>
                 <td className="py-1.5 pr-4">{formatCurrency(category.budgeted)}</td>
@@ -54,6 +59,7 @@ export function CategorySummary({ categories }: { categories: BudgetCategorySumm
           })}
         </tbody>
       </table>
+      )}
     </div>
   );
 }

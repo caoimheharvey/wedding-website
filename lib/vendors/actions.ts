@@ -14,7 +14,8 @@ import {
   mockUpdateVendor,
 } from "./mock-store";
 import { bookingStatusFormSchema, parseOptionalAmount, vendorFormSchema } from "./schema";
-import type { VendorCategory } from "./types";
+// Category ids are plain strings (see lib/vendors/types.ts).
+type VendorCategory = string;
 
 export type VendorActionState =
   | { errors: Record<string, string[] | undefined>; message?: string }

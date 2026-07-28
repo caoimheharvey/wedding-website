@@ -1,16 +1,11 @@
-// Vendors and budget items share one category taxonomy (lib/categories.ts)
-// so a budget category links straight through to its vendors. Re-exported
-// under the vendor-familiar names to avoid a wider rename across this module.
-export {
-  WEDDING_CATEGORIES as VENDOR_CATEGORIES,
-  WEDDING_CATEGORY_LABELS as VENDOR_CATEGORY_LABELS,
-  type WeddingCategory as VendorCategory,
-} from "@/lib/categories";
-import type { WeddingCategory } from "@/lib/categories";
+// Vendors and budget items share one category taxonomy (lib/categories),
+// which is admin-editable (an "Add Category" button on Planning) and
+// therefore DB-backed rather than a fixed compile-time list — category ids
+// are just strings, validated at write time against lib/categories/queries.
 
 export interface Vendor {
   id: string;
-  category: WeddingCategory;
+  category: string;
   name: string;
   contactName: string | null;
   email: string | null;

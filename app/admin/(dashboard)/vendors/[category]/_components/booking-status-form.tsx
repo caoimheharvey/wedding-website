@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { updateBookingStatus, type VendorActionState } from "@/lib/vendors/actions";
-import type { Vendor, VendorCategory } from "@/lib/vendors/types";
+import type { Vendor } from "@/lib/vendors/types";
 
 const initialState: VendorActionState = undefined;
 
@@ -11,7 +11,7 @@ export function BookingStatusForm({
   category,
 }: {
   vendor: Vendor;
-  category: VendorCategory;
+  category: string;
 }) {
   const action = updateBookingStatus.bind(null, vendor.id, category);
   const [state, formAction, isPending] = useActionState(action, initialState);

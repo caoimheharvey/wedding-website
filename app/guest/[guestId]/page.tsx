@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { getGuestById, listGuests } from "@/lib/guests/queries";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
-import { isLocalTestMode } from "@/lib/local-test";
+import { canPreviewGuestView } from "@/lib/guest-preview";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
+import { plusOnePartyNames } from "@/lib/guest-site/party-names";
 import { GuestSiteView } from "../_components/guest-site-view";
 import { GuestViewSections } from "../_components/guest-view-sections";
 import { LanguageTabs, isPreferredLanguage } from "../_components/language-tabs";
@@ -16,10 +17,7 @@ export default async function GuestPreviewPage({
   params: Promise<{ guestId: string }>;
   searchParams: Promise<{ lang?: string }>;
 }) {
-  // Real guest sign-in exists (see /guest/sign-in), but this specific route
-  // previews an exact guest by id for the admin, which needs to stay
-  // local-test-only — never expose guest data without real auth in production.
-  if (!isLocalTestMode()) notFound();
+  if (!(await canPreviewGuestView())) notFound();
 
   const { guestId } = await params;
   const { lang } = await searchParams;
@@ -48,7 +46,7 @@ export default async function GuestPreviewPage({
           ← Back to admin
         </Link>
         <span>
-          Local preview — viewing as {guest.firstName} {guest.lastName}.{" "}
+          Preview — viewing as {guest.firstName} {guest.lastName}.{" "}
           <Link href="/admin/guest-view" className="underline">
             Switch guest
           </Link>
@@ -61,7 +59,7 @@ export default async function GuestPreviewPage({
       />
 
       <GuestSiteView
-        firstName={guest.firstName}
+        greetingNames={plusOnePartyNames(guest, allGuests)}
         language={language}
         effectiveStatus={effectiveStatus}
         effectiveDeadline={effectiveDeadline}

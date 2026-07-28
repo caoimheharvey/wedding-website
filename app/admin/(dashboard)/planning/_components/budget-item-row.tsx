@@ -5,15 +5,16 @@ import { useActionState, useState, useTransition } from "react";
 import { deleteBudgetItem, updateBudgetItem, type BudgetItemActionState } from "@/lib/budget/actions";
 import { formatCurrency } from "@/lib/budget/format";
 import type { BudgetItem } from "@/lib/budget/types";
-import { WEDDING_CATEGORIES, WEDDING_CATEGORY_LABELS } from "@/lib/categories";
+import type { Category } from "@/lib/categories/types";
 
 const initialState: BudgetItemActionState = undefined;
 
-export function BudgetItemRow({ item }: { item: BudgetItem }) {
+export function BudgetItemRow({ item, categories }: { item: BudgetItem; categories: Category[] }) {
   const [isEditing, setIsEditing] = useState(false);
   const updateAction = updateBudgetItem.bind(null, item.id);
   const [state, formAction, isSaving] = useActionState(updateAction, initialState);
   const [isPending, startTransition] = useTransition();
+  const categoryLabel = categories.find((category) => category.id === item.category)?.label ?? item.category;
 
   // Adjust state during render (React's recommended alternative to an
   // effect here) rather than after commit, avoiding an extra render tick.
@@ -42,9 +43,9 @@ export function BudgetItemRow({ item }: { item: BudgetItem }) {
             <label className="flex flex-col gap-1 text-xs text-ink">
               Category
               <select name="category" defaultValue={item.category} required className="input">
-                {WEDDING_CATEGORIES.map((category) => (
-                  <option key={category} value={category}>
-                    {WEDDING_CATEGORY_LABELS[category]}
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.label}
                   </option>
                 ))}
               </select>
@@ -122,7 +123,7 @@ export function BudgetItemRow({ item }: { item: BudgetItem }) {
       </td>
       <td className="py-2 pr-4">
         <Link href={`/admin/vendors/${item.category}`} className="text-aegean hover:underline">
-          {WEDDING_CATEGORY_LABELS[item.category]}
+          {categoryLabel}
         </Link>
       </td>
       <td className="py-2 pr-4">{formatCurrency(item.budgetedAmount)}</td>

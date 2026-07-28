@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getGuestSession } from "@/lib/guest-auth/session";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import { canPreviewGuestView } from "@/lib/guest-preview";
 import { mockUpdateGuest } from "./mock-store";
 import { getGuestById } from "./queries";
 
@@ -19,8 +20,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * file, since this exists for guests missing *all* contact info, not as a
  * general self-service edit form.
  *
- * `previewGuestId` mirrors lib/rsvp/guest-actions.ts's submitRsvp — local-test-
- * only, lets the admin preview route exercise this without a real session.
+ * `previewGuestId` mirrors lib/rsvp/guest-actions.ts's submitRsvp — admin-
+ * preview-only, lets the preview route exercise this without a real session.
  */
 export async function submitContactInfo(
   email: string,
@@ -28,7 +29,8 @@ export async function submitContactInfo(
   previewGuestId?: string,
 ): Promise<{ message?: string }> {
   const session = await getGuestSession();
-  const actingGuestId = isLocalTestMode() && previewGuestId ? previewGuestId : session?.guestId;
+  const canPreview = await canPreviewGuestView();
+  const actingGuestId = canPreview && previewGuestId ? previewGuestId : session?.guestId;
   if (!actingGuestId) return { message: "Your session has expired — please sign in again." };
 
   const trimmedEmail = email.trim();

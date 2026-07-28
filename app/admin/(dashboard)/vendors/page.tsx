@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { countVendorsByCategory } from "@/lib/vendors/queries";
-import { VENDOR_CATEGORIES, VENDOR_CATEGORY_LABELS } from "@/lib/vendors/types";
+import { listCategories } from "@/lib/categories/queries";
 
 export default async function VendorsPage() {
-  const counts = await countVendorsByCategory();
+  const [counts, categories] = await Promise.all([countVendorsByCategory(), listCategories()]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -16,17 +16,15 @@ export default async function VendorsPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {VENDOR_CATEGORIES.map((category) => {
-          const entry = counts[category];
+        {categories.map((category) => {
+          const entry = counts[category.id];
           return (
             <Link
-              key={category}
-              href={`/admin/vendors/${category}`}
+              key={category.id}
+              href={`/admin/vendors/${category.id}`}
               className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4 transition hover:border-aegean"
             >
-              <span className="font-display text-lg text-ink">
-                {VENDOR_CATEGORY_LABELS[category]}
-              </span>
+              <span className="font-display text-lg text-ink">{category.label}</span>
               <span className="text-xs text-foreground/50">
                 {entry?.total ? `${entry.total} vendor${entry.total === 1 ? "" : "s"}` : "No vendors yet"}
               </span>

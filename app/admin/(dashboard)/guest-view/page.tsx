@@ -1,14 +1,12 @@
 import { listGuestViewSections } from "@/lib/guest-view/queries";
 import { listGuests } from "@/lib/guests/queries";
-import { isLocalTestMode } from "@/lib/local-test";
 import { GuestViewManager } from "./_components/guest-view-manager";
 import { PreviewPicker } from "./_components/preview-picker";
 
 export default async function GuestViewPage() {
-  const localTest = isLocalTestMode();
   const [sections, guests] = await Promise.all([
     listGuestViewSections(),
-    localTest ? listGuests() : Promise.resolve([]),
+    listGuests(),
   ]);
 
   return (
@@ -22,7 +20,7 @@ export default async function GuestViewPage() {
         </p>
       </div>
 
-      {localTest && <PreviewPicker guests={guests} />}
+      <PreviewPicker guests={guests} />
 
       <GuestViewManager sections={sections} />
     </div>

@@ -3,22 +3,26 @@
 import Link from "next/link";
 import { useTransition } from "react";
 import { deleteVendor, setVendorSelected } from "@/lib/vendors/actions";
-import type { Vendor, VendorCategory } from "@/lib/vendors/types";
+import { getBudgetFit } from "@/lib/vendors/budget-fit";
+import type { Vendor } from "@/lib/vendors/types";
 import { BookingStatusForm } from "./booking-status-form";
 
 export function VendorCard({
   vendor,
   category,
+  categoryBudgeted,
   isComparing,
   onToggleCompare,
   compareDisabled,
 }: {
   vendor: Vendor;
-  category: VendorCategory;
+  category: string;
+  categoryBudgeted: number;
   isComparing: boolean;
   onToggleCompare: () => void;
   compareDisabled: boolean;
 }) {
+  const budgetFit = getBudgetFit(vendor.priceQuote, categoryBudgeted);
   const [isPending, startTransition] = useTransition();
 
   function handleToggleSelected() {
@@ -81,7 +85,22 @@ export function VendorCard({
           </a>
         )}
         {vendor.priceQuote != null && (
-          <div className="font-medium text-ink">€{vendor.priceQuote.toLocaleString()}</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-ink">€{vendor.priceQuote.toLocaleString()}</span>
+            {budgetFit && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${
+                  budgetFit.status === "over"
+                    ? "bg-terracotta/15 text-terracotta"
+                    : "bg-olive/15 text-olive"
+                }`}
+              >
+                {budgetFit.status === "over"
+                  ? `€${budgetFit.overBy.toLocaleString()} over budget`
+                  : "In budget"}
+              </span>
+            )}
+          </div>
         )}
         {vendor.notes && <div className="text-foreground/60 italic">{vendor.notes}</div>}
       </dl>

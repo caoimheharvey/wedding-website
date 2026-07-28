@@ -1,14 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listVendorsByCategory } from "@/lib/vendors/queries";
-import { VENDOR_CATEGORIES, VENDOR_CATEGORY_LABELS, type VendorCategory } from "@/lib/vendors/types";
+import { listCategories } from "@/lib/categories/queries";
 import { getCategoryBudgetSummary } from "@/lib/budget/queries";
 import { formatCurrency } from "@/lib/budget/format";
 import { VendorList } from "./_components/vendor-list";
-
-function isVendorCategory(value: string): value is VendorCategory {
-  return (VENDOR_CATEGORIES as readonly string[]).includes(value);
-}
 
 export default async function VendorCategoryPage({
   params,
@@ -16,12 +12,15 @@ export default async function VendorCategoryPage({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
-  if (!isVendorCategory(category)) notFound();
 
-  const [vendors, budget] = await Promise.all([
+  const [vendors, budget, categories] = await Promise.all([
     listVendorsByCategory(category),
     getCategoryBudgetSummary(category),
+    listCategories(),
   ]);
+  const categoryLabel = categories.find((c) => c.id === category)?.label;
+  if (!categoryLabel) notFound();
+
   const overBudget = budget.actual > budget.budgeted;
   const hasBudget = budget.budgeted > 0 || budget.actual > 0;
 
@@ -32,7 +31,7 @@ export default async function VendorCategoryPage({
           ← Back to vendors
         </Link>
         <div className="mt-2 flex items-center justify-between">
-          <h1 className="font-display text-2xl text-ink">{VENDOR_CATEGORY_LABELS[category]}</h1>
+          <h1 className="font-display text-2xl text-ink">{categoryLabel}</h1>
           <Link
             href={`/admin/vendors/${category}/new`}
             className="rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
@@ -75,7 +74,7 @@ export default async function VendorCategoryPage({
         </p>
       )}
 
-      <VendorList vendors={vendors} category={category} />
+      <VendorList vendors={vendors} category={category} categoryBudgeted={budget.budgeted} />
     </div>
   );
 }

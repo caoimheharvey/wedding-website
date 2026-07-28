@@ -129,5 +129,5 @@ export async function quickGuestSignIn(
 
 export async function signOutGuest(): Promise<void> {
   await deleteGuestSession();
-  redirect("/guest/sign-in");
+  redirect("/");
 }

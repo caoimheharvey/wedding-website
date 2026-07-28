@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getGuestSession } from "@/lib/guest-auth/session";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import { canPreviewGuestView } from "@/lib/guest-preview";
 import { mockSetGuestRsvpStatus } from "@/lib/guests/mock-store";
 import { listGuests } from "@/lib/guests/queries";
 import { RSVP_STATUS_OPTIONS, type RsvpStatus } from "@/lib/guests/types";
@@ -20,21 +21,17 @@ export interface RsvpEntry {
  * at them (a default the guest being spoken for can always override, but a
  * delegate can't submit for someone unrelated to them).
  *
- * `previewGuestId` lets the admin's local-test-only "preview as a specific
- * guest" route exercise this without a real session. It's ignored outside
- * local test mode, so it can't be used to bypass auth in production even if
- * someone tampered with the client.
+ * `previewGuestId` lets an admin preview route exercise this without a real
+ * guest session. It's ignored unless the caller is in local test mode or
+ * signed in as an admin, so it can't be used to bypass auth in production.
  */
 export async function submitRsvp(
   entries: RsvpEntry[],
   previewGuestId?: string,
 ): Promise<{ message?: string }> {
-  // In local test mode, an explicit previewGuestId always wins over a real
-  // session: the preview route means "act as this specific guest," and a
-  // leftover real session cookie from testing sign-in shouldn't silently
-  // override that.
   const session = await getGuestSession();
-  const actingGuestId = isLocalTestMode() && previewGuestId ? previewGuestId : session?.guestId;
+  const canPreview = await canPreviewGuestView();
+  const actingGuestId = canPreview && previewGuestId ? previewGuestId : session?.guestId;
   if (!actingGuestId) return { message: "Your session has expired — please sign in again." };
 
   if (entries.length === 0) return {};

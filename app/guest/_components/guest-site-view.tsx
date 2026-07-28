@@ -3,13 +3,13 @@ import type { PreferredLanguage } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 
 export function GuestSiteView({
-  firstName,
+  greetingNames,
   language,
   effectiveStatus,
   effectiveDeadline,
   delegateFor,
 }: {
-  firstName: string;
+  greetingNames: string[];
   language: PreferredLanguage;
   effectiveStatus: EffectiveRsvpStatus;
   effectiveDeadline?: string | null;
@@ -21,7 +21,7 @@ export function GuestSiteView({
     <>
       <p className="text-sm tracking-[0.3em] text-aegean uppercase">{strings.phaseLabel}</p>
       <h1 className="font-display text-5xl text-ink">Caoimhe &amp; Alexandre</h1>
-      <p className="text-lg text-ink">{strings.greeting(firstName)}</p>
+      <p className="text-lg text-ink">{strings.greeting(greetingNames)}</p>
       <p className="max-w-md text-foreground/70">{strings.intro}</p>
 
       {delegateFor && delegateFor.length > 0 && (

@@ -1,13 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { createBudgetItem, type BudgetItemActionState } from "@/lib/budget/actions";
-import { WEDDING_CATEGORIES, WEDDING_CATEGORY_LABELS } from "@/lib/categories";
+import type { Category } from "@/lib/categories/types";
 
 const initialState: BudgetItemActionState = undefined;
 
-export function BudgetItemForm() {
+export function BudgetItemForm({
+  categories,
+  onDone,
+}: {
+  categories: Category[];
+  onDone?: () => void;
+}) {
   const [state, formAction, isPending] = useActionState(createBudgetItem, initialState);
+
+  useEffect(() => {
+    if (state?.message === "Item added.") onDone?.();
+  }, [state, onDone]);
 
   return (
     <form
@@ -29,9 +39,9 @@ export function BudgetItemForm() {
             <option value="" disabled>
               Choose one
             </option>
-            {WEDDING_CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {WEDDING_CATEGORY_LABELS[category]}
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.label}
               </option>
             ))}
           </select>
@@ -61,7 +71,7 @@ export function BudgetItemForm() {
         <input name="notes" className="input" placeholder="Optional" />
       </label>
       {state?.message && <p className="text-sm text-foreground/60">{state.message}</p>}
-      <div>
+      <div className="flex items-center gap-3">
         <button
           type="submit"
           disabled={isPending}
@@ -69,6 +79,11 @@ export function BudgetItemForm() {
         >
           {isPending ? "Adding…" : "Add item"}
         </button>
+        {onDone && (
+          <button type="button" onClick={onDone} className="text-sm text-foreground/60 hover:underline">
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   );

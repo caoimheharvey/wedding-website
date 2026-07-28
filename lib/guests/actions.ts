@@ -2,6 +2,7 @@
 
 import * as z from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/dal";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
@@ -97,7 +98,7 @@ export async function createGuest(
   }
 
   revalidatePath("/admin/guests");
-  return { message: "Guest added." };
+  redirect("/admin/guests");
 }
 
 export async function updateGuest(

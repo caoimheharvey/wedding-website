@@ -1,14 +1,14 @@
 import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
-import type { WeddingCategory } from "@/lib/categories";
+import { listCategories } from "@/lib/categories/queries";
 import { mockGetTotalBudget, mockListBudgetItems, mockListContributions } from "./mock-store";
 import type { BudgetCategorySummary, BudgetContribution, BudgetItem, BudgetSummary } from "./types";
 
 interface BudgetItemRow {
   id: string;
   name: string;
-  category: WeddingCategory;
+  category: string;
   budgeted_amount: number;
   actual_amount: number;
   is_diy: boolean;
@@ -93,13 +93,20 @@ export async function listContributions(): Promise<BudgetContribution[]> {
 }
 
 export async function getBudgetSummary(): Promise<BudgetSummary> {
-  const [totalBudget, items, contributions] = await Promise.all([
+  const [totalBudget, items, contributions, categories] = await Promise.all([
     getTotalBudget(),
     listBudgetItems(),
     listContributions(),
+    listCategories(),
   ]);
-
-  const byCategory = new Map<WeddingCategory, BudgetCategorySummary>();
+  // Seeded from every known category (not just ones with a budget item yet)
+  // so a freshly-added category shows up here — and in Vendors — right away.
+  const byCategory = new Map<string, BudgetCategorySummary>(
+    categories.map((category) => [
+      category.id,
+      { category: category.id, categoryLabel: category.label, budgeted: 0, actual: 0 },
+    ]),
+  );
   let totalBudgeted = 0;
   let totalActual = 0;
 
@@ -109,6 +116,7 @@ export async function getBudgetSummary(): Promise<BudgetSummary> {
 
     const existing = byCategory.get(item.category) ?? {
       category: item.category,
+      categoryLabel: item.category,
       budgeted: 0,
       actual: 0,
     };
@@ -125,20 +133,20 @@ export async function getBudgetSummary(): Promise<BudgetSummary> {
     availableBudget: totalBudget !== null ? totalBudget + totalContributions : null,
     totalBudgeted,
     totalActual,
-    categories: [...byCategory.values()].sort((a, b) => a.category.localeCompare(b.category)),
+    categories: [...byCategory.values()].sort((a, b) => a.categoryLabel.localeCompare(b.categoryLabel)),
   };
 }
 
 /** Budgeted vs. actual spend for a single category — used on the Vendors
  *  category page so the budget context is visible without leaving it. */
-export async function getCategoryBudgetSummary(
-  category: WeddingCategory,
-): Promise<BudgetCategorySummary> {
-  const items = await listBudgetItems();
+export async function getCategoryBudgetSummary(category: string): Promise<BudgetCategorySummary> {
+  const [items, categories] = await Promise.all([listBudgetItems(), listCategories()]);
   const inCategory = items.filter((item) => item.category === category);
+  const categoryLabel = categories.find((c) => c.id === category)?.label ?? category;
 
   return {
     category,
+    categoryLabel,
     budgeted: inCategory.reduce((sum, item) => sum + item.budgetedAmount, 0),
     actual: inCategory.reduce((sum, item) => sum + item.actualAmount, 0),
   };
