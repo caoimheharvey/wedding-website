@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Guest } from "@/lib/guests/types";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
+import { GuestSearchResults } from "../../_components/guest-search-results";
 
 export function GuestDelegatesPicker({
   guests,
@@ -67,26 +68,19 @@ export function GuestDelegatesPicker({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search guests to add…"
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-foreground/40 focus:border-aegean focus:outline-none"
+          className="input"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
         />
-        {matches.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full rounded-md border border-border bg-surface shadow-md">
-            {matches.map((guest) => (
-              <li key={guest.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedIds((ids) => [...ids, guest.id]);
-                    setQuery("");
-                  }}
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-sand/50"
-                >
-                  {guestDisplayName(guest)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <GuestSearchResults
+          matches={matches}
+          getLabel={guestDisplayName}
+          onSelect={(guest) => {
+            setSelectedIds((ids) => [...ids, guest.id]);
+            setQuery("");
+          }}
+        />
       </div>
     </div>
   );

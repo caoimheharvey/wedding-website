@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { PREFERRED_LANGUAGE_LABELS, type Guest, type PreferredLanguage } from "@/lib/guests/types";
 import { PREVIEW_PERSONAS, type PreviewRole } from "@/lib/guest-site/preview-personas";
+import { GuestSearchResults } from "../../_components/guest-search-results";
 
 export function PreviewPicker({ guests }: { guests: Guest[] }) {
   const [mode, setMode] = useState<"role" | "guest">("role");
@@ -114,26 +115,19 @@ export function PreviewPicker({ guests }: { guests: Guest[] }) {
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search guests by name…"
-                  className="w-64 rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-foreground/40 focus:border-aegean focus:outline-none"
+                  className="input w-64 max-w-full"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                 />
-                {matches.length > 0 && (
-                  <ul className="absolute z-10 mt-1 w-64 rounded-md border border-border bg-surface shadow-md">
-                    {matches.map((guest) => (
-                      <li key={guest.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedGuest(guest);
-                            setQuery("");
-                          }}
-                          className="block w-full px-3 py-2 text-left text-sm hover:bg-sand/50"
-                        >
-                          {guest.firstName} {guest.lastName}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <GuestSearchResults
+                  className="w-64 max-w-full"
+                  matches={matches}
+                  onSelect={(guest) => {
+                    setSelectedGuest(guest);
+                    setQuery("");
+                  }}
+                />
               </div>
             )}
           </div>

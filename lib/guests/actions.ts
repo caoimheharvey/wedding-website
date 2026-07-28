@@ -196,7 +196,7 @@ export async function updateGuest(
   }
 
   revalidatePath("/admin/guests");
-  return { message: "Guest updated." };
+  redirect("/admin/guests");
 }
 
 export async function deleteGuest(guestId: string): Promise<{ message?: string }> {
