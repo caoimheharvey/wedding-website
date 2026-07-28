@@ -31,6 +31,8 @@ export const rsvpStatusSectionFormSchema = sectionMetaSchema;
 
 export const contactInfoSectionFormSchema = sectionMetaSchema;
 
+export const builtinSectionFormSchema = sectionMetaSchema;
+
 export const embedItemSchema = z.object({
   provider: z.enum(["google_maps", "pinterest", "other"]),
   url: z.url({ error: "Enter a valid URL" }),

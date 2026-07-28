@@ -3,4 +3,6 @@ export interface SiteSettings {
   defaultRsvpDeadline: string | null;
   /** ISO date (YYYY-MM-DD). The wedding day — used for countdown and planning phases. */
   weddingDate: string | null;
+  /** Venue or city shown on the guest site and calendar download. */
+  weddingLocation: string | null;
 }

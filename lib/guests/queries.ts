@@ -37,6 +37,7 @@ interface GuestRow {
   rsvp_status: Guest["rsvpStatus"];
   seating_table_id: string | null;
   notes: string | null;
+  dietary_restrictions: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -59,6 +60,7 @@ function mapRow(row: GuestRow): Guest {
     rsvpStatus: row.rsvp_status,
     seatingTableId: row.seating_table_id,
     notes: row.notes,
+    dietaryRestrictions: row.dietary_restrictions,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

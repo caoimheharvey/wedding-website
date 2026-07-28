@@ -6,6 +6,71 @@ import { WEDDING_PARTY_ROLE_LABELS } from "@/lib/guests/types";
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import { localizedSectionTitle } from "@/lib/guest-view/section-title";
 
+function sectionTypeLabel(type: GuestViewSection["type"]): string {
+  switch (type) {
+    case "text":
+      return "Text";
+    case "embed_group":
+      return "Embeds";
+    case "image_group":
+      return "Images";
+    case "contact_info":
+      return "Contact info";
+    case "rsvp_status":
+      return "RSVP status";
+    case "countdown":
+      return "Countdown";
+    case "wedding_date":
+      return "Wedding date";
+    case "dietary_restrictions":
+      return "Dietary";
+    case "rsvp":
+      return "RSVP";
+  }
+}
+
+function sectionTypeDescription(section: GuestViewSection): string {
+  switch (section.type) {
+    case "text":
+      return (section.body.en ?? "").slice(0, 100);
+    case "embed_group":
+      return `${section.embeds.length} embed(s), ${section.columnCount ?? 1} column(s)`;
+    case "image_group":
+      return `${section.images.length} image(s), ${section.columnCount ?? 1} column(s)`;
+    case "contact_info":
+      return "Guests can verify and update contact details for themselves and linked guests.";
+    case "rsvp_status":
+      return "Shows each guest their current RSVP status and deadline.";
+    case "countdown":
+      return "Live countdown to the wedding date from Overview settings.";
+    case "wedding_date":
+      return "Wedding date, location, and add-to-calendar buttons.";
+    case "dietary_restrictions":
+      return "Guests can record dietary requirements for their party.";
+    case "rsvp":
+      return "Guests submit or update their RSVP here.";
+  }
+}
+
+function sectionDefaultTitle(section: GuestViewSection): string | null {
+  switch (section.type) {
+    case "rsvp":
+      return "RSVP form";
+    case "rsvp_status":
+      return "RSVP status";
+    case "contact_info":
+      return "Contact info prompt";
+    case "countdown":
+      return "Countdown";
+    case "wedding_date":
+      return "Wedding date";
+    case "dietary_restrictions":
+      return "Dietary requirements";
+    default:
+      return null;
+  }
+}
+
 export function SectionListItem({
   section,
   isFirst,
@@ -41,17 +106,7 @@ export function SectionListItem({
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-sand px-2 py-0.5 text-xs font-medium text-ink/60">
-            {section.type === "text"
-              ? "Text"
-              : section.type === "embed_group"
-                ? "Embeds"
-                : section.type === "image_group"
-                  ? "Images"
-                  : section.type === "contact_info"
-                    ? "Contact info"
-                    : section.type === "rsvp_status"
-                      ? "RSVP status"
-                      : "RSVP"}
+            {sectionTypeLabel(section.type)}
           </span>
           {section.visibleToRoles.length > 0 ? (
             section.visibleToRoles.map((role) => (
@@ -69,28 +124,9 @@ export function SectionListItem({
           )}
         </div>
         <p className="mt-1 font-medium text-ink">
-          {displayTitle ||
-            (section.type === "rsvp"
-              ? "RSVP form"
-              : section.type === "rsvp_status"
-                ? "RSVP status"
-                : section.type === "contact_info"
-                  ? "Contact info prompt"
-                  : "(untitled)")}
+          {displayTitle || sectionDefaultTitle(section) || "(untitled)"}
         </p>
-        <p className="mt-0.5 text-xs text-foreground/50">
-          {section.type === "text"
-            ? (section.body.en ?? "").slice(0, 100)
-            : section.type === "embed_group"
-              ? `${section.embeds.length} embed(s), ${section.columnCount ?? 1} column(s)`
-              : section.type === "image_group"
-                ? `${section.images.length} image(s), ${section.columnCount ?? 1} column(s)`
-                : section.type === "contact_info"
-                  ? "Guests can verify and update contact details for themselves and linked guests."
-                  : section.type === "rsvp_status"
-                    ? "Shows each guest their current RSVP status and deadline."
-                    : "Guests submit or update their RSVP here."}
-        </p>
+        <p className="mt-0.5 text-xs text-foreground/50">{sectionTypeDescription(section)}</p>
       </div>
       <div className="flex flex-col items-end gap-2">
         <div className="flex items-center gap-2">

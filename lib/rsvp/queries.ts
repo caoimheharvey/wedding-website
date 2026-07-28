@@ -10,7 +10,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("site_settings")
-    .select("default_rsvp_deadline, wedding_date")
+    .select("default_rsvp_deadline, wedding_date, wedding_location")
     .eq("id", 1)
     .single();
 
@@ -18,5 +18,6 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   return {
     defaultRsvpDeadline: data.default_rsvp_deadline,
     weddingDate: data.wedding_date,
+    weddingLocation: data.wedding_location,
   };
 }

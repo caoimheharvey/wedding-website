@@ -78,6 +78,7 @@ export default async function Home({
             <GuestViewSections
               sections={sections}
               language={language}
+              siteSettings={siteSettings}
               rsvp={{
                 guest,
                 allGuests,
@@ -131,7 +132,7 @@ export default async function Home({
           language={language}
           delegateFor={persona.delegateFor}
         />
-        <GuestViewSections sections={sections} language={language} />
+        <GuestViewSections sections={sections} language={language} siteSettings={siteSettings} />
       </main>
     );
   }

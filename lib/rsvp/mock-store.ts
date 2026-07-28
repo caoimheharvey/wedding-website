@@ -8,6 +8,7 @@ import type { SiteSettings } from "./types";
 let settings: SiteSettings = {
   defaultRsvpDeadline: "2027-04-01",
   weddingDate: "2028-07-15",
+  weddingLocation: "Villa Cimbrone, Ravello",
 };
 
 export function mockGetSiteSettings(): SiteSettings {
@@ -21,5 +22,10 @@ export function mockUpdateDefaultRsvpDeadline(deadline: string | null): SiteSett
 
 export function mockUpdateWeddingDate(date: string | null): SiteSettings {
   settings = { ...settings, weddingDate: date };
+  return settings;
+}
+
+export function mockUpdateWeddingLocation(location: string | null): SiteSettings {
+  settings = { ...settings, weddingLocation: location };
   return settings;
 }

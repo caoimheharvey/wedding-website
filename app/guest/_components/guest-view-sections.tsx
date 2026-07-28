@@ -2,10 +2,14 @@ import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
 import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
+import type { SiteSettings } from "@/lib/rsvp/types";
 import { localizedSectionTitle } from "@/lib/guest-view/section-title";
+import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
 import { ContactInfoForm } from "./contact-info-form";
+import { DietaryRestrictionsForm } from "./dietary-restrictions-form";
+import { CountdownSectionView, WeddingDateSectionView } from "./wedding-info-sections";
 
 const GRID_COLS: Record<number, string> = {
   1: "grid-cols-1",
@@ -37,12 +41,14 @@ export interface RsvpSectionContext {
 export function GuestViewSections({
   sections,
   language,
+  siteSettings,
   rsvp,
 }: {
   sections: GuestViewSection[];
   language: PreferredLanguage;
-  /** Renders "rsvp" sections at their configured position. Omit to skip them
-   *  (e.g. role-only previews that have no real guest to submit an RSVP for). */
+  siteSettings: SiteSettings;
+  /** Renders interactive sections at their configured position. Omit to skip them
+   *  (e.g. role-only previews that have no real guest to submit for). */
   rsvp?: RsvpSectionContext;
 }) {
   if (sections.length === 0) return null;
@@ -98,6 +104,37 @@ export function GuestViewSections({
               guest={rsvp.guest}
               allGuests={rsvp.allGuests}
               delegatePairs={rsvp.delegatePairs}
+              language={language}
+              previewGuestId={rsvp.previewGuestId}
+              title={sectionTitle}
+            />
+          );
+        }
+        if (section.type === "countdown") {
+          return (
+            <CountdownSectionView
+              key={section.id}
+              language={language}
+              weddingDate={siteSettings.weddingDate}
+              title={sectionTitle ?? GUEST_SITE_STRINGS[language].countdownSection.heading}
+            />
+          );
+        }
+        if (section.type === "wedding_date") {
+          return (
+            <WeddingDateSectionView
+              key={section.id}
+              language={language}
+              siteSettings={siteSettings}
+              title={sectionTitle ?? GUEST_SITE_STRINGS[language].weddingDateSection.heading}
+            />
+          );
+        }
+        if (section.type === "dietary_restrictions" && rsvp) {
+          return (
+            <DietaryRestrictionsForm
+              key={section.id}
+              people={rsvp.rsvpSubmittees}
               language={language}
               previewGuestId={rsvp.previewGuestId}
               title={sectionTitle}

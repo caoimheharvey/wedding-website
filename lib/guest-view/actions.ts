@@ -7,6 +7,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import {
   mockCreateContactInfoSection,
+  mockCreateBuiltinSection,
   mockCreateEmbedGroupSection,
   mockCreateImageGroupSection,
   mockCreateRsvpSection,
@@ -15,6 +16,7 @@ import {
   mockDeleteGuestViewSection,
   mockMoveGuestViewSection,
   mockUpdateContactInfoSection,
+  mockUpdateBuiltinSection,
   mockUpdateEmbedGroupSection,
   mockUpdateImageGroupSection,
   mockUpdateRsvpSection,
@@ -31,7 +33,9 @@ import {
   rsvpSectionFormSchema,
   rsvpStatusSectionFormSchema,
   textSectionFormSchema,
+  builtinSectionFormSchema,
 } from "./schema";
+import type { GuestViewSectionType } from "./types";
 
 export type GuestViewSectionActionState =
   | { errors: Record<string, string[] | undefined>; message?: string }
@@ -648,4 +652,123 @@ export async function moveGuestViewSection(
 
   revalidatePath("/admin/guest-view");
   return {};
+}
+
+type BuiltinSectionType = Extract<
+  GuestViewSectionType,
+  "countdown" | "wedding_date" | "dietary_restrictions"
+>;
+
+function parseBuiltinSectionForm(formData: FormData) {
+  return builtinSectionFormSchema.safeParse({
+    ...Object.fromEntries(formData),
+    visibleToRoles: parseVisibleToRoles(formData),
+  });
+}
+
+async function createBuiltinSection(
+  type: BuiltinSectionType,
+  _prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  await requireAdmin();
+
+  const parsed = parseBuiltinSectionForm(formData);
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+
+  const existing = await listGuestViewSections();
+  const orderIndex = existing.length;
+
+  if (isLocalTestMode()) {
+    mockCreateBuiltinSection(type, parsed.data, orderIndex);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from("guest_view_sections").insert({
+      type,
+      title: parsed.data.title || null,
+      order_index: orderIndex,
+      visible_to_roles: parsed.data.visibleToRoles,
+    });
+    if (error) return { message: `Could not save section: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  revalidatePath("/");
+  return { message: "Section added." };
+}
+
+async function updateBuiltinSection(
+  type: BuiltinSectionType,
+  sectionId: string,
+  _prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  await requireAdmin();
+
+  const parsed = parseBuiltinSectionForm(formData);
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+
+  if (isLocalTestMode()) {
+    mockUpdateBuiltinSection(sectionId, parsed.data);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("guest_view_sections")
+      .update({
+        title: parsed.data.title || null,
+        visible_to_roles: parsed.data.visibleToRoles,
+      })
+      .eq("id", sectionId)
+      .eq("type", type);
+    if (error) return { message: `Could not save section: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  revalidatePath("/");
+  return { message: "Section updated." };
+}
+
+export async function createCountdownSection(
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return createBuiltinSection("countdown", prevState, formData);
+}
+
+export async function updateCountdownSection(
+  sectionId: string,
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return updateBuiltinSection("countdown", sectionId, prevState, formData);
+}
+
+export async function createWeddingDateSection(
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return createBuiltinSection("wedding_date", prevState, formData);
+}
+
+export async function updateWeddingDateSection(
+  sectionId: string,
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return updateBuiltinSection("wedding_date", sectionId, prevState, formData);
+}
+
+export async function createDietaryRestrictionsSection(
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return createBuiltinSection("dietary_restrictions", prevState, formData);
+}
+
+export async function updateDietaryRestrictionsSection(
+  sectionId: string,
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return updateBuiltinSection("dietary_restrictions", sectionId, prevState, formData);
 }

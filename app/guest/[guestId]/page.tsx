@@ -69,6 +69,7 @@ export default async function GuestPreviewPage({
       <GuestViewSections
         sections={sections}
         language={language}
+        siteSettings={siteSettings}
         rsvp={{
           guest,
           allGuests,

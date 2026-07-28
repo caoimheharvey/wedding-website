@@ -12,9 +12,11 @@ import {
   guestNeedsLastName,
   type ContactInfoEntry,
 } from "./contact-info";
+import { DIETARY_SUCCESS_MESSAGE } from "./dietary-info";
 import { formatStoredPhoneForCountry } from "@/lib/phone/format";
 import { mockUpdateGuest } from "./mock-store";
 import { getGuestById, listGuests, listRsvpDelegatePairs } from "./queries";
+import { rsvpSubmitteesFor } from "./rsvp-delegates";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -109,4 +111,58 @@ export async function submitContactInfo(
   revalidatePath("/guest");
   revalidatePath("/admin/guests");
   return { message: CONTACT_INFO_SUCCESS_MESSAGE };
+}
+
+export async function submitDietaryRestrictions(
+  _prevState: { message?: string } | undefined,
+  formData: FormData,
+): Promise<{ message?: string }> {
+  const session = await getGuestSession();
+  const canPreview = await canPreviewGuestView();
+  const previewGuestId = String(formData.get("previewGuestId") ?? "").trim() || undefined;
+  const actingGuestId = canPreview && previewGuestId ? previewGuestId : session?.guestId;
+  if (!actingGuestId) return { message: "Your session has expired — please sign in again." };
+
+  const actingGuest = await getGuestById(actingGuestId);
+  if (!actingGuest) return { message: "Your session has expired — please sign in again." };
+
+  const [allGuests, pairs] = await Promise.all([listGuests(), listRsvpDelegatePairs()]);
+  const allowedGuestIds = new Set(
+    rsvpSubmitteesFor(actingGuest, allGuests, pairs).map((guest) => guest.id),
+  );
+
+  const updates: Array<{ guestId: string; dietaryRestrictions: string | null }> = [];
+  for (const [key, value] of formData.entries()) {
+    if (!key.startsWith("dietary_")) continue;
+    const guestId = key.slice("dietary_".length);
+    if (!allowedGuestIds.has(guestId)) {
+      return { message: "You're not able to update that guest's dietary details." };
+    }
+    updates.push({
+      guestId,
+      dietaryRestrictions: String(value).trim() || null,
+    });
+  }
+
+  if (updates.length === 0) return {};
+
+  if (isLocalTestMode()) {
+    for (const update of updates) {
+      mockUpdateGuest(update.guestId, { dietaryRestrictions: update.dietaryRestrictions });
+    }
+  } else {
+    const supabase = getSupabaseAdmin();
+    for (const update of updates) {
+      const { error } = await supabase
+        .from("guests")
+        .update({ dietary_restrictions: update.dietaryRestrictions })
+        .eq("id", update.guestId);
+      if (error) return { message: `Could not save dietary details: ${error.message}` };
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/guest");
+  revalidatePath("/admin/guests");
+  return { message: DIETARY_SUCCESS_MESSAGE };
 }

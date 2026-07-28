@@ -6,7 +6,10 @@ export type GuestViewSectionType =
   | "rsvp"
   | "rsvp_status"
   | "image_group"
-  | "contact_info";
+  | "contact_info"
+  | "countdown"
+  | "wedding_date"
+  | "dietary_restrictions";
 export type EmbedProvider = "google_maps" | "pinterest" | "other";
 
 export interface GuestViewEmbed {

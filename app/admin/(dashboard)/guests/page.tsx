@@ -3,6 +3,7 @@ import { listGuestsWithPlusOnes } from "@/lib/guests/queries";
 import type { Guest } from "@/lib/guests/types";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
+import { GuestStats } from "./_components/guest-stats";
 import { GuestsSection } from "./_components/guests-section";
 
 export default async function GuestsPage() {
@@ -40,6 +41,8 @@ export default async function GuestsPage() {
           Add guest
         </Link>
       </div>
+
+      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
 
       <GuestsSection
         guests={guests}

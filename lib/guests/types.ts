@@ -96,6 +96,7 @@ export interface Guest {
   rsvpStatus: RsvpStatus;
   seatingTableId: string | null;
   notes: string | null;
+  dietaryRestrictions: string | null;
   createdAt: string;
   updatedAt: string;
 }

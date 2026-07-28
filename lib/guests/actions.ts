@@ -59,6 +59,7 @@ function toGuestFields(
     rsvpDeadlineOverride: values.rsvpDeadlineOverride || null,
     rsvpStatus: values.rsvpStatus,
     notes: values.notes || null,
+    dietaryRestrictions: null,
   };
 }
 

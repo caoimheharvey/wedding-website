@@ -10,7 +10,9 @@ import type {
   rsvpSectionFormSchema,
   rsvpStatusSectionFormSchema,
   textSectionFormSchema,
+  builtinSectionFormSchema,
 } from "./schema";
+import type { GuestViewSectionType } from "./types";
 
 export interface MockImageInput {
   url: string;
@@ -359,6 +361,45 @@ function toMockImages(images: MockImageInput[]): GuestViewImage[] {
     caption: image.caption || null,
     orderIndex: index,
   }));
+}
+
+export function mockCreateBuiltinSection(
+  type: Extract<GuestViewSectionType, "countdown" | "wedding_date" | "dietary_restrictions">,
+  data: z.infer<typeof builtinSectionFormSchema>,
+  orderIndex: number,
+): GuestViewSection {
+  const now = new Date().toISOString();
+  const section: GuestViewSection = {
+    id: crypto.randomUUID(),
+    type,
+    titles: englishTitle(data.title),
+    orderIndex,
+    visibleToRoles: data.visibleToRoles,
+    body: { en: null, fr: null, zh: null },
+    columnCount: null,
+    embeds: [],
+    images: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  sections.push(section);
+  return section;
+}
+
+export function mockUpdateBuiltinSection(
+  id: string,
+  data: z.infer<typeof builtinSectionFormSchema>,
+): void {
+  sections = sections.map((section) =>
+    section.id === id
+      ? {
+          ...section,
+          titles: englishTitle(data.title),
+          visibleToRoles: data.visibleToRoles,
+          updatedAt: new Date().toISOString(),
+        }
+      : section,
+  );
 }
 
 export function mockDeleteGuestViewSection(id: string): void {

@@ -47,7 +47,10 @@ export default async function OverviewPage() {
       <section className="grid gap-4 lg:grid-cols-2">
         <CountdownCard weddingDate={siteSettings.weddingDate} />
         <section className="rounded-lg border border-border bg-surface p-4">
-          <WeddingDateEditor weddingDate={siteSettings.weddingDate} />
+          <WeddingDateEditor
+            weddingDate={siteSettings.weddingDate}
+            weddingLocation={siteSettings.weddingLocation}
+          />
         </section>
       </section>
 

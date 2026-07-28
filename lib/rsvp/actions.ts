@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { mockSetGuestRsvpStatus, mockSetRsvpDeadlineOverrides } from "@/lib/guests/mock-store";
 import { RSVP_STATUS_OPTIONS, type RsvpStatus } from "@/lib/guests/types";
-import { mockUpdateDefaultRsvpDeadline, mockUpdateWeddingDate } from "./mock-store";
+import { mockUpdateDefaultRsvpDeadline, mockUpdateWeddingDate, mockUpdateWeddingLocation } from "./mock-store";
 
 const deadlineSchema = z.union([z.iso.date(), z.literal("")]).optional();
 
@@ -58,6 +58,30 @@ export async function updateWeddingDate(date: string | null): Promise<{ message?
 
   revalidatePath("/admin/overview");
   revalidatePath("/admin/planning");
+  revalidatePath("/");
+  return {};
+}
+
+export async function updateWeddingLocation(
+  location: string | null,
+): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const value = location?.trim() || null;
+
+  if (isLocalTestMode()) {
+    mockUpdateWeddingLocation(value);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ wedding_location: value })
+      .eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/overview");
+  revalidatePath("/");
   return {};
 }
 

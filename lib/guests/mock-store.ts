@@ -30,6 +30,7 @@ function makeGuest(overrides: GuestOverrides): Guest {
     rsvpStatus: "invited",
     seatingTableId: null,
     notes: null,
+    dietaryRestrictions: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,
