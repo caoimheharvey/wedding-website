@@ -172,6 +172,16 @@ export function GuestForm({
         />
       </Field>
 
+      <Field label="Dietary restrictions" error={state?.errors?.dietaryRestrictions?.[0]}>
+        <textarea
+          name="dietaryRestrictions"
+          defaultValue={guest?.dietaryRestrictions ?? ""}
+          rows={2}
+          className="input"
+          placeholder="Guests can also log this themselves from the guest site"
+        />
+      </Field>
+
       {state?.message && (
         <p className="text-sm text-terracotta">{state.message}</p>
       )}

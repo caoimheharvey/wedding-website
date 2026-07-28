@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { submitDietaryRestrictions } from "@/lib/guests/guest-actions";
 import { DIETARY_SUCCESS_MESSAGE } from "@/lib/guests/dietary-info";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
@@ -21,6 +21,9 @@ export function DietaryRestrictionsForm({
   title?: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language].dietarySection;
+  const peopleSignature = people
+    .map((person) => `${person.id}:${person.dietaryRestrictions ?? ""}`)
+    .join("|");
   const [fieldsByGuestId, setFieldsByGuestId] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       people.map((person) => [person.id, person.dietaryRestrictions ?? ""]),
@@ -28,13 +31,17 @@ export function DietaryRestrictionsForm({
   );
   const [state, formAction, isPending] = useActionState(submitDietaryRestrictions, initialState);
 
-  useEffect(() => {
+  // Adjust state during render (React's recommended alternative to an
+  // effect here) rather than after commit, avoiding an extra render tick.
+  const [handledSignature, setHandledSignature] = useState(peopleSignature);
+  if (peopleSignature !== handledSignature) {
+    setHandledSignature(peopleSignature);
     setFieldsByGuestId(
       Object.fromEntries(
         people.map((person) => [person.id, person.dietaryRestrictions ?? ""]),
       ),
     );
-  }, [people]);
+  }
 
   return (
     <form

@@ -7,6 +7,7 @@ import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { GuestStats } from "../guests/_components/guest-stats";
 import { CountdownCard } from "./_components/countdown-card";
+import { DietaryRequirementsCard } from "./_components/dietary-requirements-card";
 import { OverviewBudgetCard } from "./_components/overview-budget-card";
 import { PlanningPhaseCard } from "./_components/planning-phase-card";
 import { WeddingDateEditor } from "./_components/wedding-date-editor";
@@ -73,6 +74,8 @@ export default async function OverviewPage() {
         </header>
         <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
       </section>
+
+      <DietaryRequirementsCard guests={guests} />
     </article>
   );
 }

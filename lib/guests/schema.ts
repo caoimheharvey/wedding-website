@@ -23,6 +23,7 @@ export const guestFormSchema = z.object({
   rsvpDeadlineOverride: z.union([z.iso.date(), z.literal("")]).optional(),
   rsvpStatus: z.enum(RSVP_STATUS_OPTIONS).optional().default("invited"),
   notes: z.string().trim().optional(),
+  dietaryRestrictions: z.string().trim().optional(),
 });
 
 export type GuestFormValues = z.infer<typeof guestFormSchema>;

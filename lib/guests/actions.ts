@@ -38,6 +38,7 @@ function toGuestRow(values: z.infer<typeof guestFormSchema>) {
     rsvp_deadline_override: values.rsvpDeadlineOverride || null,
     rsvp_status: values.rsvpStatus,
     notes: values.notes || null,
+    dietary_restrictions: values.dietaryRestrictions || null,
   };
 }
 
@@ -59,7 +60,7 @@ function toGuestFields(
     rsvpDeadlineOverride: values.rsvpDeadlineOverride || null,
     rsvpStatus: values.rsvpStatus,
     notes: values.notes || null,
-    dietaryRestrictions: null,
+    dietaryRestrictions: values.dietaryRestrictions || null,
   };
 }
 

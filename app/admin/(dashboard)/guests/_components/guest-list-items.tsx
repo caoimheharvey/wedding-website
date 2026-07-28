@@ -52,6 +52,11 @@ function GuestMeta({
       {guest.notes && (
         <div className="mt-1 text-xs text-foreground/60 italic">{guest.notes}</div>
       )}
+      {guest.dietaryRestrictions && (
+        <div className="mt-1 text-xs font-medium text-terracotta">
+          Dietary: {guest.dietaryRestrictions}
+        </div>
+      )}
     </>
   );
 }

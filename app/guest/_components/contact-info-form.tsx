@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
+import { useMemo, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   CONTACT_INFO_SUCCESS_MESSAGE,
@@ -61,18 +61,22 @@ export function ContactInfoForm({
     return contactEditableGuests(guest, allGuests, delegatePairs);
   }, [onboarding, guest, allGuests, delegatePairs]);
 
-  const peopleSignature = people
+  const peopleSignature = `${language}::${people
     .map((person) => `${person.id}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`)
-    .join("|");
+    .join("|")}`;
   const [fieldsByGuestId, setFieldsByGuestId] = useState<Record<string, ContactFields>>(() =>
     Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person, language)])),
   );
 
-  useEffect(() => {
+  // Adjust state during render (React's recommended alternative to an
+  // effect here) rather than after commit, avoiding an extra render tick.
+  const [handledSignature, setHandledSignature] = useState(peopleSignature);
+  if (peopleSignature !== handledSignature) {
+    setHandledSignature(peopleSignature);
     setFieldsByGuestId(
       Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person, language)])),
     );
-  }, [peopleSignature, people, language]);
+  }
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();

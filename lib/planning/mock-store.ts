@@ -183,7 +183,7 @@ const SEED_ITEMS: Array<{
   },
 ];
 
-let items: PlanningChecklistItem[] = SEED_ITEMS.map((seed, index) => ({
+const items: PlanningChecklistItem[] = SEED_ITEMS.map((seed, index) => ({
   id: `mock-checklist-${index + 1}`,
   phaseId: seed.phaseId,
   title: seed.title,
