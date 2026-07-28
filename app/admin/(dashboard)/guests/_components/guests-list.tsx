@@ -9,7 +9,6 @@ export function GuestsList({
   effectiveStatusById,
   selected,
   onToggleSelect,
-  showPreviewLink,
 }: {
   guests: GuestWithPlusOnes[];
   nestedIds: Set<string>;
@@ -17,7 +16,6 @@ export function GuestsList({
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
   selected: Set<string>;
   onToggleSelect?: (guestId: string) => void;
-  showPreviewLink?: boolean;
 }) {
   const nameFor = (guestId: string | null) => (guestId ? nameById[guestId] : undefined);
 
@@ -51,7 +49,6 @@ export function GuestsList({
               isNested={nestedIds.has(guest.id)}
               selected={selected.has(guest.id)}
               onToggleSelect={onToggleSelect}
-              showPreviewLink={showPreviewLink}
             />
           ))}
         </tbody>
@@ -71,7 +68,6 @@ export function GuestsList({
               isNested={isNested}
               selected={selected.has(guest.id)}
               onToggleSelect={onToggleSelect}
-              showPreviewLink={showPreviewLink}
             />
           );
           return isNested ? (

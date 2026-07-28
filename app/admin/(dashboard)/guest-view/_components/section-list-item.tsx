@@ -38,7 +38,13 @@ export function SectionListItem({
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-sand px-2 py-0.5 text-xs font-medium text-ink/60">
-            {section.type === "text" ? "Text" : "Embeds"}
+            {section.type === "text"
+              ? "Text"
+              : section.type === "embed_group"
+                ? "Embeds"
+                : section.type === "image_group"
+                  ? "Images"
+                  : "RSVP"}
           </span>
           {section.visibleToRoles.length > 0 ? (
             section.visibleToRoles.map((role) => (
@@ -55,11 +61,17 @@ export function SectionListItem({
             </span>
           )}
         </div>
-        <p className="mt-1 font-medium text-ink">{section.title || "(untitled)"}</p>
+        <p className="mt-1 font-medium text-ink">
+          {section.title || (section.type === "rsvp" ? "RSVP form" : "(untitled)")}
+        </p>
         <p className="mt-0.5 text-xs text-foreground/50">
           {section.type === "text"
             ? (section.body.en ?? "").slice(0, 100)
-            : `${section.embeds.length} embed(s), ${section.columnCount ?? 1} column(s)`}
+            : section.type === "embed_group"
+              ? `${section.embeds.length} embed(s), ${section.columnCount ?? 1} column(s)`
+              : section.type === "image_group"
+                ? `${section.images.length} image(s), ${section.columnCount ?? 1} column(s)`
+                : "Guests submit or update their RSVP here."}
         </p>
       </div>
       <div className="flex flex-col items-end gap-2">

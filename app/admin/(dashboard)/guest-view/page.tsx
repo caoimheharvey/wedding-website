@@ -1,8 +1,15 @@
 import { listGuestViewSections } from "@/lib/guest-view/queries";
+import { listGuests } from "@/lib/guests/queries";
+import { isLocalTestMode } from "@/lib/local-test";
 import { GuestViewManager } from "./_components/guest-view-manager";
+import { PreviewPicker } from "./_components/preview-picker";
 
 export default async function GuestViewPage() {
-  const sections = await listGuestViewSections();
+  const localTest = isLocalTestMode();
+  const [sections, guests] = await Promise.all([
+    listGuestViewSections(),
+    localTest ? listGuests() : Promise.resolve([]),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -14,6 +21,8 @@ export default async function GuestViewPage() {
           separate &quot;extra&quot; page.
         </p>
       </div>
+
+      {localTest && <PreviewPicker guests={guests} />}
 
       <GuestViewManager sections={sections} />
     </div>

@@ -4,19 +4,26 @@ import { useState } from "react";
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import { TextSectionForm } from "./text-section-form";
 import { EmbedGroupForm } from "./embed-group-form";
+import { ImageGroupForm } from "./image-group-form";
+import { RsvpSectionForm } from "./rsvp-section-form";
 import { SectionListItem } from "./section-list-item";
 
 export function GuestViewManager({ sections }: { sections: GuestViewSection[] }) {
-  const [addingType, setAddingType] = useState<"text" | "embed_group" | null>(null);
+  const [addingType, setAddingType] = useState<
+    "text" | "embed_group" | "image_group" | "rsvp" | null
+  >(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const hasRsvpSection = sections.some((section) => section.type === "rsvp");
 
   return (
     <div className="flex flex-col gap-4">
       {addingType === "text" && <TextSectionForm onDone={() => setAddingType(null)} />}
       {addingType === "embed_group" && <EmbedGroupForm onDone={() => setAddingType(null)} />}
+      {addingType === "image_group" && <ImageGroupForm onDone={() => setAddingType(null)} />}
+      {addingType === "rsvp" && <RsvpSectionForm onDone={() => setAddingType(null)} />}
 
       {!addingType && (
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => setAddingType("text")}
@@ -31,6 +38,22 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
           >
             + Embed section
           </button>
+          <button
+            type="button"
+            onClick={() => setAddingType("image_group")}
+            className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
+          >
+            + Image section
+          </button>
+          {!hasRsvpSection && (
+            <button
+              type="button"
+              onClick={() => setAddingType("rsvp")}
+              className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
+            >
+              + RSVP section
+            </button>
+          )}
         </div>
       )}
 
@@ -46,8 +69,20 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
                   section={section}
                   onDone={() => setEditingId(null)}
                 />
-              ) : (
+              ) : section.type === "embed_group" ? (
                 <EmbedGroupForm
+                  key={section.id}
+                  section={section}
+                  onDone={() => setEditingId(null)}
+                />
+              ) : section.type === "image_group" ? (
+                <ImageGroupForm
+                  key={section.id}
+                  section={section}
+                  onDone={() => setEditingId(null)}
+                />
+              ) : (
+                <RsvpSectionForm
                   key={section.id}
                   section={section}
                   onDone={() => setEditingId(null)}

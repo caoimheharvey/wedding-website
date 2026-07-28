@@ -2,6 +2,7 @@
 
 import * as z from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/dal";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
@@ -32,17 +33,33 @@ export async function createSeatingTable(
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
 
   const data = { name: parsed.data.name, description: parsed.data.description || null };
+  const guestIds = formData.getAll("guestIds").map(String).filter(Boolean);
 
   if (isLocalTestMode()) {
-    mockInsertSeatingTable(data);
+    const table = mockInsertSeatingTable(data);
+    for (const guestId of guestIds) mockAssignGuestToTable(guestId, table.id);
   } else {
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("seating_tables").insert(data);
+    const { data: inserted, error } = await supabase
+      .from("seating_tables")
+      .insert(data)
+      .select("id")
+      .single();
     if (error) return { message: `Could not save table: ${error.message}` };
+
+    if (guestIds.length > 0) {
+      const { error: assignError } = await supabase
+        .from("guests")
+        .update({ seating_table_id: inserted.id })
+        .in("id", guestIds);
+      if (assignError) {
+        return { message: `Table created, but couldn't seat guests: ${assignError.message}` };
+      }
+    }
   }
 
   revalidatePath("/admin/seating");
-  return { message: "Table added." };
+  redirect("/admin/seating");
 }
 
 export async function updateSeatingTable(

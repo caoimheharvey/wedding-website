@@ -1,4 +1,5 @@
 import "server-only";
+import type { WeddingCategory } from "@/lib/categories";
 import type { BudgetItem } from "./types";
 
 /**
@@ -10,29 +11,49 @@ let items: BudgetItem[] = seed();
 
 function seed(): BudgetItem[] {
   const now = new Date().toISOString();
-  const starters: Array<[string, string]> = [
-    ["Venue rental", "Venue"],
-    ["Catering & bar", "Catering"],
-    ["Photography", "Photography & Video"],
-    ["Videography", "Photography & Video"],
-    ["Wedding attire", "Attire"],
-    ["Hair & makeup", "Attire"],
-    ["Flowers & decor", "Flowers & Decor"],
-    ["Music / DJ or band", "Entertainment"],
-    ["Officiant", "Ceremony"],
-    ["Wedding rings", "Ceremony"],
-    ["Invitations & stationery", "Stationery"],
-    ["Guest travel & accommodation support", "Travel"],
-    ["Favors & gifts", "Favors"],
-    ["Contingency", "Miscellaneous"],
+  const starters: Array<{
+    name: string;
+    category: WeddingCategory;
+    budgetedAmount: number;
+    actualAmount: number;
+    isDiy?: boolean;
+  }> = [
+    { name: "Venue rental", category: "venue", budgetedAmount: 6000, actualAmount: 6000 },
+    { name: "Catering & bar", category: "catering", budgetedAmount: 8000, actualAmount: 0 },
+    { name: "Photography", category: "photography", budgetedAmount: 3000, actualAmount: 800 },
+    { name: "Videography", category: "videography", budgetedAmount: 1500, actualAmount: 0 },
+    { name: "Wedding attire", category: "attire", budgetedAmount: 1200, actualAmount: 0 },
+    { name: "Hair & makeup", category: "hair_makeup", budgetedAmount: 400, actualAmount: 0 },
+    // Budgeted below the selected florist's quote on purpose — a real
+    // "this category is going to run over" case to exercise the indicator.
+    { name: "Flowers & decor", category: "flowers_decor", budgetedAmount: 2000, actualAmount: 500 },
+    { name: "Music / DJ or band", category: "music_entertainment", budgetedAmount: 1500, actualAmount: 0 },
+    { name: "Officiant", category: "officiant", budgetedAmount: 300, actualAmount: 0 },
+    { name: "Wedding rings", category: "jewelry", budgetedAmount: 800, actualAmount: 0 },
+    {
+      name: "Invitations & stationery",
+      category: "stationery",
+      budgetedAmount: 300,
+      actualAmount: 150,
+      isDiy: true,
+    },
+    {
+      name: "Guest travel & accommodation support",
+      category: "transportation",
+      budgetedAmount: 500,
+      actualAmount: 0,
+    },
+    { name: "Favors & gifts", category: "favors", budgetedAmount: 200, actualAmount: 80, isDiy: true },
+    { name: "Contingency", category: "other", budgetedAmount: 700, actualAmount: 0 },
   ];
 
-  return starters.map(([name, category]) => ({
+  return starters.map((starter) => ({
     id: crypto.randomUUID(),
-    name,
-    category,
-    budgetedAmount: 0,
-    actualAmount: 0,
+    name: starter.name,
+    category: starter.category,
+    budgetedAmount: starter.budgetedAmount,
+    actualAmount: starter.actualAmount,
+    isDiy: starter.isDiy ?? false,
     notes: null,
     createdAt: now,
     updatedAt: now,

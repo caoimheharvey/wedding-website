@@ -1,7 +1,18 @@
 import "server-only";
 import type * as z from "zod";
-import type { GuestViewSection } from "./types";
-import type { embedGroupFormSchema, embedItemSchema, textSectionFormSchema } from "./schema";
+import type { GuestViewImage, GuestViewSection } from "./types";
+import type {
+  embedGroupFormSchema,
+  embedItemSchema,
+  imageGroupFormSchema,
+  rsvpSectionFormSchema,
+  textSectionFormSchema,
+} from "./schema";
+
+export interface MockImageInput {
+  url: string;
+  caption: string;
+}
 
 /**
  * In-memory guest-view sections used only when LOCAL_TEST_BYPASS_AUTH is set.
@@ -14,9 +25,22 @@ function seed(): GuestViewSection[] {
   return [
     {
       id: crypto.randomUUID(),
+      type: "rsvp",
+      title: null,
+      orderIndex: 0,
+      visibleToRoles: [],
+      body: { en: null, fr: null, zh: null },
+      columnCount: null,
+      embeds: [],
+      images: [],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: crypto.randomUUID(),
       type: "text",
       title: "Getting there",
-      orderIndex: 0,
+      orderIndex: 1,
       visibleToRoles: [],
       body: {
         en: "The ceremony will be held at Villa Cimbrone, with the reception following at the same venue. More travel details soon.",
@@ -25,6 +49,7 @@ function seed(): GuestViewSection[] {
       },
       columnCount: null,
       embeds: [],
+      images: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -32,7 +57,7 @@ function seed(): GuestViewSection[] {
       id: crypto.randomUUID(),
       type: "text",
       title: "Maid of Honor details",
-      orderIndex: 1,
+      orderIndex: 2,
       visibleToRoles: ["maid_of_honor"],
       body: {
         en: "You're on for the toast right after the cake cutting — no pressure! Rehearsal is at 4pm the day before.",
@@ -41,6 +66,7 @@ function seed(): GuestViewSection[] {
       },
       columnCount: null,
       embeds: [],
+      images: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -63,8 +89,9 @@ export function mockCreateTextSection(
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: data.bodyEn, fr: data.bodyFr || null, zh: data.bodyZh || null },
-    columnCount: null,
+    columnCount: data.columnCount,
     embeds: [],
+    images: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -80,6 +107,42 @@ export function mockUpdateTextSection(id: string, data: z.infer<typeof textSecti
           title: data.title || null,
           visibleToRoles: data.visibleToRoles,
           body: { en: data.bodyEn, fr: data.bodyFr || null, zh: data.bodyZh || null },
+          columnCount: data.columnCount,
+          updatedAt: new Date().toISOString(),
+        }
+      : section,
+  );
+}
+
+export function mockCreateRsvpSection(
+  data: z.infer<typeof rsvpSectionFormSchema>,
+  orderIndex: number,
+): GuestViewSection {
+  const now = new Date().toISOString();
+  const section: GuestViewSection = {
+    id: crypto.randomUUID(),
+    type: "rsvp",
+    title: data.title || null,
+    orderIndex,
+    visibleToRoles: data.visibleToRoles,
+    body: { en: null, fr: null, zh: null },
+    columnCount: null,
+    embeds: [],
+    images: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  sections.push(section);
+  return section;
+}
+
+export function mockUpdateRsvpSection(id: string, data: z.infer<typeof rsvpSectionFormSchema>): void {
+  sections = sections.map((section) =>
+    section.id === id
+      ? {
+          ...section,
+          title: data.title || null,
+          visibleToRoles: data.visibleToRoles,
           updatedAt: new Date().toISOString(),
         }
       : section,
@@ -107,6 +170,7 @@ export function mockCreateEmbedGroupSection(
       caption: embed.caption || null,
       orderIndex: index,
     })),
+    images: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -137,6 +201,57 @@ export function mockUpdateEmbedGroupSection(
         }
       : section,
   );
+}
+
+export function mockCreateImageGroupSection(
+  data: z.infer<typeof imageGroupFormSchema>,
+  images: MockImageInput[],
+  orderIndex: number,
+): GuestViewSection {
+  const now = new Date().toISOString();
+  const section: GuestViewSection = {
+    id: crypto.randomUUID(),
+    type: "image_group",
+    title: data.title || null,
+    orderIndex,
+    visibleToRoles: data.visibleToRoles,
+    body: { en: null, fr: null, zh: null },
+    columnCount: data.columnCount,
+    embeds: [],
+    images: toMockImages(images),
+    createdAt: now,
+    updatedAt: now,
+  };
+  sections.push(section);
+  return section;
+}
+
+export function mockUpdateImageGroupSection(
+  id: string,
+  data: z.infer<typeof imageGroupFormSchema>,
+  images: MockImageInput[],
+): void {
+  sections = sections.map((section) =>
+    section.id === id
+      ? {
+          ...section,
+          title: data.title || null,
+          visibleToRoles: data.visibleToRoles,
+          columnCount: data.columnCount,
+          images: toMockImages(images),
+          updatedAt: new Date().toISOString(),
+        }
+      : section,
+  );
+}
+
+function toMockImages(images: MockImageInput[]): GuestViewImage[] {
+  return images.map((image, index) => ({
+    id: crypto.randomUUID(),
+    url: image.url,
+    caption: image.caption || null,
+    orderIndex: index,
+  }));
 }
 
 export function mockDeleteGuestViewSection(id: string): void {

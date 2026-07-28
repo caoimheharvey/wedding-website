@@ -28,6 +28,7 @@ function toRow(values: z.infer<typeof budgetItemFormSchema>) {
     category: values.category,
     budgeted_amount: values.budgetedAmount,
     actual_amount: values.actualAmount,
+    is_diy: values.isDiy,
     notes: values.notes || null,
   };
 }
@@ -38,6 +39,7 @@ function toFields(values: z.infer<typeof budgetItemFormSchema>) {
     category: values.category,
     budgetedAmount: values.budgetedAmount,
     actualAmount: values.actualAmount,
+    isDiy: values.isDiy,
     notes: values.notes || null,
   };
 }

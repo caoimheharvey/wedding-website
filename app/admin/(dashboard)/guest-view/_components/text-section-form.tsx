@@ -101,6 +101,20 @@ export function TextSectionForm({
       </fieldset>
 
       <label className="flex flex-col gap-1 text-sm text-ink">
+        Columns
+        <select name="columnCount" defaultValue={section?.columnCount ?? 1} className="input w-auto">
+          {[1, 2, 3, 4].map((count) => (
+            <option key={count} value={count}>
+              {count}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs font-normal text-foreground/50">
+          More than 1 lays the text out newspaper-style once there&apos;s enough of it.
+        </span>
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm text-ink">
         English
         <textarea
           name="bodyEn"

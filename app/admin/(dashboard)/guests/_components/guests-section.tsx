@@ -5,6 +5,7 @@ import { setGuestRsvpDeadlineOverrides } from "@/lib/rsvp/actions";
 import type { GuestWithPlusOnes } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { DefaultDeadlineEditor } from "./default-deadline-editor";
+import { GuestStats } from "./guest-stats";
 import {
   GuestsFilters,
   type InvitedByFilter,
@@ -18,13 +19,11 @@ export function GuestsSection({
   nameById,
   effectiveStatusById,
   defaultDeadline,
-  showPreviewLinks,
 }: {
   guests: GuestWithPlusOnes[];
   nameById: Record<string, string>;
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
   defaultDeadline: string | null;
-  showPreviewLinks?: boolean;
 }) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -154,6 +153,8 @@ export function GuestsSection({
       )}
       {message && <p className="text-sm text-foreground/60">{message}</p>}
 
+      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
+
       <GuestsFilters
         priority={priorityFilter}
         onPriorityChange={setPriorityFilter}
@@ -170,7 +171,6 @@ export function GuestsSection({
         effectiveStatusById={effectiveStatusById}
         selected={selected}
         onToggleSelect={selectMode ? toggleSelect : undefined}
-        showPreviewLink={showPreviewLinks}
       />
     </div>
   );

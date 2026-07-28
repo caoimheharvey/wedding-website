@@ -3,7 +3,6 @@ import { listGuestsWithPlusOnes } from "@/lib/guests/queries";
 import type { Guest } from "@/lib/guests/types";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
-import { isLocalTestMode } from "@/lib/local-test";
 import { GuestsSection } from "./_components/guests-section";
 
 export default async function GuestsPage() {
@@ -47,7 +46,6 @@ export default async function GuestsPage() {
         nameById={nameById}
         effectiveStatusById={effectiveStatusById}
         defaultDeadline={siteSettings.defaultRsvpDeadline}
-        showPreviewLinks={isLocalTestMode()}
       />
     </div>
   );

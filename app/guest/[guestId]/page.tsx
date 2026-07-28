@@ -7,7 +7,6 @@ import { isLocalTestMode } from "@/lib/local-test";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { GuestSiteView } from "../_components/guest-site-view";
 import { GuestViewSections } from "../_components/guest-view-sections";
-import { RsvpForm } from "../_components/rsvp-form";
 import { LanguageTabs, isPreferredLanguage } from "../_components/language-tabs";
 
 export default async function GuestPreviewPage({
@@ -68,16 +67,19 @@ export default async function GuestPreviewPage({
         effectiveDeadline={effectiveDeadline}
       />
 
-      <RsvpForm
-        guest={guest}
-        delegateFor={delegateFor}
+      <GuestViewSections
+        sections={sections}
         language={language}
-        deadlinePassed={effectiveStatus === "deadline_missed"}
-        delegateName={delegateName ? `${delegateName.firstName} ${delegateName.lastName}` : undefined}
-        previewGuestId={guest.id}
+        rsvp={{
+          guest,
+          delegateFor,
+          deadlinePassed: effectiveStatus === "deadline_missed",
+          delegateName: delegateName
+            ? `${delegateName.firstName} ${delegateName.lastName}`
+            : undefined,
+          previewGuestId: guest.id,
+        }}
       />
-
-      <GuestViewSections sections={sections} language={language} />
     </main>
   );
 }

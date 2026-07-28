@@ -85,7 +85,6 @@ export function GuestRow({
   isNested = false,
   selected,
   onToggleSelect,
-  showPreviewLink,
 }: {
   guest: GuestWithPlusOnes;
   linkedPlusOneCount: number;
@@ -95,7 +94,6 @@ export function GuestRow({
   isNested?: boolean;
   selected?: boolean;
   onToggleSelect?: (guestId: string) => void;
-  showPreviewLink?: boolean;
 }) {
   return (
     <tr className="border-b border-border/60 align-top">
@@ -140,15 +138,6 @@ export function GuestRow({
       </td>
       <td className="py-3 pr-4">
         <div className="flex items-center gap-3">
-          {showPreviewLink && (
-            <Link
-              href={`/guest/${guest.id}`}
-              target="_blank"
-              className="text-sm font-medium text-olive hover:underline"
-            >
-              Preview
-            </Link>
-          )}
           <Link
             href={`/admin/guests/${guest.id}/edit`}
             className="text-sm font-medium text-aegean hover:underline"
@@ -175,7 +164,6 @@ export function GuestCard({
   isNested = false,
   selected,
   onToggleSelect,
-  showPreviewLink,
 }: {
   guest: GuestWithPlusOnes;
   linkedPlusOneCount: number;
@@ -185,7 +173,6 @@ export function GuestCard({
   isNested?: boolean;
   selected?: boolean;
   onToggleSelect?: (guestId: string) => void;
-  showPreviewLink?: boolean;
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
@@ -218,15 +205,6 @@ export function GuestCard({
         {guest.phone && <div>{guest.phone}</div>}
       </dl>
       <div className="mt-3 flex items-center gap-4">
-        {showPreviewLink && (
-          <Link
-            href={`/guest/${guest.id}`}
-            target="_blank"
-            className="text-sm font-medium text-olive hover:underline"
-          >
-            Preview
-          </Link>
-        )}
         <Link
           href={`/admin/guests/${guest.id}/edit`}
           className="text-sm font-medium text-aegean hover:underline"

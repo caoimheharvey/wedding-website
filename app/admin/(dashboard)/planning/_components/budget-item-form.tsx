@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { createBudgetItem, type BudgetItemActionState } from "@/lib/budget/actions";
+import { WEDDING_CATEGORIES, WEDDING_CATEGORY_LABELS } from "@/lib/categories";
 
 const initialState: BudgetItemActionState = undefined;
 
@@ -24,7 +25,16 @@ export function BudgetItemForm() {
         </label>
         <label className="flex flex-col gap-1 text-sm text-ink sm:col-span-2">
           Category
-          <input name="category" required className="input" placeholder="e.g. Flowers & Decor" />
+          <select name="category" required defaultValue="" className="input">
+            <option value="" disabled>
+              Choose one
+            </option>
+            {WEDDING_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {WEDDING_CATEGORY_LABELS[category]}
+              </option>
+            ))}
+          </select>
           {state?.errors?.category && (
             <span className="text-xs text-terracotta">{state.errors.category[0]}</span>
           )}
@@ -38,6 +48,14 @@ export function BudgetItemForm() {
           <input type="number" name="actualAmount" min="0" step="0.01" defaultValue="0" className="input" />
         </label>
       </div>
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          name="isDiy"
+          className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean"
+        />
+        We&apos;re doing this ourselves (DIY) — no vendor
+      </label>
       <label className="flex flex-col gap-1 text-sm text-ink">
         Notes
         <input name="notes" className="input" placeholder="Optional" />

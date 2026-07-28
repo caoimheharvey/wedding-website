@@ -12,6 +12,7 @@ export function RsvpForm({
   deadlinePassed,
   delegateName,
   previewGuestId,
+  title,
 }: {
   guest: Guest;
   delegateFor: Guest[];
@@ -20,6 +21,8 @@ export function RsvpForm({
   delegateName?: string;
   /** Local-test-only: lets the admin preview route submit without a real session. */
   previewGuestId?: string;
+  /** Overrides the default heading — set from the Guest View section's title. */
+  title?: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language].rsvpForm;
   const people = [guest, ...delegateFor];
@@ -31,6 +34,10 @@ export function RsvpForm({
   const [message, setMessage] = useState<string | null>(null);
 
   if (deadlinePassed) return null;
+
+  function setAll(status: RsvpStatus) {
+    setStatuses(Object.fromEntries(people.map((person) => [person.id, status])));
+  }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -49,9 +56,27 @@ export function RsvpForm({
       onSubmit={handleSubmit}
       className="w-full rounded-lg border border-border bg-surface p-4 text-left"
     >
-      <h2 className="mb-3 font-display text-lg text-ink">{strings.heading}</h2>
+      <h2 className="mb-3 font-display text-lg text-ink">{title || strings.heading}</h2>
       {guest.rsvpDelegateOf && delegateName && (
         <p className="mb-3 text-xs text-foreground/50">{strings.delegateNote(delegateName)}</p>
+      )}
+      {people.length > 1 && (
+        <div className="mb-3 flex gap-3">
+          <button
+            type="button"
+            onClick={() => setAll("yes")}
+            className="text-xs font-medium text-aegean hover:underline"
+          >
+            {strings.yesToAll}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAll("no")}
+            className="text-xs font-medium text-terracotta hover:underline"
+          >
+            {strings.noToAll}
+          </button>
+        </div>
       )}
       <div className="flex flex-col gap-3">
         {people.map((person) => (

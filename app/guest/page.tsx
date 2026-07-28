@@ -1,17 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { PREFERRED_LANGUAGE_LABELS, type PreferredLanguage } from "@/lib/guests/types";
+import type { PreferredLanguage } from "@/lib/guests/types";
 import { getGuestById, listGuests } from "@/lib/guests/queries";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { isLocalTestMode } from "@/lib/local-test";
 import { getGuestSession } from "@/lib/guest-auth/session";
 import { signOutGuest } from "@/lib/guest-auth/actions";
-import { PREVIEW_PERSONAS, getPreviewPersona } from "@/lib/guest-site/preview-personas";
+import { getPreviewPersona } from "@/lib/guest-site/preview-personas";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { GuestSiteView } from "./_components/guest-site-view";
 import { GuestViewSections } from "./_components/guest-view-sections";
-import { RsvpForm } from "./_components/rsvp-form";
 import { LanguageTabs, isPreferredLanguage } from "./_components/language-tabs";
 
 export default async function GuestHomePage({
@@ -60,17 +59,18 @@ export default async function GuestHomePage({
             effectiveDeadline={effectiveDeadline}
           />
 
-          <RsvpForm
-            guest={guest}
-            delegateFor={delegateFor}
+          <GuestViewSections
+            sections={sections}
             language={language}
-            deadlinePassed={effectiveStatus === "deadline_missed"}
-            delegateName={
-              delegateHolder ? `${delegateHolder.firstName} ${delegateHolder.lastName}` : undefined
-            }
+            rsvp={{
+              guest,
+              delegateFor,
+              deadlinePassed: effectiveStatus === "deadline_missed",
+              delegateName: delegateHolder
+                ? `${delegateHolder.firstName} ${delegateHolder.lastName}`
+                : undefined,
+            }}
           />
-
-          <GuestViewSections sections={sections} language={language} />
         </main>
       );
     }
@@ -80,9 +80,9 @@ export default async function GuestHomePage({
     redirect("/guest/sign-in");
   }
 
-  // Local test mode, no session: keep the role/language persona picker so
-  // the couple can quickly check "what does role X see" without needing to
-  // complete a real sign-in for every check.
+  // Local test mode, no session: this route only renders a preview when
+  // linked to with role/lang query params — the picker UI for choosing
+  // those now lives in the admin Guest View tab, not here.
   const language: PreferredLanguage = isPreferredLanguage(lang) ? lang : "en";
   const persona = role ? getPreviewPersona(role) : null;
   const [siteSettings, allSections] = await Promise.all([
@@ -101,51 +101,18 @@ export default async function GuestHomePage({
         .
       </div>
 
-      <h1 className="font-display text-2xl text-ink">Preview the guest view</h1>
-      <p className="text-sm text-foreground/60">
-        Role and language are what determine what a guest is served, so preview by those instead
-        of picking one of your guests every time.
-      </p>
-
-      <form
-        method="get"
-        className="flex w-full flex-wrap items-end gap-3 rounded-lg border border-border bg-surface p-4 text-left"
-      >
-        <label className="flex flex-col gap-1 text-sm text-ink">
-          Role
-          <select name="role" defaultValue={role ?? "general"} className="input w-auto">
-            {PREVIEW_PERSONAS.map((preview) => (
-              <option key={preview.role} value={preview.role}>
-                {preview.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-ink">
-          Language
-          <select name="lang" defaultValue={language} className="input w-auto">
-            {Object.entries(PREFERRED_LANGUAGE_LABELS).map(([code, label]) => (
-              <option key={code} value={code}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="submit"
-          className="rounded-full bg-aegean px-4 py-2 text-sm font-medium text-whitewash transition hover:bg-aegean-dark"
-        >
-          Preview
-        </button>
-      </form>
-
-      <p className="text-xs text-foreground/50">
-        Looking for a specific guest&apos;s exact view? Preview them from the{" "}
-        <Link href="/admin/guests" className="underline">
-          admin Guests list
-        </Link>{" "}
-        instead.
-      </p>
+      {!persona && (
+        <>
+          <h1 className="font-display text-2xl text-ink">Preview the guest view</h1>
+          <p className="text-sm text-foreground/60">
+            Pick a role or a specific guest to preview from the{" "}
+            <Link href="/admin/guest-view" className="text-aegean underline">
+              admin Guest View tab
+            </Link>
+            .
+          </p>
+        </>
+      )}
 
       {persona && (
         <>

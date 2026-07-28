@@ -1,15 +1,17 @@
 import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import type { WeddingCategory } from "@/lib/categories";
 import { mockGetTotalBudget, mockListBudgetItems } from "./mock-store";
 import type { BudgetCategorySummary, BudgetItem, BudgetSummary } from "./types";
 
 interface BudgetItemRow {
   id: string;
   name: string;
-  category: string;
+  category: WeddingCategory;
   budgeted_amount: number;
   actual_amount: number;
+  is_diy: boolean;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -22,6 +24,7 @@ function mapRow(row: BudgetItemRow): BudgetItem {
     category: row.category,
     budgetedAmount: Number(row.budgeted_amount),
     actualAmount: Number(row.actual_amount),
+    isDiy: row.is_diy,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -59,7 +62,7 @@ export async function listBudgetItems(): Promise<BudgetItem[]> {
 export async function getBudgetSummary(): Promise<BudgetSummary> {
   const [totalBudget, items] = await Promise.all([getTotalBudget(), listBudgetItems()]);
 
-  const byCategory = new Map<string, BudgetCategorySummary>();
+  const byCategory = new Map<WeddingCategory, BudgetCategorySummary>();
   let totalBudgeted = 0;
   let totalActual = 0;
 
@@ -82,5 +85,20 @@ export async function getBudgetSummary(): Promise<BudgetSummary> {
     totalBudgeted,
     totalActual,
     categories: [...byCategory.values()].sort((a, b) => a.category.localeCompare(b.category)),
+  };
+}
+
+/** Budgeted vs. actual spend for a single category — used on the Vendors
+ *  category page so the budget context is visible without leaving it. */
+export async function getCategoryBudgetSummary(
+  category: WeddingCategory,
+): Promise<BudgetCategorySummary> {
+  const items = await listBudgetItems();
+  const inCategory = items.filter((item) => item.category === category);
+
+  return {
+    category,
+    budgeted: inCategory.reduce((sum, item) => sum + item.budgetedAmount, 0),
+    actual: inCategory.reduce((sum, item) => sum + item.actualAmount, 0),
   };
 }

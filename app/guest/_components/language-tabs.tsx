@@ -3,6 +3,14 @@ import { PREFERRED_LANGUAGE_LABELS, type PreferredLanguage } from "@/lib/guests/
 
 export const LANGUAGE_CODES = Object.keys(PREFERRED_LANGUAGE_LABELS) as PreferredLanguage[];
 
+// Tab labels a guest recognizes at a glance — a language code ("ZH") means
+// nothing to someone who reads Chinese, but the script does.
+const LANGUAGE_TAB_LABELS: Record<PreferredLanguage, string> = {
+  en: "EN",
+  fr: "FR",
+  zh: "中文",
+};
+
 export function isPreferredLanguage(value: string | undefined): value is PreferredLanguage {
   return !!value && (LANGUAGE_CODES as string[]).includes(value);
 }
@@ -26,7 +34,7 @@ export function LanguageTabs({
               : "text-foreground/50 hover:text-aegean"
           }
         >
-          {code.toUpperCase()}
+          {LANGUAGE_TAB_LABELS[code]}
         </Link>
       ))}
     </nav>

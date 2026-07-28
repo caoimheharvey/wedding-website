@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { listSeatingTablesWithGuests, listUnseatedYesGuests } from "@/lib/seating/queries";
-import { AddTableForm } from "./_components/add-table-form";
 import { TableCard } from "./_components/table-card";
 
 export default async function SeatingPage() {
@@ -10,9 +10,15 @@ export default async function SeatingPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl text-ink">Seating</h1>
-
-      <AddTableForm />
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-2xl text-ink">Seating</h1>
+        <Link
+          href="/admin/seating/new"
+          className="rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
+        >
+          Add table
+        </Link>
+      </div>
 
       {tables.length === 0 ? (
         <p className="text-sm text-foreground/60">No tables yet. Add one above.</p>

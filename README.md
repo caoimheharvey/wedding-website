@@ -27,7 +27,8 @@ and optionally an Anthropic API key. Once you have the values below, copy
    plenty for this).
 2. In the SQL Editor, run each file in
    [`supabase/migrations/`](supabase/migrations) **in order** (`0001` through
-   `0006`).
+   `0010`). `0008` also creates a public `guest-view-images` Storage bucket
+   for the Guest View image sections — no separate Storage setup needed.
 3. In Project Settings → API, copy the **Project URL** → `SUPABASE_URL`, and
    the **service_role** secret key → `SUPABASE_SERVICE_ROLE_KEY`.
    The service-role key bypasses Row Level Security — it's only ever used
@@ -135,6 +136,5 @@ than being guessed at upfront:
   (with a budget-constraint warning) on top of them yet.
 - **Messaging**: templated mass email/SMS (Resend + Twilio), scheduled sends,
   per-guest language selection at send time.
-- **Vendors**: contact details, contracts, linking a vendor to budget items.
 - **Supplemental contributions**: recording additional family income against
   the total budget, separate from the couple's own contribution.
