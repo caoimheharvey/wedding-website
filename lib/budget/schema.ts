@@ -9,3 +9,9 @@ export const budgetItemFormSchema = z.object({
   isDiy: z.coerce.boolean().default(false),
   notes: z.string().trim().optional(),
 });
+
+export const budgetContributionFormSchema = z.object({
+  contributorName: z.string().trim().min(1, { error: "Who gave this is required" }),
+  amount: z.coerce.number().min(0, { error: "Must be zero or more" }),
+  notes: z.string().trim().optional(),
+});

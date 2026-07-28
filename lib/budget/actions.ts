@@ -7,11 +7,14 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import {
   mockDeleteBudgetItem,
+  mockDeleteContribution,
   mockInsertBudgetItem,
+  mockInsertContribution,
   mockUpdateBudgetItem,
+  mockUpdateContribution,
   mockUpdateTotalBudget,
 } from "./mock-store";
-import { budgetItemFormSchema } from "./schema";
+import { budgetContributionFormSchema, budgetItemFormSchema } from "./schema";
 
 export type BudgetItemActionState =
   | { errors: Record<string, string[] | undefined>; message?: string }
@@ -121,6 +124,92 @@ export async function deleteBudgetItem(itemId: string): Promise<{ message?: stri
     const supabase = getSupabaseAdmin();
     const { error } = await supabase.from("budget_items").delete().eq("id", itemId);
     if (error) return { message: `Could not delete item: ${error.message}` };
+  }
+
+  revalidatePath("/admin/planning");
+  return {};
+}
+
+function parseContributionForm(formData: FormData) {
+  return budgetContributionFormSchema.safeParse(Object.fromEntries(formData));
+}
+
+function toContributionRow(values: z.infer<typeof budgetContributionFormSchema>) {
+  return {
+    contributor_name: values.contributorName,
+    amount: values.amount,
+    notes: values.notes || null,
+  };
+}
+
+function toContributionFields(values: z.infer<typeof budgetContributionFormSchema>) {
+  return {
+    contributorName: values.contributorName,
+    amount: values.amount,
+    notes: values.notes || null,
+  };
+}
+
+export async function createContribution(
+  _prevState: BudgetItemActionState,
+  formData: FormData,
+): Promise<BudgetItemActionState> {
+  await requireAdmin();
+
+  const parsed = parseContributionForm(formData);
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+
+  if (isLocalTestMode()) {
+    mockInsertContribution(toContributionFields(parsed.data));
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("budget_contributions")
+      .insert(toContributionRow(parsed.data));
+    if (error) return { message: `Could not save contribution: ${error.message}` };
+  }
+
+  revalidatePath("/admin/planning");
+  return { message: "Contribution added." };
+}
+
+export async function updateContribution(
+  contributionId: string,
+  _prevState: BudgetItemActionState,
+  formData: FormData,
+): Promise<BudgetItemActionState> {
+  await requireAdmin();
+
+  const parsed = parseContributionForm(formData);
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+
+  if (isLocalTestMode()) {
+    mockUpdateContribution(contributionId, toContributionFields(parsed.data));
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("budget_contributions")
+      .update(toContributionRow(parsed.data))
+      .eq("id", contributionId);
+    if (error) return { message: `Could not save contribution: ${error.message}` };
+  }
+
+  revalidatePath("/admin/planning");
+  return { message: "Contribution updated." };
+}
+
+export async function deleteContribution(contributionId: string): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  if (isLocalTestMode()) {
+    mockDeleteContribution(contributionId);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("budget_contributions")
+      .delete()
+      .eq("id", contributionId);
+    if (error) return { message: `Could not delete contribution: ${error.message}` };
   }
 
   revalidatePath("/admin/planning");

@@ -44,7 +44,9 @@ export function SectionListItem({
                 ? "Embeds"
                 : section.type === "image_group"
                   ? "Images"
-                  : "RSVP"}
+                  : section.type === "contact_info"
+                    ? "Contact info"
+                    : "RSVP"}
           </span>
           {section.visibleToRoles.length > 0 ? (
             section.visibleToRoles.map((role) => (
@@ -62,7 +64,12 @@ export function SectionListItem({
           )}
         </div>
         <p className="mt-1 font-medium text-ink">
-          {section.title || (section.type === "rsvp" ? "RSVP form" : "(untitled)")}
+          {section.title ||
+            (section.type === "rsvp"
+              ? "RSVP form"
+              : section.type === "contact_info"
+                ? "Contact info prompt"
+                : "(untitled)")}
         </p>
         <p className="mt-0.5 text-xs text-foreground/50">
           {section.type === "text"
@@ -71,7 +78,9 @@ export function SectionListItem({
               ? `${section.embeds.length} embed(s), ${section.columnCount ?? 1} column(s)`
               : section.type === "image_group"
                 ? `${section.images.length} image(s), ${section.columnCount ?? 1} column(s)`
-                : "Guests submit or update their RSVP here."}
+                : section.type === "contact_info"
+                  ? "Only shown to guests with no email or phone on file."
+                  : "Guests submit or update their RSVP here."}
         </p>
       </div>
       <div className="flex flex-col items-end gap-2">

@@ -2,6 +2,7 @@ import "server-only";
 import type * as z from "zod";
 import type { GuestViewImage, GuestViewSection } from "./types";
 import type {
+  contactInfoSectionFormSchema,
   embedGroupFormSchema,
   embedItemSchema,
   imageGroupFormSchema,
@@ -38,9 +39,22 @@ function seed(): GuestViewSection[] {
     },
     {
       id: crypto.randomUUID(),
+      type: "contact_info",
+      title: null,
+      orderIndex: 1,
+      visibleToRoles: [],
+      body: { en: null, fr: null, zh: null },
+      columnCount: null,
+      embeds: [],
+      images: [],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: crypto.randomUUID(),
       type: "text",
       title: "Getting there",
-      orderIndex: 1,
+      orderIndex: 2,
       visibleToRoles: [],
       body: {
         en: "The ceremony will be held at Villa Cimbrone, with the reception following at the same venue. More travel details soon.",
@@ -57,7 +71,7 @@ function seed(): GuestViewSection[] {
       id: crypto.randomUUID(),
       type: "text",
       title: "Maid of Honor details",
-      orderIndex: 2,
+      orderIndex: 3,
       visibleToRoles: ["maid_of_honor"],
       body: {
         en: "You're on for the toast right after the cake cutting — no pressure! Rehearsal is at 4pm the day before.",
@@ -137,6 +151,44 @@ export function mockCreateRsvpSection(
 }
 
 export function mockUpdateRsvpSection(id: string, data: z.infer<typeof rsvpSectionFormSchema>): void {
+  sections = sections.map((section) =>
+    section.id === id
+      ? {
+          ...section,
+          title: data.title || null,
+          visibleToRoles: data.visibleToRoles,
+          updatedAt: new Date().toISOString(),
+        }
+      : section,
+  );
+}
+
+export function mockCreateContactInfoSection(
+  data: z.infer<typeof contactInfoSectionFormSchema>,
+  orderIndex: number,
+): GuestViewSection {
+  const now = new Date().toISOString();
+  const section: GuestViewSection = {
+    id: crypto.randomUUID(),
+    type: "contact_info",
+    title: data.title || null,
+    orderIndex,
+    visibleToRoles: data.visibleToRoles,
+    body: { en: null, fr: null, zh: null },
+    columnCount: null,
+    embeds: [],
+    images: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  sections.push(section);
+  return section;
+}
+
+export function mockUpdateContactInfoSection(
+  id: string,
+  data: z.infer<typeof contactInfoSectionFormSchema>,
+): void {
   sections = sections.map((section) =>
     section.id === id
       ? {

@@ -83,7 +83,7 @@ export function PreviewPicker({ guests }: { guests: Guest[] }) {
             </select>
           </label>
           <Link
-            href={`/guest?role=${role}&lang=${lang}`}
+            href={`/?role=${role}&lang=${lang}`}
             target="_blank"
             className="rounded-full bg-aegean px-4 py-2 text-sm font-medium text-whitewash transition hover:bg-aegean-dark"
           >

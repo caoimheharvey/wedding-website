@@ -1,6 +1,6 @@
 import "server-only";
 import type { WeddingCategory } from "@/lib/categories";
-import type { BudgetItem } from "./types";
+import type { BudgetContribution, BudgetItem } from "./types";
 
 /**
  * In-memory budget data used only when LOCAL_TEST_BYPASS_AUTH is set.
@@ -8,6 +8,7 @@ import type { BudgetItem } from "./types";
  */
 let totalBudget: number | null = 12500;
 let items: BudgetItem[] = seed();
+let contributions: BudgetContribution[] = seedContributions();
 
 function seed(): BudgetItem[] {
   const now = new Date().toISOString();
@@ -58,6 +59,66 @@ function seed(): BudgetItem[] {
     createdAt: now,
     updatedAt: now,
   }));
+}
+
+function seedContributions(): BudgetContribution[] {
+  const now = new Date().toISOString();
+  return [
+    {
+      id: crypto.randomUUID(),
+      contributorName: "Caoimhe's parents",
+      amount: 1000,
+      notes: "Offered after the venue deposit — earmarked for catering.",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: crypto.randomUUID(),
+      contributorName: "Alexandre's parents",
+      amount: 500,
+      notes: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+}
+
+export function mockListContributions(): BudgetContribution[] {
+  return [...contributions].sort((a, b) => a.contributorName.localeCompare(b.contributorName));
+}
+
+export function mockInsertContribution(
+  data: Omit<BudgetContribution, "id" | "createdAt" | "updatedAt">,
+): BudgetContribution {
+  const now = new Date().toISOString();
+  const contribution: BudgetContribution = {
+    ...data,
+    id: crypto.randomUUID(),
+    createdAt: now,
+    updatedAt: now,
+  };
+  contributions.push(contribution);
+  return contribution;
+}
+
+export function mockUpdateContribution(
+  id: string,
+  data: Omit<BudgetContribution, "id" | "createdAt" | "updatedAt">,
+): BudgetContribution | null {
+  const index = contributions.findIndex((contribution) => contribution.id === id);
+  if (index === -1) return null;
+
+  const updated: BudgetContribution = {
+    ...contributions[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  contributions[index] = updated;
+  return updated;
+}
+
+export function mockDeleteContribution(id: string): void {
+  contributions = contributions.filter((contribution) => contribution.id !== id);
 }
 
 export function mockGetTotalBudget(): number | null {

@@ -1,6 +1,7 @@
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
 import { RsvpForm } from "./rsvp-form";
+import { ContactInfoForm } from "./contact-info-form";
 
 const GRID_COLS: Record<number, string> = {
   1: "grid-cols-1",
@@ -59,6 +60,17 @@ export function GuestViewSections({
               language={language}
               deadlinePassed={rsvp.deadlinePassed}
               delegateName={rsvp.delegateName}
+              previewGuestId={rsvp.previewGuestId}
+              title={section.title}
+            />
+          );
+        }
+        if (section.type === "contact_info" && rsvp) {
+          return (
+            <ContactInfoForm
+              key={section.id}
+              guest={rsvp.guest}
+              language={language}
               previewGuestId={rsvp.previewGuestId}
               title={section.title}
             />

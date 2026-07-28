@@ -124,7 +124,7 @@ export async function quickGuestSignIn(
   if (!guest) return { message: QUICK_SIGN_IN_ERROR };
 
   await createGuestSession(guest.id, QUICK_SIGN_IN_SESSION_MS);
-  redirect("/guest");
+  redirect("/");
 }
 
 export async function signOutGuest(): Promise<void> {

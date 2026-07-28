@@ -49,7 +49,7 @@ export default async function GuestPreviewPage({
         </Link>
         <span>
           Local preview — viewing as {guest.firstName} {guest.lastName}.{" "}
-          <Link href="/guest" className="underline">
+          <Link href="/admin/guest-view" className="underline">
             Switch guest
           </Link>
         </span>

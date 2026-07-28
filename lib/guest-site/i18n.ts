@@ -16,6 +16,13 @@ interface GuestSiteStrings {
     submit: string;
     delegateNote: (name: string) => string;
   };
+  contactInfoForm: {
+    heading: string;
+    description: string;
+    emailPlaceholder: string;
+    phonePlaceholder: string;
+    submit: string;
+  };
 }
 
 export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
@@ -45,6 +52,14 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       delegateNote: (name) =>
         `${name} normally handles this for you, but you can submit it yourself too.`,
     },
+    contactInfoForm: {
+      heading: "Stay in the loop",
+      description:
+        "We don't have your email or phone on file yet — add one (or both) so we can send you updates.",
+      emailPlaceholder: "Email address",
+      phonePlaceholder: "Phone number",
+      submit: "Save my details",
+    },
   },
   fr: {
     phaseLabel: "Réservez la date",
@@ -72,6 +87,14 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       delegateNote: (name) =>
         `${name} s'en occupe habituellement pour vous, mais vous pouvez aussi répondre vous-même.`,
     },
+    contactInfoForm: {
+      heading: "Restez informé·e",
+      description:
+        "Nous n'avons pas encore votre email ou votre téléphone — ajoutez l'un ou l'autre pour recevoir nos prochaines nouvelles.",
+      emailPlaceholder: "Adresse email",
+      phonePlaceholder: "Numéro de téléphone",
+      submit: "Enregistrer mes coordonnées",
+    },
   },
   zh: {
     phaseLabel: "预留日期",
@@ -96,6 +119,13 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       noToAll: "全部无法出席",
       submit: "提交回复",
       delegateNote: (name) => `通常由 ${name} 为您处理，但您也可以自己提交。`,
+    },
+    contactInfoForm: {
+      heading: "保持联系",
+      description: "我们目前没有您的电子邮件或电话号码 — 请填写其中一项（或两项），以便我们向您发送最新消息。",
+      emailPlaceholder: "电子邮件地址",
+      phonePlaceholder: "电话号码",
+      submit: "保存我的联系方式",
     },
   },
 };

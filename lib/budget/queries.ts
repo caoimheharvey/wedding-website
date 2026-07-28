@@ -2,8 +2,8 @@ import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import type { WeddingCategory } from "@/lib/categories";
-import { mockGetTotalBudget, mockListBudgetItems } from "./mock-store";
-import type { BudgetCategorySummary, BudgetItem, BudgetSummary } from "./types";
+import { mockGetTotalBudget, mockListBudgetItems, mockListContributions } from "./mock-store";
+import type { BudgetCategorySummary, BudgetContribution, BudgetItem, BudgetSummary } from "./types";
 
 interface BudgetItemRow {
   id: string;
@@ -17,6 +17,15 @@ interface BudgetItemRow {
   updated_at: string;
 }
 
+interface BudgetContributionRow {
+  id: string;
+  contributor_name: string;
+  amount: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 function mapRow(row: BudgetItemRow): BudgetItem {
   return {
     id: row.id,
@@ -25,6 +34,17 @@ function mapRow(row: BudgetItemRow): BudgetItem {
     budgetedAmount: Number(row.budgeted_amount),
     actualAmount: Number(row.actual_amount),
     isDiy: row.is_diy,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapContributionRow(row: BudgetContributionRow): BudgetContribution {
+  return {
+    id: row.id,
+    contributorName: row.contributor_name,
+    amount: Number(row.amount),
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -59,8 +79,25 @@ export async function listBudgetItems(): Promise<BudgetItem[]> {
   return (data as BudgetItemRow[]).map(mapRow);
 }
 
+export async function listContributions(): Promise<BudgetContribution[]> {
+  if (isLocalTestMode()) return mockListContributions();
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("budget_contributions")
+    .select("*")
+    .order("contributor_name", { ascending: true });
+
+  if (error) throw new Error(`Failed to load contributions: ${error.message}`);
+  return (data as BudgetContributionRow[]).map(mapContributionRow);
+}
+
 export async function getBudgetSummary(): Promise<BudgetSummary> {
-  const [totalBudget, items] = await Promise.all([getTotalBudget(), listBudgetItems()]);
+  const [totalBudget, items, contributions] = await Promise.all([
+    getTotalBudget(),
+    listBudgetItems(),
+    listContributions(),
+  ]);
 
   const byCategory = new Map<WeddingCategory, BudgetCategorySummary>();
   let totalBudgeted = 0;
@@ -80,8 +117,12 @@ export async function getBudgetSummary(): Promise<BudgetSummary> {
     byCategory.set(item.category, existing);
   }
 
+  const totalContributions = contributions.reduce((sum, c) => sum + c.amount, 0);
+
   return {
     totalBudget,
+    totalContributions,
+    availableBudget: totalBudget !== null ? totalBudget + totalContributions : null,
     totalBudgeted,
     totalActual,
     categories: [...byCategory.values()].sort((a, b) => a.category.localeCompare(b.category)),

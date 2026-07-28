@@ -6,14 +6,16 @@ import { TextSectionForm } from "./text-section-form";
 import { EmbedGroupForm } from "./embed-group-form";
 import { ImageGroupForm } from "./image-group-form";
 import { RsvpSectionForm } from "./rsvp-section-form";
+import { ContactInfoSectionForm } from "./contact-info-section-form";
 import { SectionListItem } from "./section-list-item";
 
 export function GuestViewManager({ sections }: { sections: GuestViewSection[] }) {
   const [addingType, setAddingType] = useState<
-    "text" | "embed_group" | "image_group" | "rsvp" | null
+    "text" | "embed_group" | "image_group" | "rsvp" | "contact_info" | null
   >(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const hasRsvpSection = sections.some((section) => section.type === "rsvp");
+  const hasContactInfoSection = sections.some((section) => section.type === "contact_info");
 
   return (
     <div className="flex flex-col gap-4">
@@ -21,6 +23,9 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
       {addingType === "embed_group" && <EmbedGroupForm onDone={() => setAddingType(null)} />}
       {addingType === "image_group" && <ImageGroupForm onDone={() => setAddingType(null)} />}
       {addingType === "rsvp" && <RsvpSectionForm onDone={() => setAddingType(null)} />}
+      {addingType === "contact_info" && (
+        <ContactInfoSectionForm onDone={() => setAddingType(null)} />
+      )}
 
       {!addingType && (
         <div className="flex flex-wrap gap-3">
@@ -54,6 +59,15 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
               + RSVP section
             </button>
           )}
+          {!hasContactInfoSection && (
+            <button
+              type="button"
+              onClick={() => setAddingType("contact_info")}
+              className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
+            >
+              + Contact info section
+            </button>
+          )}
         </div>
       )}
 
@@ -77,6 +91,12 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
                 />
               ) : section.type === "image_group" ? (
                 <ImageGroupForm
+                  key={section.id}
+                  section={section}
+                  onDone={() => setEditingId(null)}
+                />
+              ) : section.type === "contact_info" ? (
+                <ContactInfoSectionForm
                   key={section.id}
                   section={section}
                   onDone={() => setEditingId(null)}

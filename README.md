@@ -10,7 +10,7 @@ editable line-item checklist), a Guest View content builder (text and
 embed sections, restrictable to specific wedding-party roles, with optional
 AI-assisted translation/rewriting), and real guest sign-in + RSVP submission
 (magic-link email or an instant "name + phone/email" quick sign-in, both
-landing on the guest's actual personalized `/guest` page) — see
+landing on the guest's actual personalized view at the site root, `/`) — see
 [Guest sign-in](#4-guest-sign-in-resend) below. See [Roadmap](#roadmap) for
 what's left.
 
@@ -27,7 +27,7 @@ and optionally an Anthropic API key. Once you have the values below, copy
    plenty for this).
 2. In the SQL Editor, run each file in
    [`supabase/migrations/`](supabase/migrations) **in order** (`0001` through
-   `0010`). `0008` also creates a public `guest-view-images` Storage bucket
+   `0013`). `0008` also creates a public `guest-view-images` Storage bucket
    for the Guest View image sections — no separate Storage setup needed.
 3. In Project Settings → API, copy the **Project URL** → `SUPABASE_URL`, and
    the **service_role** secret key → `SUPABASE_SERVICE_ROLE_KEY`.
@@ -136,5 +136,3 @@ than being guessed at upfront:
   (with a budget-constraint warning) on top of them yet.
 - **Messaging**: templated mass email/SMS (Resend + Twilio), scheduled sends,
   per-guest language selection at send time.
-- **Supplemental contributions**: recording additional family income against
-  the total budget, separate from the couple's own contribution.

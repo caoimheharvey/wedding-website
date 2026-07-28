@@ -15,5 +15,5 @@ export async function GET(request: NextRequest) {
   }
 
   await createGuestSession(guestId);
-  return NextResponse.redirect(new URL("/guest", request.url));
+  return NextResponse.redirect(new URL("/", request.url));
 }
