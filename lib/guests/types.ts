@@ -80,10 +80,13 @@ export const RSVP_STATUS_OPTIONS = ["invited", "yes", "no"] as const satisfies r
 
 export interface Guest {
   id: string;
-  firstName: string;
+  /** Null only for guests who signed in via WeChat handle and haven't onboarded yet. */
+  firstName: string | null;
   lastName: string | null;
   email: string | null;
   phone: string | null;
+  /** Alternate sign-in identifier for guests who prefer WeChat over name/contact. */
+  wechatHandle: string | null;
   relationshipPriority: RelationshipPriority;
   preferredLanguage: PreferredLanguage;
   partyRoles: WeddingPartyRole[];

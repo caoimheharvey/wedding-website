@@ -22,10 +22,11 @@ import {
 
 interface GuestRow {
   id: string;
-  first_name: string;
+  first_name: string | null;
   last_name: string | null;
   email: string | null;
   phone: string | null;
+  wechat_handle: string | null;
   relationship_priority: number;
   preferred_language: Guest["preferredLanguage"];
   party_roles: Guest["partyRoles"] | null;
@@ -49,6 +50,7 @@ function mapRow(row: GuestRow): Guest {
     lastName: row.last_name,
     email: row.email,
     phone: row.phone,
+    wechatHandle: row.wechat_handle,
     relationshipPriority: row.relationship_priority as RelationshipPriority,
     preferredLanguage: row.preferred_language,
     partyRoles: row.party_roles ?? [],

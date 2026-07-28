@@ -19,6 +19,7 @@ function makeGuest(overrides: GuestOverrides): Guest {
     lastName: null,
     email: null,
     phone: null,
+    wechatHandle: null,
     relationshipPriority: 4,
     preferredLanguage: "en",
     partyRoles: [],
@@ -267,7 +268,7 @@ export function mockListGuests(): Guest[] {
     (a, b) =>
       a.relationshipPriority - b.relationshipPriority ||
       (a.lastName ?? "").localeCompare(b.lastName ?? "") ||
-      a.firstName.localeCompare(b.firstName),
+      (a.firstName ?? "").localeCompare(b.firstName ?? ""),
   );
 }
 

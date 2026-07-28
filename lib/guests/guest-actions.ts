@@ -9,6 +9,7 @@ import { contactEditableGuests } from "@/lib/guest-site/contact-editable-guests"
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import {
   CONTACT_INFO_SUCCESS_MESSAGE,
+  guestNeedsFirstName,
   guestNeedsLastName,
   type ContactInfoEntry,
 } from "./contact-info";
@@ -56,6 +57,11 @@ export async function submitContactInfo(
       : null;
     const existing = allGuests.find((guest) => guest.id === entry.guestId);
 
+    if (guestNeedsFirstName(existing ?? { firstName: null }) && !entry.firstName.trim()) {
+      const label = existing ? guestDisplayName(existing) || "this guest" : "each guest";
+      return { message: `Please add a first name for ${label}.` };
+    }
+
     if (!trimmedEmail && !formattedPhone) {
       if (!existing?.email && !existing?.phone) {
         const label = existing ? guestDisplayName(existing) : "each guest";
@@ -79,6 +85,9 @@ export async function submitContactInfo(
         ? formatStoredPhoneForCountry(entry.phoneCountryId, entry.phoneNational)
         : null;
       mockUpdateGuest(entry.guestId, {
+        firstName: guestNeedsFirstName(existing ?? { firstName: null })
+          ? entry.firstName.trim() || null
+          : existing?.firstName ?? null,
         lastName: guestNeedsLastName(existing ?? { lastName: null })
           ? entry.lastName.trim() || null
           : existing?.lastName ?? null,
@@ -96,6 +105,9 @@ export async function submitContactInfo(
       const { error } = await supabase
         .from("guests")
         .update({
+          first_name: guestNeedsFirstName(existing ?? { firstName: null })
+            ? entry.firstName.trim() || null
+            : existing?.firstName ?? null,
           last_name: guestNeedsLastName(existing ?? { lastName: null })
             ? entry.lastName.trim() || null
             : existing?.lastName ?? null,

@@ -11,6 +11,24 @@ function formatNameList(names: string[], conjunction: string): string {
 interface GuestSiteStrings {
   phaseLabel: string;
   greeting: (names: string[]) => string;
+  guestSignIn: {
+    description: string;
+    nameTab: string;
+    wechatTab: string;
+    firstNamePlaceholder: string;
+    lastNamePlaceholder: string;
+    contactPlaceholder: string;
+    wechatPlaceholder: string;
+    continue: string;
+    checking: string;
+    errors: {
+      missingName: string;
+      noMatch: string;
+      contactRequired: string;
+      missingWechat: string;
+      wechatNoMatch: string;
+    };
+  };
   yourRsvp: string;
   rsvpDeadlineLabel: (date: string) => string;
   rsvpStatusLabels: Record<EffectiveRsvpStatus, string>;
@@ -26,6 +44,7 @@ interface GuestSiteStrings {
     heading: string;
     description: string;
     linkedGuestsNote: string;
+    firstNamePlaceholder: string;
     lastNamePlaceholder: string;
     emailPlaceholder: string;
     phonePlaceholder: string;
@@ -34,6 +53,7 @@ interface GuestSiteStrings {
   contactOnboarding: {
     heading: string;
     description: string;
+    firstNamePlaceholder: string;
     lastNamePlaceholder: string;
     emailPlaceholder: string;
     phonePlaceholder: string;
@@ -65,6 +85,27 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   en: {
     phaseLabel: "Save the date",
     greeting: (names) => `Hello, ${formatNameList(names, "and")}!`,
+    guestSignIn: {
+      description:
+        "Enter your first and last name as shown on your invitation. If we already have your email or phone number, enter that too — otherwise you'll be asked for contact details next.",
+      nameTab: "Sign in with name",
+      wechatTab: "Sign in with WeChat",
+      firstNamePlaceholder: "First name",
+      lastNamePlaceholder: "Last name",
+      contactPlaceholder: "Email or phone (if we have it on file)",
+      wechatPlaceholder: "WeChat handle",
+      continue: "Continue",
+      checking: "Checking…",
+      errors: {
+        missingName: "Enter your first and last name as shown on your invitation.",
+        noMatch:
+          "We couldn't find a match for those details. Double-check your first and last name, or ask whoever sent your invitation.",
+        contactRequired: "Enter the email or phone number we have on file for you.",
+        missingWechat: "Enter your WeChat handle.",
+        wechatNoMatch:
+          "We couldn't find that WeChat handle. Double-check it, or ask whoever sent your invitation.",
+      },
+    },
     yourRsvp: "Your RSVP status",
     rsvpDeadlineLabel: (date) => `Please respond by ${date}.`,
     rsvpStatusLabels: {
@@ -94,6 +135,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "If you're RSVPing for someone else, check and update their contact details below.",
       linkedGuestsNote:
         "These are guests linked to you as a plus-one or whose RSVP you handle.",
+      firstNamePlaceholder: "First name",
       lastNamePlaceholder: "Last name",
       emailPlaceholder: "Email address",
       phonePlaceholder: "Mobile number",
@@ -102,7 +144,8 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     contactOnboarding: {
       heading: "One more step",
       description:
-        "We don't have an email or phone number for you yet. Add at least one so we can reach you — then you'll see everything else.",
+        "We're missing a few details for you. Fill these in so we can reach you — then you'll see everything else.",
+      firstNamePlaceholder: "First name",
       lastNamePlaceholder: "Last name",
       emailPlaceholder: "Email address",
       phonePlaceholder: "Mobile number",
@@ -132,6 +175,27 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   fr: {
     phaseLabel: "Réservez la date",
     greeting: (names) => `Bonjour, ${formatNameList(names, "et")} !`,
+    guestSignIn: {
+      description:
+        "Entrez votre prénom et votre nom tels qu'ils figurent sur votre invitation. Si nous avons déjà votre email ou votre numéro de téléphone, indiquez-le aussi — sinon nous vous demanderons vos coordonnées ensuite.",
+      nameTab: "Se connecter avec un nom",
+      wechatTab: "Se connecter avec WeChat",
+      firstNamePlaceholder: "Prénom",
+      lastNamePlaceholder: "Nom de famille",
+      contactPlaceholder: "Email ou téléphone (si nous l'avons)",
+      wechatPlaceholder: "Identifiant WeChat",
+      continue: "Continuer",
+      checking: "Vérification…",
+      errors: {
+        missingName: "Entrez votre prénom et votre nom tels qu'ils figurent sur votre invitation.",
+        noMatch:
+          "Nous n'avons pas trouvé de correspondance. Vérifiez votre prénom et votre nom, ou contactez la personne qui vous a invité·e.",
+        contactRequired: "Entrez l'email ou le numéro de téléphone que nous avons pour vous.",
+        missingWechat: "Entrez votre identifiant WeChat.",
+        wechatNoMatch:
+          "Nous n'avons pas trouvé cet identifiant WeChat. Vérifiez-le, ou contactez la personne qui vous a invité·e.",
+      },
+    },
     yourRsvp: "Votre statut de réponse",
     rsvpDeadlineLabel: (date) => `Merci de répondre avant le ${date}.`,
     rsvpStatusLabels: {
@@ -161,6 +225,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         "Si vous répondez pour quelqu'un d'autre, vérifiez et mettez à jour ses coordonnées ci-dessous.",
       linkedGuestsNote:
         "Ces invités sont liés à vous en tant qu'accompagnant·e ou dont vous gérez la réponse.",
+      firstNamePlaceholder: "Prénom",
       lastNamePlaceholder: "Nom de famille",
       emailPlaceholder: "Adresse email",
       phonePlaceholder: "Numéro de téléphone",
@@ -169,7 +234,8 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     contactOnboarding: {
       heading: "Encore une étape",
       description:
-        "Nous n'avons pas encore votre email ou numéro de téléphone. Ajoutez-en au moins un pour que nous puissions vous joindre — vous verrez ensuite le reste du site.",
+        "Il nous manque quelques informations vous concernant. Complétez-les pour que nous puissions vous joindre — vous verrez ensuite le reste du site.",
+      firstNamePlaceholder: "Prénom",
       lastNamePlaceholder: "Nom de famille",
       emailPlaceholder: "Adresse email",
       phonePlaceholder: "Numéro de téléphone",
@@ -199,6 +265,25 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   zh: {
     phaseLabel: "预留日期",
     greeting: (names) => `你好，${formatNameList(names, "和")}！`,
+    guestSignIn: {
+      description:
+        "请输入邀请函上的名字和姓氏。如果我们已经有您的电子邮件或电话号码，也请一并填写——否则我们稍后会请您提供联系方式。",
+      nameTab: "使用姓名登录",
+      wechatTab: "使用微信登录",
+      firstNamePlaceholder: "名字",
+      lastNamePlaceholder: "姓氏",
+      contactPlaceholder: "电子邮件或电话（如果我们已有记录）",
+      wechatPlaceholder: "微信号",
+      continue: "继续",
+      checking: "正在核对…",
+      errors: {
+        missingName: "请输入邀请函上的名字和姓氏。",
+        noMatch: "未能找到匹配的信息，请检查您的姓名，或联系邀请您的人。",
+        contactRequired: "请输入我们记录中您的电子邮件或电话号码。",
+        missingWechat: "请输入您的微信号。",
+        wechatNoMatch: "未能找到该微信号，请检查后重试，或联系邀请您的人。",
+      },
+    },
     yourRsvp: "您的回复状态",
     rsvpDeadlineLabel: (date) => `请在 ${date} 前回复。`,
     rsvpStatusLabels: {
@@ -226,6 +311,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       heading: "保持联系",
       description: "如果您代他人回复，请核对并更新下方的联系方式。",
       linkedGuestsNote: "这些是与您关联的陪同嘉宾或您代为回复的宾客。",
+      firstNamePlaceholder: "名字",
       lastNamePlaceholder: "姓氏",
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",
@@ -233,7 +319,8 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
     contactOnboarding: {
       heading: "还差一步",
-      description: "我们还没有您的电子邮件或电话号码。请至少填写一项以便我们与您联系，之后您即可查看其余内容。",
+      description: "我们还缺少您的一些信息。请填写以便我们与您联系，之后您即可查看其余内容。",
+      firstNamePlaceholder: "名字",
       lastNamePlaceholder: "姓氏",
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",

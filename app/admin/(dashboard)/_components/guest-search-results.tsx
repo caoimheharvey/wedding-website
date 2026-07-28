@@ -14,7 +14,8 @@ export function GuestSearchResults({
 }) {
   if (matches.length === 0) return null;
 
-  const labelFor = getLabel ?? ((guest: Guest) => `${guest.firstName} ${guest.lastName}`.trim());
+  const labelFor =
+    getLabel ?? ((guest: Guest) => `${guest.firstName ?? ""} ${guest.lastName ?? ""}`.trim());
 
   return (
     <ul

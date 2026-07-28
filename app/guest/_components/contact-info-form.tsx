@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   CONTACT_INFO_SUCCESS_MESSAGE,
+  guestNeedsFirstName,
   guestNeedsLastName,
   type ContactInfoEntry,
 } from "@/lib/guests/contact-info";
@@ -19,6 +20,7 @@ import { PhoneInput } from "./phone-input";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 
 interface ContactFields {
+  firstName: string;
   lastName: string;
   email: string;
   phoneCountryId: string;
@@ -28,6 +30,7 @@ interface ContactFields {
 function fieldsFromGuest(guest: Guest, language: PreferredLanguage): ContactFields {
   const parsed = parseStoredPhone(guest.phone, defaultPhoneCountryId(language));
   return {
+    firstName: guest.firstName ?? "",
     lastName: guest.lastName ?? "",
     email: guest.email ?? "",
     phoneCountryId: parsed.countryId,
@@ -62,7 +65,10 @@ export function ContactInfoForm({
   }, [onboarding, guest, allGuests, delegatePairs]);
 
   const peopleSignature = `${language}::${people
-    .map((person) => `${person.id}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`)
+    .map(
+      (person) =>
+        `${person.id}:${person.firstName ?? ""}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`,
+    )
     .join("|")}`;
   const [fieldsByGuestId, setFieldsByGuestId] = useState<Record<string, ContactFields>>(() =>
     Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person, language)])),
@@ -97,6 +103,9 @@ export function ContactInfoForm({
     startTransition(async () => {
       const entries: ContactInfoEntry[] = people.map((person) => ({
         guestId: person.id,
+        firstName: guestNeedsFirstName(person)
+          ? (fieldsByGuestId[person.id]?.firstName ?? "")
+          : (person.firstName ?? ""),
         lastName: guestNeedsLastName(person)
           ? (fieldsByGuestId[person.id]?.lastName ?? "")
           : (person.lastName ?? ""),
@@ -133,7 +142,16 @@ export function ContactInfoForm({
             key={person.id}
             className="flex flex-col gap-3 border-t border-border/60 pt-4 first:border-t-0 first:pt-0"
           >
-            <p className="text-sm font-medium text-ink">{guestDisplayName(person)}</p>
+            <p className="text-sm font-medium text-ink">{guestDisplayName(person) || "Your details"}</p>
+            {guestNeedsFirstName(person) && (
+              <input
+                type="text"
+                value={fieldsByGuestId[person.id]?.firstName ?? ""}
+                onChange={(event) => updateField(person.id, "firstName", event.target.value)}
+                placeholder={strings.firstNamePlaceholder}
+                className="input text-center"
+              />
+            )}
             {guestNeedsLastName(person) && (
               <input
                 type="text"

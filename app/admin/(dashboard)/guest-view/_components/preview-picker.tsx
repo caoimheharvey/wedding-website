@@ -17,7 +17,7 @@ export function PreviewPicker({ guests }: { guests: Guest[] }) {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
     return guests
-      .filter((guest) => `${guest.firstName} ${guest.lastName}`.toLowerCase().includes(q))
+      .filter((guest) => `${guest.firstName ?? ""} ${guest.lastName ?? ""}`.toLowerCase().includes(q))
       .slice(0, 8);
   }, [guests, query]);
 

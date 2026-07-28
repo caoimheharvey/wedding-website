@@ -597,3 +597,10 @@ alter table guest_view_sections add column body_zh_columns jsonb;
 alter table guest_view_embeds add column column_index smallint not null default 0;
 alter table guest_view_images add column column_index smallint not null default 0;
 
+
+-- >>> supabase/migrations/0024_guest_wechat_handle.sql
+alter table guests add column wechat_handle text;
+create unique index guests_wechat_handle_key on guests (wechat_handle) where wechat_handle is not null;
+
+alter table guests alter column first_name drop not null;
+

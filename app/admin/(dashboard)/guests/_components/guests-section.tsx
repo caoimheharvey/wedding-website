@@ -67,7 +67,8 @@ export function GuestsSection({
   const [searchQuery, setSearchQuery] = useState("");
 
   const alphabetically = (a: GuestWithPlusOnes, b: GuestWithPlusOnes) =>
-    (a.lastName ?? "").localeCompare(b.lastName ?? "") || a.firstName.localeCompare(b.firstName);
+    (a.lastName ?? "").localeCompare(b.lastName ?? "") ||
+    (a.firstName ?? "").localeCompare(b.firstName ?? "");
 
   const { orderedGuests, nestedIds } = useMemo(() => {
     const flat = guests.flatMap((guest) => [guest, ...guest.plusOnes]);

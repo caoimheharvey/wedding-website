@@ -17,7 +17,7 @@ export function AddTableForm({ eligibleGuests }: { eligibleGuests?: Guest[] }) {
     const q = query.trim().toLowerCase();
     if (!q) return eligibleGuests;
     return eligibleGuests.filter((guest) =>
-      `${guest.firstName} ${guest.lastName}`.toLowerCase().includes(q),
+      `${guest.firstName ?? ""} ${guest.lastName ?? ""}`.toLowerCase().includes(q),
     );
   }, [eligibleGuests, query]);
 

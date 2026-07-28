@@ -19,7 +19,7 @@ export function guestMatchesName(guest: Guest, firstName: string, lastName: stri
   const inputLast = normalizeNamePart(lastName);
   if (!inputFirst) return false;
 
-  const guestFirst = normalizeNamePart(guest.firstName);
+  const guestFirst = normalizeNamePart(guest.firstName ?? "");
   const guestLast = normalizeNamePart(guest.lastName ?? "");
   if (guestFirst !== inputFirst) return false;
 
@@ -49,13 +49,28 @@ export function guestContactMatches(guest: Guest, contact: string): boolean {
   return emailMatches || phoneMatches;
 }
 
+/** WeChat handles are matched case-insensitively; a leading "@" is ignored. */
+export function normalizeWechatHandle(value: string): string {
+  return value.trim().toLowerCase().replace(/^@/, "");
+}
+
+export function findGuestByWechatHandle(guests: Guest[], handle: string): Guest | null {
+  const normalized = normalizeWechatHandle(handle);
+  if (!normalized) return null;
+  return (
+    guests.find(
+      (guest) => guest.wechatHandle && normalizeWechatHandle(guest.wechatHandle) === normalized,
+    ) ?? null
+  );
+}
+
 export function findGuestsByName(guests: Guest[], firstName: string, lastName: string): Guest[] {
   return guests.filter((guest) => guestMatchesName(guest, firstName, lastName));
 }
 
 function guestsWithFirstName(guests: Guest[], firstName: string): Guest[] {
   const normalizedFirst = normalizeNamePart(firstName);
-  return guests.filter((guest) => normalizeNamePart(guest.firstName) === normalizedFirst);
+  return guests.filter((guest) => normalizeNamePart(guest.firstName ?? "") === normalizedFirst);
 }
 
 /**

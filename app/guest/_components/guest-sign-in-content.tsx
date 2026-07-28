@@ -1,17 +1,21 @@
+import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
+import type { PreferredLanguage } from "@/lib/guests/types";
 import { QuickSignInForm } from "../sign-in/_components/quick-sign-in-form";
+import { LanguageTabs } from "./language-tabs";
 
-export function GuestSignInContent() {
+export function GuestSignInContent({ language }: { language: PreferredLanguage }) {
+  const strings = GUEST_SITE_STRINGS[language].guestSignIn;
+
   return (
     <>
+      <LanguageTabs currentLanguage={language} hrefFor={(code) => `/?lang=${code}`} />
+
       <p className="text-sm tracking-[0.3em] text-aegean uppercase">Guests</p>
       <h1 className="font-display text-4xl text-ink">Caoimhe &amp; Alexandre</h1>
 
       <div className="w-full rounded-lg border border-border bg-surface p-4 text-left">
-        <p className="mb-3 text-sm text-foreground/70">
-          Enter your first and last name as shown on your invitation. If we already have your email
-          or phone number, enter that too — otherwise you&apos;ll be asked for contact details next.
-        </p>
-        <QuickSignInForm />
+        <p className="mb-3 text-sm text-foreground/70">{strings.description}</p>
+        <QuickSignInForm language={language} />
       </div>
     </>
   );

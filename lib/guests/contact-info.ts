@@ -11,8 +11,13 @@ export function guestNeedsLastName(guest: { lastName: string | null }): boolean 
   return !guest.lastName?.trim();
 }
 
+export function guestNeedsFirstName(guest: { firstName: string | null }): boolean {
+  return !guest.firstName?.trim();
+}
+
 export interface ContactInfoEntry {
   guestId: string;
+  firstName: string;
   lastName: string;
   email: string;
   phoneCountryId: string;

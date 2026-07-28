@@ -38,9 +38,9 @@ export function GuestForm({
         <Field label="First name" error={state?.errors?.firstName?.[0]}>
           <input
             name="firstName"
-            defaultValue={guest?.firstName}
-            required
+            defaultValue={guest?.firstName ?? ""}
             className="input"
+            placeholder="Leave blank if using WeChat sign-in below"
           />
         </Field>
         <Field label="Last name (optional)" error={state?.errors?.lastName?.[0]}>
@@ -64,6 +64,14 @@ export function GuestForm({
             name="phone"
             defaultValue={guest?.phone ?? ""}
             className="input"
+          />
+        </Field>
+        <Field label="WeChat handle" error={state?.errors?.wechatHandle?.[0]}>
+          <input
+            name="wechatHandle"
+            defaultValue={guest?.wechatHandle ?? ""}
+            className="input"
+            placeholder="Lets this guest sign in without a name on file yet"
           />
         </Field>
         <Field label="Relationship priority" error={state?.errors?.relationshipPriority?.[0]}>

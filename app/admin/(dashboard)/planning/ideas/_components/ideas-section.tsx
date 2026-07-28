@@ -1,32 +1,98 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
-import { createWeddingIdea, deleteWeddingIdea, type IdeaActionState } from "@/lib/ideas/actions";
+import {
+  createWeddingIdea,
+  deleteWeddingIdea,
+  promoteWeddingIdea,
+  type IdeaActionState,
+} from "@/lib/ideas/actions";
+import { PLANNING_PHASES } from "@/lib/planning/phases";
+import type { PlanningPhaseId } from "@/lib/planning/types";
 import type { WeddingIdea } from "@/lib/ideas/types";
 
 const initialState: IdeaActionState = undefined;
 
 function IdeaCard({ idea }: { idea: WeddingIdea }) {
   const [isPending, startTransition] = useTransition();
+  const [promoting, setPromoting] = useState(false);
+  const [phaseId, setPhaseId] = useState(PLANNING_PHASES[0].id);
+  const [promoteMessage, setPromoteMessage] = useState<string | null>(null);
 
   return (
     <article className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 text-left">
       <div className="flex items-start justify-between gap-3">
         <h2 className="font-medium text-ink">{idea.title}</h2>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            startTransition(async () => {
-              await deleteWeddingIdea(idea.id);
-            });
-          }}
-          className="shrink-0 text-xs text-foreground/40 hover:text-terracotta disabled:opacity-50"
-        >
-          Remove
-        </button>
+        <div className="flex shrink-0 items-center gap-3">
+          {!promoting && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => setPromoting(true)}
+              className="text-xs text-aegean hover:underline disabled:opacity-50"
+            >
+              Promote to checklist
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              startTransition(async () => {
+                await deleteWeddingIdea(idea.id);
+              });
+            }}
+            className="text-xs text-foreground/40 hover:text-terracotta disabled:opacity-50"
+          >
+            Remove
+          </button>
+        </div>
       </div>
       {idea.description && <p className="text-sm text-foreground/60">{idea.description}</p>}
+
+      {promoting && (
+        <div className="mt-1 flex flex-wrap items-center gap-2 rounded-md border border-border/60 bg-background/40 p-2">
+          <select
+            value={phaseId}
+            onChange={(event) => setPhaseId(event.target.value as PlanningPhaseId)}
+            className="input w-auto text-xs"
+          >
+            {PLANNING_PHASES.map((phase) => (
+              <option key={phase.id} value={phase.id}>
+                {phase.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              startTransition(async () => {
+                const result = await promoteWeddingIdea(idea.id, phaseId);
+                if (result.message === "Idea moved to checklist.") {
+                  setPromoting(false);
+                } else {
+                  setPromoteMessage(result.message ?? null);
+                }
+              });
+            }}
+            className="rounded-full bg-aegean px-3 py-1 text-xs font-medium text-whitewash transition hover:bg-aegean-dark disabled:opacity-50"
+          >
+            {isPending ? "Moving…" : "Add to checklist"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPromoting(false);
+              setPromoteMessage(null);
+            }}
+            className="text-xs text-foreground/60 hover:underline"
+          >
+            Cancel
+          </button>
+          {promoteMessage && <p className="w-full text-xs text-terracotta">{promoteMessage}</p>}
+        </div>
+      )}
     </article>
   );
 }

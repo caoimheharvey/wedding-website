@@ -34,6 +34,10 @@ export function mockInsertWeddingIdea(data: {
   return idea;
 }
 
+export function mockGetWeddingIdea(id: string): WeddingIdea | undefined {
+  return ideas.find((idea) => idea.id === id);
+}
+
 export function mockDeleteWeddingIdea(id: string): boolean {
   const before = ideas.length;
   ideas = ideas.filter((idea) => idea.id !== id);

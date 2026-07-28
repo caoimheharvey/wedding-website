@@ -8,8 +8,8 @@ import { InvitedByBadge } from "./invited-by-badge";
 import { RsvpStatusSelect } from "./rsvp-status-select";
 import { DeleteGuestButton } from "./delete-guest-button";
 
-function guestName(guest: { firstName: string; lastName: string | null }) {
-  return guestDisplayName(guest);
+function guestName(guest: { firstName: string | null; lastName: string | null }) {
+  return guestDisplayName(guest) || "Unnamed guest";
 }
 
 function GuestMeta({
@@ -56,6 +56,9 @@ function GuestMeta({
         <div className="mt-1 text-xs font-medium text-terracotta">
           Dietary: {guest.dietaryRestrictions}
         </div>
+      )}
+      {guest.wechatHandle && (
+        <div className="mt-1 text-xs text-foreground/60">WeChat: {guest.wechatHandle}</div>
       )}
     </>
   );

@@ -2,18 +2,17 @@
 
 import { redirect } from "next/navigation";
 import { listGuests } from "@/lib/guests/queries";
-import { resolveGuestForQuickSignIn } from "@/lib/guests/guest-lookup";
+import { findGuestByWechatHandle, resolveGuestForQuickSignIn } from "@/lib/guests/guest-lookup";
+import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
+import { PREFERRED_LANGUAGE_LABELS, type PreferredLanguage } from "@/lib/guests/types";
 import { createGuestSession, deleteGuestSession } from "./session";
 
 const QUICK_SIGN_IN_SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-// Deliberately vague — don't confirm whether the name or the contact detail
-// was the part that didn't match.
-const QUICK_SIGN_IN_ERROR =
-  "We couldn't find a match for those details. Double-check your first and last name, or ask whoever sent your invitation.";
-
-const CONTACT_REQUIRED_ERROR =
-  "Enter the email or phone number we have on file for you.";
+function parseLanguage(value: FormDataEntryValue | null): PreferredLanguage {
+  const str = String(value ?? "");
+  return str in PREFERRED_LANGUAGE_LABELS ? (str as PreferredLanguage) : "en";
+}
 
 export type QuickSignInState = { message?: string } | undefined;
 
@@ -27,21 +26,44 @@ export async function quickGuestSignIn(
   _prevState: QuickSignInState,
   formData: FormData,
 ): Promise<QuickSignInState> {
+  const strings = GUEST_SITE_STRINGS[parseLanguage(formData.get("language"))].guestSignIn.errors;
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
   const contact = String(formData.get("contact") ?? "").trim();
 
   if (!firstName || !lastName) {
-    return { message: "Enter your first and last name as shown on your invitation." };
+    return { message: strings.missingName };
   }
 
   const guests = await listGuests();
   const result = resolveGuestForQuickSignIn(guests, firstName, lastName, contact);
 
-  if (result === "contact_required") return { message: CONTACT_REQUIRED_ERROR };
-  if (result === "contact_mismatch" || result === null) return { message: QUICK_SIGN_IN_ERROR };
+  if (result === "contact_required") return { message: strings.contactRequired };
+  if (result === "contact_mismatch" || result === null) return { message: strings.noMatch };
 
   await createGuestSession(result.id, QUICK_SIGN_IN_SESSION_MS);
+  redirect("/");
+}
+
+/**
+ * Sign-in via WeChat handle — an alternate identifier for guests who don't
+ * use email or phone. If the matched guest has no name on file yet, they're
+ * prompted to complete onboarding (first name, last name, contact info)
+ * before seeing the rest of the site.
+ */
+export async function wechatGuestSignIn(
+  _prevState: QuickSignInState,
+  formData: FormData,
+): Promise<QuickSignInState> {
+  const strings = GUEST_SITE_STRINGS[parseLanguage(formData.get("language"))].guestSignIn.errors;
+  const wechatHandle = String(formData.get("wechatHandle") ?? "").trim();
+  if (!wechatHandle) return { message: strings.missingWechat };
+
+  const guests = await listGuests();
+  const guest = findGuestByWechatHandle(guests, wechatHandle);
+  if (!guest) return { message: strings.wechatNoMatch };
+
+  await createGuestSession(guest.id, QUICK_SIGN_IN_SESSION_MS);
   redirect("/");
 }
 
