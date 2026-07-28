@@ -20,7 +20,7 @@ export function GuestsList({
   const nameFor = (guestId: string | null) => (guestId ? nameById[guestId] : undefined);
 
   if (guests.length === 0) {
-    return <p className="text-sm text-foreground/60">No guests match these filters.</p>;
+    return <p className="text-sm text-foreground/60">No guests match your search and filters.</p>;
   }
 
   return (

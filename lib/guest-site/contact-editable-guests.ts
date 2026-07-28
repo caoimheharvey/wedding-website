@@ -17,7 +17,7 @@ function plusOnePartyGuests(guest: Guest, allGuests: Guest[]): Guest[] {
   return [guest, ...plusOnes];
 }
 
-/** Guests whose contact details the signed-in guest may view and update. */
+/** Plus-ones and RSVP delegatees whose contact details the signed-in guest may update — never includes the guest themselves. */
 export function contactEditableGuests(
   actingGuest: Guest,
   allGuests: Guest[],
@@ -26,17 +26,18 @@ export function contactEditableGuests(
   const byId = new Map<string, Guest>();
 
   for (const guest of plusOnePartyGuests(actingGuest, allGuests)) {
-    byId.set(guest.id, guest);
+    if (guest.id !== actingGuest.id) {
+      byId.set(guest.id, guest);
+    }
   }
   for (const guest of allGuests) {
-    if (canDelegateRsvpFor(actingGuest.id, guest.id, allGuests, pairs)) {
+    if (
+      guest.id !== actingGuest.id &&
+      canDelegateRsvpFor(actingGuest.id, guest.id, allGuests, pairs)
+    ) {
       byId.set(guest.id, guest);
     }
   }
 
-  return [...byId.values()].sort((a, b) => {
-    if (a.id === actingGuest.id) return -1;
-    if (b.id === actingGuest.id) return 1;
-    return guestDisplayName(a).localeCompare(guestDisplayName(b));
-  });
+  return [...byId.values()].sort((a, b) => guestDisplayName(a).localeCompare(guestDisplayName(b)));
 }

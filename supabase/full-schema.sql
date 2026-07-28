@@ -518,3 +518,9 @@ drop index if exists guests_rsvp_delegate_of_idx;
 
 alter table guest_rsvp_delegates enable row level security;
 
+
+-- >>> supabase/migrations/0018_guest_view_section_title_i18n.sql
+-- Localized titles for text sections (English stays in title, matching body_en).
+alter table guest_view_sections add column title_fr text;
+alter table guest_view_sections add column title_zh text;
+

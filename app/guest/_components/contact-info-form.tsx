@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition, type FormEvent } from "rea
 import { useRouter } from "next/navigation";
 import {
   CONTACT_INFO_SUCCESS_MESSAGE,
+  guestNeedsLastName,
   type ContactInfoEntry,
 } from "@/lib/guests/contact-info";
 import { submitContactInfo } from "@/lib/guests/guest-actions";
@@ -52,6 +53,7 @@ export function ContactInfoForm({
     if (onboarding) return [guest];
     return contactEditableGuests(guest, allGuests, delegatePairs);
   }, [onboarding, guest, allGuests, delegatePairs]);
+
   const peopleSignature = people
     .map((person) => `${person.id}:${person.lastName ?? ""}:${person.email ?? ""}:${person.phone ?? ""}`)
     .join("|");
@@ -70,6 +72,8 @@ export function ContactInfoForm({
 
   const showLinkedNote = !onboarding && people.length > 1;
 
+  if (!onboarding && people.length === 0) return null;
+
   function updateField(guestId: string, key: keyof ContactFields, value: string) {
     setFieldsByGuestId((current) => ({
       ...current,
@@ -82,7 +86,9 @@ export function ContactInfoForm({
     startTransition(async () => {
       const entries: ContactInfoEntry[] = people.map((person) => ({
         guestId: person.id,
-        lastName: fieldsByGuestId[person.id]?.lastName ?? "",
+        lastName: guestNeedsLastName(person)
+          ? (fieldsByGuestId[person.id]?.lastName ?? "")
+          : (person.lastName ?? ""),
         email: fieldsByGuestId[person.id]?.email ?? "",
         phone: fieldsByGuestId[person.id]?.phone ?? "",
       }));
@@ -116,13 +122,15 @@ export function ContactInfoForm({
             className="flex flex-col gap-3 border-t border-border/60 pt-4 first:border-t-0 first:pt-0"
           >
             <p className="text-sm font-medium text-ink">{guestDisplayName(person)}</p>
-            <input
-              type="text"
-              value={fieldsByGuestId[person.id]?.lastName ?? ""}
-              onChange={(event) => updateField(person.id, "lastName", event.target.value)}
-              placeholder={strings.lastNamePlaceholder}
-              className="input text-center"
-            />
+            {guestNeedsLastName(person) && (
+              <input
+                type="text"
+                value={fieldsByGuestId[person.id]?.lastName ?? ""}
+                onChange={(event) => updateField(person.id, "lastName", event.target.value)}
+                placeholder={strings.lastNamePlaceholder}
+                className="input text-center"
+              />
+            )}
             <input
               type="email"
               value={fieldsByGuestId[person.id]?.email ?? ""}

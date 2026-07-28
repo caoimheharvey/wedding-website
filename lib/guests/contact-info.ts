@@ -7,6 +7,10 @@ export function guestNeedsContactOnboarding(guest: {
   return !guest.email?.trim() && !guest.phone?.trim();
 }
 
+export function guestNeedsLastName(guest: { lastName: string | null }): boolean {
+  return !guest.lastName?.trim();
+}
+
 export interface ContactInfoEntry {
   guestId: string;
   lastName: string;

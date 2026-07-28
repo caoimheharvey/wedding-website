@@ -62,7 +62,7 @@ export function EmbedGroupForm({
         Section title (optional)
         <input
           name="title"
-          defaultValue={section?.title ?? ""}
+          defaultValue={section?.titles.en ?? ""}
           className="input"
           placeholder="e.g. Venue &amp; travel"
         />

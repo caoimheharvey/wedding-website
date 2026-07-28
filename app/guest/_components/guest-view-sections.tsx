@@ -2,6 +2,7 @@ import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
 import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
+import { localizedSectionTitle } from "@/lib/guest-view/section-title";
 import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
 import { ContactInfoForm } from "./contact-info-form";
@@ -49,14 +50,22 @@ export function GuestViewSections({
   return (
     <div className="flex w-full flex-col gap-4 text-left">
       {sections.map((section) => {
+        const sectionTitle = localizedSectionTitle(section, language);
         if (section.type === "text") {
-          return <TextSectionView key={section.id} section={section} language={language} />;
+          return (
+            <TextSectionView
+              key={section.id}
+              section={section}
+              language={language}
+              title={sectionTitle}
+            />
+          );
         }
         if (section.type === "embed_group") {
-          return <EmbedGroupView key={section.id} section={section} />;
+          return <EmbedGroupView key={section.id} section={section} title={sectionTitle} />;
         }
         if (section.type === "image_group") {
-          return <ImageGroupView key={section.id} section={section} />;
+          return <ImageGroupView key={section.id} section={section} title={sectionTitle} />;
         }
         if (section.type === "rsvp" && rsvp) {
           return (
@@ -67,7 +76,7 @@ export function GuestViewSections({
               language={language}
               deadlinePassed={rsvp.deadlinePassed}
               previewGuestId={rsvp.previewGuestId}
-              title={section.title}
+              title={sectionTitle}
             />
           );
         }
@@ -78,7 +87,7 @@ export function GuestViewSections({
               language={language}
               effectiveStatus={rsvp.effectiveStatus}
               effectiveDeadline={rsvp.effectiveDeadline}
-              title={section.title}
+              title={sectionTitle}
             />
           );
         }
@@ -91,7 +100,7 @@ export function GuestViewSections({
               delegatePairs={rsvp.delegatePairs}
               language={language}
               previewGuestId={rsvp.previewGuestId}
-              title={section.title}
+              title={sectionTitle}
             />
           );
         }
@@ -104,17 +113,19 @@ export function GuestViewSections({
 function TextSectionView({
   section,
   language,
+  title,
 }: {
   section: GuestViewSection;
   language: PreferredLanguage;
+  title: string | null;
 }) {
   const body = section.body[language] || section.body.en;
   if (!body) return null;
   const columns = TEXT_COLS[section.columnCount ?? 1] ?? "";
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
-      {section.title && <h2 className="mb-2 font-display text-lg text-ink">{section.title}</h2>}
+    <div className="rounded-lg border border-border bg-surface p-4 text-center">
+      {title && <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>}
       <div className={columns}>
         {body
           .split("\n")
@@ -129,13 +140,13 @@ function TextSectionView({
   );
 }
 
-function ImageGroupView({ section }: { section: GuestViewSection }) {
+function ImageGroupView({ section, title }: { section: GuestViewSection; title: string | null }) {
   if (section.images.length === 0) return null;
   const columns = GRID_COLS[section.columnCount ?? 2] ?? GRID_COLS[2];
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
-      {section.title && <h2 className="mb-3 font-display text-lg text-ink">{section.title}</h2>}
+      {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
       <div className={`grid gap-4 ${columns}`}>
         {section.images.map((image) => (
           <div key={image.id} className="flex flex-col gap-2">
@@ -153,13 +164,13 @@ function ImageGroupView({ section }: { section: GuestViewSection }) {
   );
 }
 
-function EmbedGroupView({ section }: { section: GuestViewSection }) {
+function EmbedGroupView({ section, title }: { section: GuestViewSection; title: string | null }) {
   if (section.embeds.length === 0) return null;
   const columns = GRID_COLS[section.columnCount ?? 2] ?? GRID_COLS[2];
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
-      {section.title && <h2 className="mb-3 font-display text-lg text-ink">{section.title}</h2>}
+      {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
       <div className={`grid gap-4 ${columns}`}>
         {section.embeds.map((embed) => (
           <div key={embed.id} className="flex flex-col gap-2">

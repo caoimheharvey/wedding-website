@@ -251,12 +251,15 @@ export async function createTextSection(
     const supabase = getSupabaseAdmin();
     const { error } = await supabase.from("guest_view_sections").insert({
       type: "text",
-      title: parsed.data.title || null,
+      title: parsed.data.titleEn || null,
+      title_fr: parsed.data.titleFr || null,
+      title_zh: parsed.data.titleZh || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
       body_en: parsed.data.bodyEn,
       body_fr: parsed.data.bodyFr || null,
       body_zh: parsed.data.bodyZh || null,
+      column_count: parsed.data.columnCount,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
   }
@@ -285,11 +288,14 @@ export async function updateTextSection(
     const { error } = await supabase
       .from("guest_view_sections")
       .update({
-        title: parsed.data.title || null,
+        title: parsed.data.titleEn || null,
+        title_fr: parsed.data.titleFr || null,
+        title_zh: parsed.data.titleZh || null,
         visible_to_roles: parsed.data.visibleToRoles,
         body_en: parsed.data.bodyEn,
         body_fr: parsed.data.bodyFr || null,
         body_zh: parsed.data.bodyZh || null,
+        column_count: parsed.data.columnCount,
       })
       .eq("id", sectionId);
     if (error) return { message: `Could not save section: ${error.message}` };

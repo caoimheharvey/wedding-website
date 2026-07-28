@@ -21,6 +21,9 @@ export function TextSectionForm({
   const [bodyEn, setBodyEn] = useState(section?.body.en ?? "");
   const [bodyFr, setBodyFr] = useState(section?.body.fr ?? "");
   const [bodyZh, setBodyZh] = useState(section?.body.zh ?? "");
+  const [titleEn, setTitleEn] = useState(section?.titles.en ?? "");
+  const [titleFr, setTitleFr] = useState(section?.titles.fr ?? "");
+  const [titleZh, setTitleZh] = useState(section?.titles.zh ?? "");
   const [aiPending, startAiTransition] = useTransition();
   const [aiMessage, setAiMessage] = useState<string | null>(null);
 
@@ -30,16 +33,23 @@ export function TextSectionForm({
     }
   }, [state, onDone]);
 
-  function handleTranslate(target: "fr" | "zh") {
-    if (!bodyEn.trim()) {
-      setAiMessage("Write the English text first.");
+  function handleTranslate(target: "fr" | "zh", source: "body" | "title") {
+    const english = source === "body" ? bodyEn : titleEn;
+    if (!english.trim()) {
+      setAiMessage(`Write the English ${source === "body" ? "text" : "title"} first.`);
       return;
     }
     startAiTransition(async () => {
-      const result = await aiTranslateSection(bodyEn, target);
+      const result = await aiTranslateSection(english, target);
       if (result.text) {
-        if (target === "fr") setBodyFr(result.text);
-        else setBodyZh(result.text);
+        if (source === "body") {
+          if (target === "fr") setBodyFr(result.text);
+          else setBodyZh(result.text);
+        } else if (target === "fr") {
+          setTitleFr(result.text);
+        } else {
+          setTitleZh(result.text);
+        }
         setAiMessage(null);
       } else {
         setAiMessage(result.message ?? "Translation failed.");
@@ -72,14 +82,51 @@ export function TextSectionForm({
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
     >
       <label className="flex flex-col gap-1 text-sm text-ink">
-        Section title (optional)
+        Section title — English (optional)
         <input
-          name="title"
-          defaultValue={section?.title ?? ""}
+          name="titleEn"
+          value={titleEn}
+          onChange={(event) => setTitleEn(event.target.value)}
           className="input"
           placeholder="e.g. Ceremony details"
         />
       </label>
+
+      <label className="flex flex-col gap-1 text-sm text-ink">
+        Section title — French
+        <input
+          name="titleFr"
+          value={titleFr}
+          onChange={(event) => setTitleFr(event.target.value)}
+          className="input"
+        />
+      </label>
+      <button
+        type="button"
+        onClick={() => handleTranslate("fr", "title")}
+        disabled={aiPending}
+        className="self-start text-xs font-medium text-aegean hover:underline disabled:opacity-50"
+      >
+        {aiPending ? "Asking AI…" : "AI: translate title from English"}
+      </button>
+
+      <label className="flex flex-col gap-1 text-sm text-ink">
+        Section title — Mandarin
+        <input
+          name="titleZh"
+          value={titleZh}
+          onChange={(event) => setTitleZh(event.target.value)}
+          className="input"
+        />
+      </label>
+      <button
+        type="button"
+        onClick={() => handleTranslate("zh", "title")}
+        disabled={aiPending}
+        className="self-start text-xs font-medium text-aegean hover:underline disabled:opacity-50"
+      >
+        {aiPending ? "Asking AI…" : "AI: translate title from English"}
+      </button>
 
       <fieldset className="flex flex-col gap-1">
         <legend className="text-sm text-ink">Visible to</legend>
@@ -149,7 +196,7 @@ export function TextSectionForm({
       </label>
       <button
         type="button"
-        onClick={() => handleTranslate("fr")}
+        onClick={() => handleTranslate("fr", "body")}
         disabled={aiPending}
         className="self-start text-xs font-medium text-aegean hover:underline disabled:opacity-50"
       >
@@ -168,7 +215,7 @@ export function TextSectionForm({
       </label>
       <button
         type="button"
-        onClick={() => handleTranslate("zh")}
+        onClick={() => handleTranslate("zh", "body")}
         disabled={aiPending}
         className="self-start text-xs font-medium text-aegean hover:underline disabled:opacity-50"
       >

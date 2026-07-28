@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { deleteGuestViewSection, moveGuestViewSection } from "@/lib/guest-view/actions";
 import { WEDDING_PARTY_ROLE_LABELS } from "@/lib/guests/types";
 import type { GuestViewSection } from "@/lib/guest-view/types";
+import { localizedSectionTitle } from "@/lib/guest-view/section-title";
 
 export function SectionListItem({
   section,
@@ -18,8 +19,10 @@ export function SectionListItem({
 }) {
   const [isPending, startTransition] = useTransition();
 
+  const displayTitle = localizedSectionTitle(section, "en");
+
   function handleDelete() {
-    if (!window.confirm(`Delete this section${section.title ? ` ("${section.title}")` : ""}?`)) {
+    if (!window.confirm(`Delete this section${displayTitle ? ` ("${displayTitle}")` : ""}?`)) {
       return;
     }
     startTransition(async () => {
@@ -66,7 +69,7 @@ export function SectionListItem({
           )}
         </div>
         <p className="mt-1 font-medium text-ink">
-          {section.title ||
+          {displayTitle ||
             (section.type === "rsvp"
               ? "RSVP form"
               : section.type === "rsvp_status"

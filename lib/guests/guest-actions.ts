@@ -9,6 +9,7 @@ import { contactEditableGuests } from "@/lib/guest-site/contact-editable-guests"
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import {
   CONTACT_INFO_SUCCESS_MESSAGE,
+  guestNeedsLastName,
   type ContactInfoEntry,
 } from "./contact-info";
 import { mockUpdateGuest } from "./mock-store";
@@ -17,9 +18,8 @@ import { getGuestById, listGuests, listRsvpDelegatePairs } from "./queries";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Guest-facing contact details form — verify or update name, email, and phone
- * for the signed-in guest plus anyone linked as their plus-one or RSVP
- * delegatee.
+ * Guest-facing contact details form — update name, email, and phone for the
+ * signed-in guest (onboarding) or for plus-ones and RSVP delegatees.
  */
 export async function submitContactInfo(
   entries: ContactInfoEntry[],
@@ -36,9 +36,10 @@ export async function submitContactInfo(
   if (!actingGuest) return { message: "Your session has expired — please sign in again." };
 
   const [allGuests, pairs] = await Promise.all([listGuests(), listRsvpDelegatePairs()]);
-  const allowedGuestIds = new Set(
-    contactEditableGuests(actingGuest, allGuests, pairs).map((guest) => guest.id),
-  );
+  const allowedGuestIds = new Set<string>([actingGuestId]);
+  for (const guest of contactEditableGuests(actingGuest, allGuests, pairs)) {
+    allowedGuestIds.add(guest.id);
+  }
 
   for (const entry of entries) {
     if (!allowedGuestIds.has(entry.guestId)) {
@@ -47,10 +48,9 @@ export async function submitContactInfo(
 
     const trimmedEmail = entry.email.trim();
     const trimmedPhone = entry.phone.trim();
-    const trimmedLastName = entry.lastName.trim();
+    const existing = allGuests.find((guest) => guest.id === entry.guestId);
 
     if (!trimmedEmail && !trimmedPhone) {
-      const existing = allGuests.find((guest) => guest.id === entry.guestId);
       if (!existing?.email && !existing?.phone) {
         const label = existing ? guestDisplayName(existing) : "each guest";
         return { message: `Please add an email or phone number for ${label}.` };
@@ -64,8 +64,11 @@ export async function submitContactInfo(
 
   if (isLocalTestMode()) {
     for (const entry of entries) {
+      const existing = allGuests.find((guest) => guest.id === entry.guestId);
       mockUpdateGuest(entry.guestId, {
-        lastName: entry.lastName.trim() || null,
+        lastName: guestNeedsLastName(existing ?? { lastName: null })
+          ? entry.lastName.trim() || null
+          : existing?.lastName ?? null,
         email: entry.email.trim() || null,
         phone: entry.phone.trim() || null,
       });
@@ -73,10 +76,13 @@ export async function submitContactInfo(
   } else {
     const supabase = getSupabaseAdmin();
     for (const entry of entries) {
+      const existing = allGuests.find((guest) => guest.id === entry.guestId);
       const { error } = await supabase
         .from("guests")
         .update({
-          last_name: entry.lastName.trim() || null,
+          last_name: guestNeedsLastName(existing ?? { lastName: null })
+            ? entry.lastName.trim() || null
+            : existing?.lastName ?? null,
           email: entry.email.trim() || null,
           phone: entry.phone.trim() || null,
         })

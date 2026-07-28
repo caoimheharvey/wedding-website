@@ -71,9 +71,9 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     contactInfoForm: {
       heading: "Stay in the loop",
       description:
-        "Please check the details below and update anything that's missing or incorrect so we can reach you with updates.",
+        "If you're RSVPing for someone else, check and update their contact details below.",
       linkedGuestsNote:
-        "You can also update contact details for your plus-one or anyone whose RSVP you handle.",
+        "These are guests linked to you as a plus-one or whose RSVP you handle.",
       lastNamePlaceholder: "Last name",
       emailPlaceholder: "Email address",
       phonePlaceholder: "Phone number",
@@ -118,9 +118,9 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     contactInfoForm: {
       heading: "Restez informé·e",
       description:
-        "Vérifiez les informations ci-dessous et corrigez ce qui manque ou n'est plus exact, afin que nous puissions vous envoyer nos nouvelles.",
+        "Si vous répondez pour quelqu'un d'autre, vérifiez et mettez à jour ses coordonnées ci-dessous.",
       linkedGuestsNote:
-        "Vous pouvez aussi mettre à jour les coordonnées de votre accompagnant·e ou de toute personne dont vous gérez la réponse.",
+        "Ces invités sont liés à vous en tant qu'accompagnant·e ou dont vous gérez la réponse.",
       lastNamePlaceholder: "Nom de famille",
       emailPlaceholder: "Adresse email",
       phonePlaceholder: "Numéro de téléphone",
@@ -164,8 +164,8 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
     contactInfoForm: {
       heading: "保持联系",
-      description: "请核对以下信息，补充或更正任何缺失或过时的内容，以便我们向您发送最新消息。",
-      linkedGuestsNote: "您也可以更新您的陪同嘉宾或您代为回复的宾客的联系方式。",
+      description: "如果您代他人回复，请核对并更新下方的联系方式。",
+      linkedGuestsNote: "这些是与您关联的陪同嘉宾或您代为回复的宾客。",
       lastNamePlaceholder: "姓氏",
       emailPlaceholder: "电子邮件地址",
       phonePlaceholder: "电话号码",

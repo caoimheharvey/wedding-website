@@ -43,7 +43,7 @@ export function RsvpStatusSectionForm({
         Section title (optional)
         <input
           name="title"
-          defaultValue={section?.title ?? ""}
+          defaultValue={section?.titles.en ?? ""}
           className="input"
           placeholder='Defaults to "Your RSVP status"'
         />

@@ -1,5 +1,6 @@
 import "server-only";
 import type * as z from "zod";
+import type { PreferredLanguage } from "@/lib/guests/types";
 import type { GuestViewImage, GuestViewSection } from "./types";
 import type {
   contactInfoSectionFormSchema,
@@ -22,13 +23,20 @@ export interface MockImageInput {
  */
 let sections: GuestViewSection[] = seed();
 
+function englishTitle(title: string | null | undefined) {
+  return { en: title || null, fr: null, zh: null } satisfies Record<
+    PreferredLanguage,
+    string | null
+  >;
+}
+
 function seed(): GuestViewSection[] {
   const now = new Date().toISOString();
   return [
     {
       id: crypto.randomUUID(),
       type: "rsvp",
-      title: null,
+      titles: englishTitle(null),
       orderIndex: 0,
       visibleToRoles: [],
       body: { en: null, fr: null, zh: null },
@@ -41,7 +49,7 @@ function seed(): GuestViewSection[] {
     {
       id: crypto.randomUUID(),
       type: "contact_info",
-      title: null,
+      titles: englishTitle(null),
       orderIndex: 1,
       visibleToRoles: [],
       body: { en: null, fr: null, zh: null },
@@ -54,7 +62,7 @@ function seed(): GuestViewSection[] {
     {
       id: crypto.randomUUID(),
       type: "text",
-      title: "Getting there",
+      titles: englishTitle("Getting there"),
       orderIndex: 2,
       visibleToRoles: [],
       body: {
@@ -71,7 +79,7 @@ function seed(): GuestViewSection[] {
     {
       id: crypto.randomUUID(),
       type: "text",
-      title: "Maid of Honor details",
+      titles: englishTitle("Maid of Honor details"),
       orderIndex: 3,
       visibleToRoles: ["maid_of_honor"],
       body: {
@@ -100,7 +108,11 @@ export function mockCreateTextSection(
   const section: GuestViewSection = {
     id: crypto.randomUUID(),
     type: "text",
-    title: data.title || null,
+    titles: {
+      en: data.titleEn || null,
+      fr: data.titleFr || null,
+      zh: data.titleZh || null,
+    },
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: data.bodyEn, fr: data.bodyFr || null, zh: data.bodyZh || null },
@@ -119,7 +131,11 @@ export function mockUpdateTextSection(id: string, data: z.infer<typeof textSecti
     section.id === id
       ? {
           ...section,
-          title: data.title || null,
+          titles: {
+      en: data.titleEn || null,
+      fr: data.titleFr || null,
+      zh: data.titleZh || null,
+    },
           visibleToRoles: data.visibleToRoles,
           body: { en: data.bodyEn, fr: data.bodyFr || null, zh: data.bodyZh || null },
           columnCount: data.columnCount,
@@ -137,7 +153,7 @@ export function mockCreateRsvpSection(
   const section: GuestViewSection = {
     id: crypto.randomUUID(),
     type: "rsvp",
-    title: data.title || null,
+    titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: null, fr: null, zh: null },
@@ -156,7 +172,7 @@ export function mockUpdateRsvpSection(id: string, data: z.infer<typeof rsvpSecti
     section.id === id
       ? {
           ...section,
-          title: data.title || null,
+          titles: englishTitle(data.title),
           visibleToRoles: data.visibleToRoles,
           updatedAt: new Date().toISOString(),
         }
@@ -172,7 +188,7 @@ export function mockCreateRsvpStatusSection(
   const section: GuestViewSection = {
     id: crypto.randomUUID(),
     type: "rsvp_status",
-    title: data.title || null,
+    titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: null, fr: null, zh: null },
@@ -194,7 +210,7 @@ export function mockUpdateRsvpStatusSection(
     section.id === id
       ? {
           ...section,
-          title: data.title || null,
+          titles: englishTitle(data.title),
           visibleToRoles: data.visibleToRoles,
           updatedAt: new Date().toISOString(),
         }
@@ -210,7 +226,7 @@ export function mockCreateContactInfoSection(
   const section: GuestViewSection = {
     id: crypto.randomUUID(),
     type: "contact_info",
-    title: data.title || null,
+    titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: null, fr: null, zh: null },
@@ -232,7 +248,7 @@ export function mockUpdateContactInfoSection(
     section.id === id
       ? {
           ...section,
-          title: data.title || null,
+          titles: englishTitle(data.title),
           visibleToRoles: data.visibleToRoles,
           updatedAt: new Date().toISOString(),
         }
@@ -249,7 +265,7 @@ export function mockCreateEmbedGroupSection(
   const section: GuestViewSection = {
     id: crypto.randomUUID(),
     type: "embed_group",
-    title: data.title || null,
+    titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: null, fr: null, zh: null },
@@ -278,7 +294,7 @@ export function mockUpdateEmbedGroupSection(
     section.id === id
       ? {
           ...section,
-          title: data.title || null,
+          titles: englishTitle(data.title),
           visibleToRoles: data.visibleToRoles,
           columnCount: data.columnCount,
           embeds: embeds.map((embed, index) => ({
@@ -303,7 +319,7 @@ export function mockCreateImageGroupSection(
   const section: GuestViewSection = {
     id: crypto.randomUUID(),
     type: "image_group",
-    title: data.title || null,
+    titles: englishTitle(data.title),
     orderIndex,
     visibleToRoles: data.visibleToRoles,
     body: { en: null, fr: null, zh: null },
@@ -326,7 +342,7 @@ export function mockUpdateImageGroupSection(
     section.id === id
       ? {
           ...section,
-          title: data.title || null,
+          titles: englishTitle(data.title),
           visibleToRoles: data.visibleToRoles,
           columnCount: data.columnCount,
           images: toMockImages(images),

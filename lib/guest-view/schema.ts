@@ -6,7 +6,11 @@ const sectionMetaSchema = z.object({
   visibleToRoles: z.array(z.enum(WEDDING_PARTY_ROLES)).default([]),
 });
 
-export const textSectionFormSchema = sectionMetaSchema.extend({
+export const textSectionFormSchema = z.object({
+  titleEn: z.string().trim().optional(),
+  titleFr: z.string().trim().optional(),
+  titleZh: z.string().trim().optional(),
+  visibleToRoles: z.array(z.enum(WEDDING_PARTY_ROLES)).default([]),
   bodyEn: z.string().trim().min(1, { error: "English text is required" }),
   bodyFr: z.string().trim().optional(),
   bodyZh: z.string().trim().optional(),

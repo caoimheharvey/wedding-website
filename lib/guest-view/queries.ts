@@ -9,6 +9,8 @@ interface SectionRow {
   id: string;
   type: GuestViewSection["type"];
   title: string | null;
+  title_fr: string | null;
+  title_zh: string | null;
   order_index: number;
   visible_to_roles: WeddingPartyRole[] | null;
   body_en: string | null;
@@ -84,7 +86,7 @@ export async function listGuestViewSections(): Promise<GuestViewSection[]> {
   return ((sectionsResult.data as SectionRow[]) ?? []).map((row) => ({
     id: row.id,
     type: row.type,
-    title: row.title,
+    titles: { en: row.title, fr: row.title_fr, zh: row.title_zh },
     orderIndex: row.order_index,
     visibleToRoles: row.visible_to_roles ?? [],
     body: { en: row.body_en, fr: row.body_fr, zh: row.body_zh },

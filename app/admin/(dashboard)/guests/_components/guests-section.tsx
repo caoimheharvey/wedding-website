@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { setGuestRsvpDeadlineOverrides } from "@/lib/rsvp/actions";
 import type { GuestWithPlusOnes } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
+import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { DefaultDeadlineEditor } from "./default-deadline-editor";
 import { GuestStats } from "./guest-stats";
 import {
@@ -13,6 +14,36 @@ import {
   type RsvpFilter,
 } from "./guests-filters";
 import { GuestsList } from "./guests-list";
+import { GuestsSearch } from "./guests-search";
+
+function guestMatchesSearch(guest: GuestWithPlusOnes, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+
+  const haystack = [guestDisplayName(guest), guest.email, guest.phone]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(q);
+}
+
+function idsMatchingSearch(flat: GuestWithPlusOnes[], query: string): Set<string> {
+  const q = query.trim();
+  if (!q) return new Set(flat.map((guest) => guest.id));
+
+  const ids = new Set<string>();
+  for (const guest of flat) {
+    if (!guestMatchesSearch(guest, q)) continue;
+    ids.add(guest.id);
+    if (guest.isPlusOneOf) ids.add(guest.isPlusOneOf);
+    for (const plusOne of guest.plusOnes) ids.add(plusOne.id);
+  }
+  for (const guest of flat) {
+    if (guest.isPlusOneOf && ids.has(guest.isPlusOneOf)) ids.add(guest.id);
+  }
+  return ids;
+}
 
 export function GuestsSection({
   guests,
@@ -34,13 +65,16 @@ export function GuestsSection({
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const [invitedByFilter, setInvitedByFilter] = useState<InvitedByFilter>("all");
   const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const alphabetically = (a: GuestWithPlusOnes, b: GuestWithPlusOnes) =>
     (a.lastName ?? "").localeCompare(b.lastName ?? "") || a.firstName.localeCompare(b.firstName);
 
   const { orderedGuests, nestedIds } = useMemo(() => {
     const flat = guests.flatMap((guest) => [guest, ...guest.plusOnes]);
+    const searchIds = idsMatchingSearch(flat, searchQuery);
     const filtered = flat
+      .filter((guest) => searchIds.has(guest.id))
       .filter((guest) => priorityFilter === "all" || guest.relationshipPriority === priorityFilter)
       .filter((guest) => invitedByFilter === "all" || guest.invitedBy === invitedByFilter)
       .filter(
@@ -77,7 +111,7 @@ export function GuestsSection({
     }
 
     return { orderedGuests: ordered, nestedIds: nested };
-  }, [guests, priorityFilter, invitedByFilter, rsvpFilter, effectiveStatusById]);
+  }, [guests, searchQuery, priorityFilter, invitedByFilter, rsvpFilter, effectiveStatusById]);
 
   function toggleSelect(guestId: string) {
     setSelected((prev) => {
@@ -163,6 +197,8 @@ export function GuestsSection({
         rsvp={rsvpFilter}
         onRsvpChange={setRsvpFilter}
       />
+
+      <GuestsSearch value={searchQuery} onChange={setSearchQuery} />
 
       <GuestsList
         guests={orderedGuests}

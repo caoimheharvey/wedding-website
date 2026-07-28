@@ -27,7 +27,7 @@ export interface GuestViewImage {
 export interface GuestViewSection {
   id: string;
   type: GuestViewSectionType;
-  title: string | null;
+  titles: Record<PreferredLanguage, string | null>;
   orderIndex: number;
   /** Empty = visible to everyone; otherwise only guests holding one of these roles. */
   visibleToRoles: WeddingPartyRole[];

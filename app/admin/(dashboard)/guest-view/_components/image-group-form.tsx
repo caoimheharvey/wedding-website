@@ -66,7 +66,7 @@ export function ImageGroupForm({
         Section title (optional)
         <input
           name="title"
-          defaultValue={section?.title ?? ""}
+          defaultValue={section?.titles.en ?? ""}
           className="input"
           placeholder="e.g. Engagement photos"
         />
