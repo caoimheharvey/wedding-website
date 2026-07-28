@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   description: "Wedding planning and guest information",
 };
 
+export const viewport = {
+  colorScheme: "light",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,7 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} h-full antialiased light`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
