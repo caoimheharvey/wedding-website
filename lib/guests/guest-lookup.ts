@@ -1,7 +1,15 @@
 import type { Guest } from "./types";
 
+/** Apostrophe-like characters seen in names (straight, curly, modifier, backtick). */
+const APOSTROPHE_LIKE = /[\u0027\u2018\u2019\u201A\u201B\u2032\u02BC`]/g;
+
 export function normalizeNamePart(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(APOSTROPHE_LIKE, "'")
+    .replace(/\s+/g, " ");
 }
 
 export function normalizePhone(phone: string): string {
