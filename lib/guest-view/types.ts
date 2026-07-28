@@ -1,6 +1,12 @@
 import type { PreferredLanguage, WeddingPartyRole } from "@/lib/guests/types";
 
-export type GuestViewSectionType = "text" | "embed_group" | "rsvp" | "image_group" | "contact_info";
+export type GuestViewSectionType =
+  | "text"
+  | "embed_group"
+  | "rsvp"
+  | "rsvp_status"
+  | "image_group"
+  | "contact_info";
 export type EmbedProvider = "google_maps" | "pinterest" | "other";
 
 export interface GuestViewEmbed {

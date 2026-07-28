@@ -1,6 +1,8 @@
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
+import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { RsvpForm } from "./rsvp-form";
+import { RsvpStatusDisplay } from "./rsvp-status-display";
 import { ContactInfoForm } from "./contact-info-form";
 
 const GRID_COLS: Record<number, string> = {
@@ -22,6 +24,8 @@ export interface RsvpSectionContext {
   delegateFor: Guest[];
   deadlinePassed: boolean;
   delegateName?: string;
+  effectiveStatus: EffectiveRsvpStatus;
+  effectiveDeadline?: string | null;
   /** Local-test-only: lets the admin preview route submit without a real session. */
   previewGuestId?: string;
 }
@@ -61,6 +65,17 @@ export function GuestViewSections({
               deadlinePassed={rsvp.deadlinePassed}
               delegateName={rsvp.delegateName}
               previewGuestId={rsvp.previewGuestId}
+              title={section.title}
+            />
+          );
+        }
+        if (section.type === "rsvp_status" && rsvp) {
+          return (
+            <RsvpStatusDisplay
+              key={section.id}
+              language={language}
+              effectiveStatus={rsvp.effectiveStatus}
+              effectiveDeadline={rsvp.effectiveDeadline}
               title={section.title}
             />
           );

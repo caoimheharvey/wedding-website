@@ -58,8 +58,6 @@ export default async function Home({
           <GuestSiteView
             greetingNames={plusOnePartyNames(guest, allGuests)}
             language={language}
-            effectiveStatus={effectiveStatus}
-            effectiveDeadline={effectiveDeadline}
           />
 
           <GuestViewSections
@@ -69,6 +67,8 @@ export default async function Home({
               guest,
               delegateFor,
               deadlinePassed: effectiveStatus === "deadline_missed",
+              effectiveStatus,
+              effectiveDeadline,
               delegateName: delegateHolder
                 ? `${delegateHolder.firstName} ${delegateHolder.lastName}`
                 : undefined,
@@ -113,8 +113,6 @@ export default async function Home({
         <GuestSiteView
           greetingNames={[`${persona.firstName} ${persona.lastName}`]}
           language={language}
-          effectiveStatus={persona.rsvpStatus}
-          effectiveDeadline={siteSettings.defaultRsvpDeadline}
           delegateFor={persona.delegateFor}
         />
         <GuestViewSections sections={sections} language={language} />

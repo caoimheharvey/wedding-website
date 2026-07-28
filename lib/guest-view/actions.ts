@@ -10,6 +10,7 @@ import {
   mockCreateEmbedGroupSection,
   mockCreateImageGroupSection,
   mockCreateRsvpSection,
+  mockCreateRsvpStatusSection,
   mockCreateTextSection,
   mockDeleteGuestViewSection,
   mockMoveGuestViewSection,
@@ -17,6 +18,7 @@ import {
   mockUpdateEmbedGroupSection,
   mockUpdateImageGroupSection,
   mockUpdateRsvpSection,
+  mockUpdateRsvpStatusSection,
   mockUpdateTextSection,
   type MockImageInput,
 } from "./mock-store";
@@ -27,6 +29,7 @@ import {
   embedItemSchema,
   imageGroupFormSchema,
   rsvpSectionFormSchema,
+  rsvpStatusSectionFormSchema,
   textSectionFormSchema,
 } from "./schema";
 
@@ -343,6 +346,69 @@ export async function updateRsvpSection(
 
   if (isLocalTestMode()) {
     mockUpdateRsvpSection(sectionId, parsed.data);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("guest_view_sections")
+      .update({
+        title: parsed.data.title || null,
+        visible_to_roles: parsed.data.visibleToRoles,
+      })
+      .eq("id", sectionId);
+    if (error) return { message: `Could not save section: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  return { message: "Section updated." };
+}
+
+export async function createRsvpStatusSection(
+  _prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  await requireAdmin();
+
+  const parsed = rsvpStatusSectionFormSchema.safeParse({
+    ...Object.fromEntries(formData),
+    visibleToRoles: parseVisibleToRoles(formData),
+  });
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+
+  const existing = await listGuestViewSections();
+  const orderIndex = existing.length;
+
+  if (isLocalTestMode()) {
+    mockCreateRsvpStatusSection(parsed.data, orderIndex);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from("guest_view_sections").insert({
+      type: "rsvp_status",
+      title: parsed.data.title || null,
+      order_index: orderIndex,
+      visible_to_roles: parsed.data.visibleToRoles,
+    });
+    if (error) return { message: `Could not save section: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  return { message: "Section added." };
+}
+
+export async function updateRsvpStatusSection(
+  sectionId: string,
+  _prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  await requireAdmin();
+
+  const parsed = rsvpStatusSectionFormSchema.safeParse({
+    ...Object.fromEntries(formData),
+    visibleToRoles: parseVisibleToRoles(formData),
+  });
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
+
+  if (isLocalTestMode()) {
+    mockUpdateRsvpStatusSection(sectionId, parsed.data);
   } else {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase

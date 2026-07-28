@@ -69,6 +69,7 @@ export async function submitRsvp(
     }
   }
 
+  revalidatePath("/");
   revalidatePath("/guest");
   revalidatePath("/admin/guests");
   return { message: "Thanks — your RSVP has been recorded." };

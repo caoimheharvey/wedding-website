@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { submitRsvp } from "@/lib/rsvp/guest-actions";
 import { RSVP_STATUS_OPTIONS, type Guest, type PreferredLanguage, type RsvpStatus } from "@/lib/guests/types";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
@@ -26,6 +27,7 @@ export function RsvpForm({
 }) {
   const strings = GUEST_SITE_STRINGS[language].rsvpForm;
   const people = [guest, ...delegateFor];
+  const router = useRouter();
 
   const [statuses, setStatuses] = useState<Record<string, RsvpStatus>>(
     Object.fromEntries(people.map((person) => [person.id, person.rsvpStatus])),
@@ -48,6 +50,9 @@ export function RsvpForm({
       }));
       const result = await submitRsvp(entries, previewGuestId);
       setMessage(result.message ?? null);
+      if (result.message === "Thanks — your RSVP has been recorded.") {
+        router.refresh();
+      }
     });
   }
 

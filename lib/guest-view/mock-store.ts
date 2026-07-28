@@ -7,6 +7,7 @@ import type {
   embedItemSchema,
   imageGroupFormSchema,
   rsvpSectionFormSchema,
+  rsvpStatusSectionFormSchema,
   textSectionFormSchema,
 } from "./schema";
 
@@ -151,6 +152,44 @@ export function mockCreateRsvpSection(
 }
 
 export function mockUpdateRsvpSection(id: string, data: z.infer<typeof rsvpSectionFormSchema>): void {
+  sections = sections.map((section) =>
+    section.id === id
+      ? {
+          ...section,
+          title: data.title || null,
+          visibleToRoles: data.visibleToRoles,
+          updatedAt: new Date().toISOString(),
+        }
+      : section,
+  );
+}
+
+export function mockCreateRsvpStatusSection(
+  data: z.infer<typeof rsvpStatusSectionFormSchema>,
+  orderIndex: number,
+): GuestViewSection {
+  const now = new Date().toISOString();
+  const section: GuestViewSection = {
+    id: crypto.randomUUID(),
+    type: "rsvp_status",
+    title: data.title || null,
+    orderIndex,
+    visibleToRoles: data.visibleToRoles,
+    body: { en: null, fr: null, zh: null },
+    columnCount: null,
+    embeds: [],
+    images: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  sections.push(section);
+  return section;
+}
+
+export function mockUpdateRsvpStatusSection(
+  id: string,
+  data: z.infer<typeof rsvpStatusSectionFormSchema>,
+): void {
   sections = sections.map((section) =>
     section.id === id
       ? {

@@ -6,15 +6,17 @@ import { TextSectionForm } from "./text-section-form";
 import { EmbedGroupForm } from "./embed-group-form";
 import { ImageGroupForm } from "./image-group-form";
 import { RsvpSectionForm } from "./rsvp-section-form";
+import { RsvpStatusSectionForm } from "./rsvp-status-section-form";
 import { ContactInfoSectionForm } from "./contact-info-section-form";
 import { SectionListItem } from "./section-list-item";
 
 export function GuestViewManager({ sections }: { sections: GuestViewSection[] }) {
   const [addingType, setAddingType] = useState<
-    "text" | "embed_group" | "image_group" | "rsvp" | "contact_info" | null
+    "text" | "embed_group" | "image_group" | "rsvp" | "rsvp_status" | "contact_info" | null
   >(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const hasRsvpSection = sections.some((section) => section.type === "rsvp");
+  const hasRsvpStatusSection = sections.some((section) => section.type === "rsvp_status");
   const hasContactInfoSection = sections.some((section) => section.type === "contact_info");
 
   return (
@@ -23,6 +25,9 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
       {addingType === "embed_group" && <EmbedGroupForm onDone={() => setAddingType(null)} />}
       {addingType === "image_group" && <ImageGroupForm onDone={() => setAddingType(null)} />}
       {addingType === "rsvp" && <RsvpSectionForm onDone={() => setAddingType(null)} />}
+      {addingType === "rsvp_status" && (
+        <RsvpStatusSectionForm onDone={() => setAddingType(null)} />
+      )}
       {addingType === "contact_info" && (
         <ContactInfoSectionForm onDone={() => setAddingType(null)} />
       )}
@@ -57,6 +62,15 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
               className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
             >
               + RSVP section
+            </button>
+          )}
+          {!hasRsvpStatusSection && (
+            <button
+              type="button"
+              onClick={() => setAddingType("rsvp_status")}
+              className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light"
+            >
+              + RSVP status section
             </button>
           )}
           {!hasContactInfoSection && (
@@ -97,6 +111,12 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
                 />
               ) : section.type === "contact_info" ? (
                 <ContactInfoSectionForm
+                  key={section.id}
+                  section={section}
+                  onDone={() => setEditingId(null)}
+                />
+              ) : section.type === "rsvp_status" ? (
+                <RsvpStatusSectionForm
                   key={section.id}
                   section={section}
                   onDone={() => setEditingId(null)}

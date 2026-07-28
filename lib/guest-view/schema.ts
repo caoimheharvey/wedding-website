@@ -23,6 +23,8 @@ export const imageGroupFormSchema = sectionMetaSchema.extend({
 
 export const rsvpSectionFormSchema = sectionMetaSchema;
 
+export const rsvpStatusSectionFormSchema = sectionMetaSchema;
+
 export const contactInfoSectionFormSchema = sectionMetaSchema;
 
 export const embedItemSchema = z.object({
