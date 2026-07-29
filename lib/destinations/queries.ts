@@ -10,6 +10,7 @@ interface DestinationRow {
   location: string | null;
   description: string | null;
   estimated_cost: number | null;
+  cost_rationale: string | null;
   travel_notes: string | null;
   guest_capacity_notes: string | null;
   pros: string | null;
@@ -27,6 +28,7 @@ function mapRow(row: DestinationRow): Destination {
     location: row.location,
     description: row.description,
     estimatedCost: row.estimated_cost,
+    costRationale: row.cost_rationale,
     travelNotes: row.travel_notes,
     guestCapacityNotes: row.guest_capacity_notes,
     pros: row.pros,

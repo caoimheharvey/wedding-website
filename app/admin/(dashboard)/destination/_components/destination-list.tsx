@@ -16,6 +16,7 @@ function CompareTable({ a, b }: { a: Destination; b: Destination }) {
   const rows: { label: string; a: string; b: string }[] = [
     { label: "Location", a: a.location ?? "—", b: b.location ?? "—" },
     { label: "Estimated cost", a: fmtMoney(a.estimatedCost), b: fmtMoney(b.estimatedCost) },
+    { label: "Cost rationale", a: a.costRationale ?? "—", b: b.costRationale ?? "—" },
     { label: "Guest capacity", a: a.guestCapacityNotes ?? "—", b: b.guestCapacityNotes ?? "—" },
     { label: "Travel notes", a: a.travelNotes ?? "—", b: b.travelNotes ?? "—" },
     { label: "Pros", a: a.pros ?? "—", b: b.pros ?? "—" },

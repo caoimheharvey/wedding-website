@@ -4,6 +4,8 @@ export interface Destination {
   location: string | null;
   description: string | null;
   estimatedCost: number | null;
+  /** Assumptions behind the estimated cost (venue tier, season, catering style, etc.). */
+  costRationale: string | null;
   travelNotes: string | null;
   guestCapacityNotes: string | null;
   pros: string | null;

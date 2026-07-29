@@ -29,6 +29,7 @@ function destinationRowFromForm(data: z.infer<typeof destinationFormSchema>) {
     location: data.location || null,
     description: data.description || null,
     estimated_cost: parseOptionalAmount(data.estimatedCost),
+    cost_rationale: data.costRationale || null,
     travel_notes: data.travelNotes || null,
     guest_capacity_notes: data.guestCapacityNotes || null,
     pros: data.pros || null,
@@ -180,18 +181,35 @@ export async function deleteDestinationRequirement(
   return {};
 }
 
-function formValuesFromGenerated(generated: GeneratedDestination) {
+function formValuesFromGenerated(generated: GeneratedDestination, nameOverride?: string) {
   return {
-    name: generated.name,
+    name: nameOverride ?? generated.name,
     location: generated.location ?? undefined,
     description: generated.description ?? undefined,
     estimatedCost: generated.estimatedCost != null ? String(generated.estimatedCost) : undefined,
+    costRationale: generated.costRationale ?? undefined,
     travelNotes: generated.travelNotes ?? undefined,
     guestCapacityNotes: generated.guestCapacityNotes ?? undefined,
     pros: generated.pros ?? undefined,
     cons: generated.cons ?? undefined,
     notes: undefined,
   };
+}
+
+function normalizeDestinationName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+/**
+ * Loose match so re-running research doesn't create duplicate tiles just
+ * because the AI phrased the name slightly differently this time (e.g.
+ * "Bodrum" vs "Bodrum, Turkey" vs "Bodrum / Antalya region").
+ */
+function namesLooselyMatch(a: string, b: string): boolean {
+  const na = normalizeDestinationName(a);
+  const nb = normalizeDestinationName(b);
+  if (!na || !nb) return false;
+  return na === nb || na.includes(nb) || nb.includes(na);
 }
 
 export type GenerateDestinationsState = { message?: string } | undefined;
@@ -227,21 +245,37 @@ export async function generateDestinationsAction(
     };
   }
 
-  const generated = [...result.destinations, ...result.suggestions];
-  if (generated.length === 0) {
+  if (result.destinations.length === 0 && result.suggestions.length === 0) {
     return { message: "The AI didn't return any destinations — try again, or add one manually." };
   }
 
   const existingDestinations = await listDestinations();
-  const existingByName = new Map(
-    existingDestinations.map((destination) => [destination.name.toLowerCase(), destination]),
-  );
 
-  for (const entry of generated) {
-    const parsed = destinationFormSchema.safeParse(formValuesFromGenerated(entry));
+  // Requested candidates may match either what the AI named the result or
+  // what the user originally typed (the AI is asked to reuse the candidate
+  // name, but isn't perfectly reliable about it).
+  const requestedEntries = result.destinations.map((entry, index) => ({
+    entry,
+    candidateHint: candidates[index],
+  }));
+  const suggestionEntries = result.suggestions.map((entry) => ({
+    entry,
+    candidateHint: undefined as string | undefined,
+  }));
+
+  for (const { entry, candidateHint } of [...requestedEntries, ...suggestionEntries]) {
+    const existingMatch = existingDestinations.find(
+      (destination) =>
+        namesLooselyMatch(destination.name, entry.name) ||
+        (candidateHint && namesLooselyMatch(destination.name, candidateHint)),
+    );
+
+    // Keep the existing tile's name on update so re-running research can't
+    // gradually rename it out from under a future match.
+    const parsed = destinationFormSchema.safeParse(
+      formValuesFromGenerated(entry, existingMatch?.name),
+    );
     if (!parsed.success) continue;
-
-    const existingMatch = existingByName.get(entry.name.toLowerCase());
 
     if (isLocalTestMode()) {
       if (existingMatch) {

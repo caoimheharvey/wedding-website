@@ -44,6 +44,14 @@ export function DestinationForm({ destination }: { destination?: Destination }) 
             className="input"
           />
         </Field>
+        <Field label="Cost rationale" error={state?.errors?.costRationale?.[0]}>
+          <input
+            name="costRationale"
+            defaultValue={destination?.costRationale ?? ""}
+            className="input"
+            placeholder="What the estimate assumes, e.g. venue tier, season"
+          />
+        </Field>
         <Field label="Guest capacity" error={state?.errors?.guestCapacityNotes?.[0]}>
           <input
             name="guestCapacityNotes"

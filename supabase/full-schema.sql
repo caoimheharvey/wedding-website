@@ -616,3 +616,7 @@ create table destination_requirements (
 
 alter table destination_requirements enable row level security;
 
+
+-- >>> supabase/migrations/0026_destination_cost_rationale.sql
+alter table destinations add column cost_rationale text;
+

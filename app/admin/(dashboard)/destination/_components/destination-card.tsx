@@ -73,6 +73,9 @@ export function DestinationCard({
         {destination.estimatedCost != null && (
           <div className="font-medium text-ink">€{destination.estimatedCost.toLocaleString()} estimated</div>
         )}
+        {destination.costRationale && (
+          <div className="text-xs text-foreground/50 italic">{destination.costRationale}</div>
+        )}
         {destination.guestCapacityNotes && <div>{destination.guestCapacityNotes}</div>}
         {destination.travelNotes && <div>{destination.travelNotes}</div>}
         {destination.description && <div className="text-foreground/60">{destination.description}</div>}

@@ -16,6 +16,8 @@ export interface GeneratedDestination {
   location: string | null;
   description: string | null;
   estimatedCost: number | null;
+  /** What's behind the estimate — venue tier, season, catering style, etc. */
+  costRationale: string | null;
   guestCapacityNotes: string | null;
   travelNotes: string | null;
   pros: string | null;
@@ -47,6 +49,7 @@ function normalizeDestination(raw: unknown): GeneratedDestination | null {
     location: asNullableString(record.location),
     description: asNullableString(record.description),
     estimatedCost: asNullableNumber(record.estimatedCost),
+    costRationale: asNullableString(record.costRationale),
     guestCapacityNotes: asNullableString(record.guestCapacityNotes),
     travelNotes: asNullableString(record.travelNotes),
     pros: asNullableString(record.pros),
@@ -105,6 +108,9 @@ export async function generateDestinationDetails(
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 8192,
+    // `temperature` is deprecated/rejected for this model (400 error if
+    // set), so consistency across runs relies entirely on the explicit
+    // costing methodology in the prompt below, not a sampling parameter.
     messages: [
       {
         role: "user",
@@ -116,7 +122,11 @@ ${requirementsList}
 Candidate destinations to research:
 ${candidateList}
 
-For each candidate, give a realistic, specific assessment of hosting a wedding there, weighing it against the requirements above — including a rough estimated total cost in EUR. Then suggest up to 3 additional destinations, not already in the candidate list, that would satisfy the requirements well — skip this if nothing strongly fits.
+For each candidate:
+- Use its name exactly as given in the candidate list above for the "name" field — don't rename it, expand it into a region, or add a country suffix. Put the country/region in "location" instead.
+- Estimate cost using this consistent methodology: assume a mid-market (not budget, not luxury) venue and full-service catering for ~100 guests, one full day. Give a single specific number in EUR, not a range. Only go noticeably above or below mid-market if a requirement explicitly calls for "affordable"/"budget" or "luxury"/"high-end". In "costRationale", state the specific assumptions behind that number in 1-2 sentences — venue/catering tier, season assumed, and anything about this destination specifically (e.g. import costs, local labor costs, currency, high/low local prices) that pushed the number up or down from a generic mid-market baseline.
+
+Then suggest up to 3 additional destinations, not already in the candidate list, that would satisfy the requirements well — skip this if nothing strongly fits. For suggestions, pick a concise, commonly-used name for the place (e.g. "Bodrum", not "Bodrum, Turkey" or "the Bodrum peninsula").
 
 Respond with the JSON object below and nothing else — no preamble, no explanation, no markdown code fences, no text after it. Your entire reply must be valid JSON starting with { and ending with }, in exactly this shape:
 {
@@ -126,6 +136,7 @@ Respond with the JSON object below and nothing else — no preamble, no explanat
       "location": "string or null, e.g. \\"Turkey\\"",
       "description": "1-2 sentence description of the vibe and venue style",
       "estimatedCost": number or null,
+      "costRationale": "string or null — the assumptions behind the estimate",
       "guestCapacityNotes": "string or null",
       "travelNotes": "string or null — flight access and transfer times",
       "pros": "string or null — 1-2 sentences, referencing how it meets the requirements",

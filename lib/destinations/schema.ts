@@ -7,6 +7,7 @@ export const destinationFormSchema = z.object({
   // Plain string, not z.coerce.number(): an empty field would coerce to 0
   // (Number("") === 0) instead of staying "no estimate yet" (null).
   estimatedCost: z.string().trim().optional(),
+  costRationale: z.string().trim().optional(),
   travelNotes: z.string().trim().optional(),
   guestCapacityNotes: z.string().trim().optional(),
   pros: z.string().trim().optional(),
