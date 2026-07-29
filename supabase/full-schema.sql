@@ -620,3 +620,27 @@ alter table destination_requirements enable row level security;
 -- >>> supabase/migrations/0026_destination_cost_rationale.sql
 alter table destinations add column cost_rationale text;
 
+
+-- >>> supabase/migrations/0027_destination_shortlist_outreach.sql
+alter table destinations add column is_shortlisted boolean not null default false;
+
+alter table destinations add column outreach_contacted boolean not null default false;
+alter table destinations add column outreach_contacted_date date;
+alter table destinations add column outreach_quotes_received boolean not null default false;
+alter table destinations add column outreach_notes text;
+
+
+-- >>> supabase/migrations/0028_wedding_decisions.sql
+create table wedding_decisions (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  link text,
+  decided_date date,
+  order_index integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table wedding_decisions enable row level security;
+

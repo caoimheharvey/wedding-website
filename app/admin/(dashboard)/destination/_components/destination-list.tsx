@@ -22,6 +22,7 @@ function CompareTable({ a, b }: { a: Destination; b: Destination }) {
     { label: "Pros", a: a.pros ?? "—", b: b.pros ?? "—" },
     { label: "Cons", a: a.cons ?? "—", b: b.cons ?? "—" },
     { label: "Selected", a: fmtBool(a.isSelected), b: fmtBool(b.isSelected) },
+    { label: "Shortlisted", a: fmtBool(a.isShortlisted), b: fmtBool(b.isShortlisted) },
   ];
 
   return (

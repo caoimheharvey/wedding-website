@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { deleteDestination, setDestinationSelected } from "@/lib/destinations/actions";
+import { deleteDestination, setDestinationSelected, setDestinationShortlisted } from "@/lib/destinations/actions";
 import type { Destination } from "@/lib/destinations/types";
+import { OutreachForm } from "./outreach-form";
 
 export function DestinationCard({
   destination,
@@ -21,6 +22,12 @@ export function DestinationCard({
   function handleToggleSelected() {
     startTransition(async () => {
       await setDestinationSelected(destination.id, !destination.isSelected);
+    });
+  }
+
+  function handleToggleShortlisted() {
+    startTransition(async () => {
+      await setDestinationShortlisted(destination.id, !destination.isShortlisted);
     });
   }
 
@@ -44,6 +51,11 @@ export function DestinationCard({
             {destination.isSelected && (
               <span className="inline-flex items-center gap-1 rounded-full bg-olive px-2 py-0.5 text-xs font-medium text-whitewash">
                 ✓ Selected destination
+              </span>
+            )}
+            {destination.isShortlisted && !destination.isSelected && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-aegean px-2 py-0.5 text-xs font-medium text-whitewash">
+                Shortlisted
               </span>
             )}
           </div>
@@ -105,6 +117,16 @@ export function DestinationCard({
           />
           Selected destination
         </label>
+        <label className="flex items-center gap-2 text-sm font-medium text-ink">
+          <input
+            type="checkbox"
+            checked={destination.isShortlisted}
+            onChange={handleToggleShortlisted}
+            disabled={isPending}
+            className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean"
+          />
+          Shortlist
+        </label>
         <label
           className={`flex items-center gap-2 text-sm ${compareDisabled ? "text-foreground/30" : "text-ink"}`}
         >
@@ -118,6 +140,8 @@ export function DestinationCard({
           Compare
         </label>
       </div>
+
+      {destination.isShortlisted && <OutreachForm destination={destination} />}
     </div>
   );
 }

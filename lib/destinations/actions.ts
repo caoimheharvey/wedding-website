@@ -13,10 +13,13 @@ import {
   mockInsertDestination,
   mockInsertDestinationRequirement,
   mockSetDestinationSelected,
+  mockSetDestinationShortlisted,
   mockUpdateDestination,
+  mockUpdateDestinationOutreach,
 } from "./mock-store";
 import { listDestinationRequirements, listDestinations } from "./queries";
-import { destinationFormSchema, parseOptionalAmount } from "./schema";
+import { destinationFormSchema, outreachFormSchema, parseOptionalAmount } from "./schema";
+import type { Destination } from "./types";
 
 export type DestinationActionState =
   | { errors: Record<string, string[] | undefined>; message?: string }
@@ -128,6 +131,60 @@ export async function setDestinationSelected(
   return {};
 }
 
+/** Not exclusive — unlike setDestinationSelected, any number can be shortlisted at once. */
+export async function setDestinationShortlisted(
+  destinationId: string,
+  shortlisted: boolean,
+): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  if (isLocalTestMode()) {
+    mockSetDestinationShortlisted(destinationId, shortlisted);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("destinations")
+      .update({ is_shortlisted: shortlisted })
+      .eq("id", destinationId);
+    if (error) return { message: `Could not update shortlist: ${error.message}` };
+  }
+
+  revalidatePath("/admin/destination");
+  return {};
+}
+
+export type OutreachActionState = { message?: string } | undefined;
+
+export async function updateDestinationOutreach(
+  destinationId: string,
+  _prevState: OutreachActionState,
+  formData: FormData,
+): Promise<OutreachActionState> {
+  await requireAdmin();
+
+  const parsed = outreachFormSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { message: "Could not save outreach status." };
+
+  if (isLocalTestMode()) {
+    mockUpdateDestinationOutreach(destinationId, parsed.data);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("destinations")
+      .update({
+        outreach_contacted: parsed.data.contacted,
+        outreach_contacted_date: parsed.data.contactedDate || null,
+        outreach_quotes_received: parsed.data.quotesReceived,
+        outreach_notes: parsed.data.notes || null,
+      })
+      .eq("id", destinationId);
+    if (error) return { message: `Could not save outreach status: ${error.message}` };
+  }
+
+  revalidatePath("/admin/destination");
+  return { message: "Outreach status updated." };
+}
+
 export type RequirementActionState = { message?: string } | undefined;
 
 export async function createDestinationRequirement(
@@ -214,6 +271,56 @@ function namesLooselyMatch(a: string, b: string): boolean {
 
 export type GenerateDestinationsState = { message?: string } | undefined;
 
+interface UpsertOutcome {
+  matched: boolean;
+  error?: string;
+}
+
+/**
+ * Applies one AI-generated entry to an existing destination (matched by
+ * name) or, when `allowCreate` is true and there's no match, creates a new
+ * tile. Keeps the existing tile's name on update so re-running research
+ * can't gradually rename it out from under a future match.
+ */
+async function upsertGeneratedDestination(
+  entry: GeneratedDestination,
+  existingDestinations: Destination[],
+  candidateHint: string | undefined,
+  allowCreate: boolean,
+): Promise<UpsertOutcome> {
+  const existingMatch = existingDestinations.find(
+    (destination) =>
+      namesLooselyMatch(destination.name, entry.name) ||
+      (candidateHint && namesLooselyMatch(destination.name, candidateHint)),
+  );
+  if (!existingMatch && !allowCreate) return { matched: false };
+
+  const parsed = destinationFormSchema.safeParse(formValuesFromGenerated(entry, existingMatch?.name));
+  if (!parsed.success) return { matched: Boolean(existingMatch) };
+
+  if (isLocalTestMode()) {
+    if (existingMatch) {
+      mockUpdateDestination(existingMatch.id, parsed.data);
+    } else {
+      mockInsertDestination(parsed.data);
+    }
+  } else {
+    const supabase = getSupabaseAdmin();
+    if (existingMatch) {
+      const { error } = await supabase
+        .from("destinations")
+        .update(destinationRowFromForm(parsed.data))
+        .eq("id", existingMatch.id);
+      if (error) return { matched: true, error: `Could not save ${entry.name}: ${error.message}` };
+    } else {
+      const { error } = await supabase.from("destinations").insert(destinationRowFromForm(parsed.data));
+      if (error) return { matched: false, error: `Could not save ${entry.name}: ${error.message}` };
+    }
+  }
+
+  return { matched: Boolean(existingMatch) };
+}
+
 /**
  * Researches candidate destinations with AI, weighed against the couple's
  * requirements checklist, and creates/updates destination rows for each
@@ -264,40 +371,8 @@ export async function generateDestinationsAction(
   }));
 
   for (const { entry, candidateHint } of [...requestedEntries, ...suggestionEntries]) {
-    const existingMatch = existingDestinations.find(
-      (destination) =>
-        namesLooselyMatch(destination.name, entry.name) ||
-        (candidateHint && namesLooselyMatch(destination.name, candidateHint)),
-    );
-
-    // Keep the existing tile's name on update so re-running research can't
-    // gradually rename it out from under a future match.
-    const parsed = destinationFormSchema.safeParse(
-      formValuesFromGenerated(entry, existingMatch?.name),
-    );
-    if (!parsed.success) continue;
-
-    if (isLocalTestMode()) {
-      if (existingMatch) {
-        mockUpdateDestination(existingMatch.id, parsed.data);
-      } else {
-        mockInsertDestination(parsed.data);
-      }
-    } else {
-      const supabase = getSupabaseAdmin();
-      if (existingMatch) {
-        const { error } = await supabase
-          .from("destinations")
-          .update(destinationRowFromForm(parsed.data))
-          .eq("id", existingMatch.id);
-        if (error) return { message: `Could not save ${entry.name}: ${error.message}` };
-      } else {
-        const { error } = await supabase
-          .from("destinations")
-          .insert(destinationRowFromForm(parsed.data));
-        if (error) return { message: `Could not save ${entry.name}: ${error.message}` };
-      }
-    }
+    const outcome = await upsertGeneratedDestination(entry, existingDestinations, candidateHint, true);
+    if (outcome.error) return { message: outcome.error };
   }
 
   revalidatePath("/admin/destination");
@@ -308,4 +383,48 @@ export async function generateDestinationsAction(
   return {
     message: `Researched ${result.destinations.length} destination(s)${suggestionNote}.`,
   };
+}
+
+/**
+ * Re-researches every existing destination with AI and updates each tile in
+ * place — never creates new tiles and ignores any additional suggestions,
+ * unlike generateDestinationsAction.
+ */
+export async function updateDestinationsWithAiAction(
+  _prevState: GenerateDestinationsState,
+  _formData: FormData,
+): Promise<GenerateDestinationsState> {
+  await requireAdmin();
+
+  const existingDestinations = await listDestinations();
+  if (existingDestinations.length === 0) {
+    return { message: "No destinations to update yet — research some with AI first." };
+  }
+
+  const requirements = (await listDestinationRequirements()).map((item) => item.requirement);
+  const candidates = existingDestinations.map((destination) => destination.name);
+
+  let result;
+  try {
+    result = await generateDestinationDetails(candidates, requirements);
+  } catch (error) {
+    return {
+      message: error instanceof Error ? error.message : "Could not update destinations.",
+    };
+  }
+
+  let updatedCount = 0;
+  for (let i = 0; i < result.destinations.length; i++) {
+    const outcome = await upsertGeneratedDestination(
+      result.destinations[i],
+      existingDestinations,
+      candidates[i],
+      false,
+    );
+    if (outcome.error) return { message: outcome.error };
+    if (outcome.matched) updatedCount += 1;
+  }
+
+  revalidatePath("/admin/destination");
+  return { message: `Updated ${updatedCount} of ${existingDestinations.length} destination(s).` };
 }

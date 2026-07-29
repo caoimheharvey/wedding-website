@@ -1,7 +1,7 @@
 import "server-only";
 import type * as z from "zod";
 import type { Destination, DestinationRequirement } from "./types";
-import { parseOptionalAmount, type destinationFormSchema } from "./schema";
+import { parseOptionalAmount, type destinationFormSchema, type outreachFormSchema } from "./schema";
 
 /**
  * In-memory destinations used only when LOCAL_TEST_BYPASS_AUTH is set.
@@ -23,6 +23,11 @@ function makeDestination(overrides: Partial<Destination> & Pick<Destination, "na
     cons: null,
     notes: null,
     isSelected: false,
+    isShortlisted: false,
+    outreachContacted: false,
+    outreachContactedDate: null,
+    outreachQuotesReceived: false,
+    outreachNotes: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -127,6 +132,33 @@ export function mockSetDestinationSelected(id: string, selected: boolean): void 
     }
     return destination;
   });
+}
+
+/** Shortlisting is not exclusive — unlike isSelected, multiple can be true. */
+export function mockSetDestinationShortlisted(id: string, shortlisted: boolean): void {
+  destinations = destinations.map((destination) =>
+    destination.id === id
+      ? { ...destination, isShortlisted: shortlisted, updatedAt: new Date().toISOString() }
+      : destination,
+  );
+}
+
+export function mockUpdateDestinationOutreach(
+  id: string,
+  data: z.infer<typeof outreachFormSchema>,
+): void {
+  destinations = destinations.map((destination) =>
+    destination.id === id
+      ? {
+          ...destination,
+          outreachContacted: data.contacted,
+          outreachContactedDate: data.contactedDate || null,
+          outreachQuotesReceived: data.quotesReceived,
+          outreachNotes: data.notes || null,
+          updatedAt: new Date().toISOString(),
+        }
+      : destination,
+  );
 }
 
 let destinationRequirements: DestinationRequirement[] = [];

@@ -3,6 +3,7 @@ import { listCategories } from "@/lib/categories/queries";
 import { formatCurrency } from "@/lib/budget/format";
 import { TotalBudgetEditor } from "./_components/total-budget-editor";
 import { BudgetProgressBar } from "./_components/budget-progress-bar";
+import { CategoryStackedBar } from "./_components/category-stacked-bar";
 import { CategorySummary } from "./_components/category-summary";
 import { AddBudgetItemSection } from "./_components/add-budget-item-section";
 import { BudgetItemRow } from "./_components/budget-item-row";
@@ -29,9 +30,19 @@ export default async function BudgetPage() {
           availableBudget={summary.availableBudget}
           totalActual={summary.totalActual}
         />
+        <CategoryStackedBar
+          categories={summary.categories}
+          valueKey="actual"
+          total={summary.availableBudget ?? summary.totalActual}
+          emptyLabel="No spending logged yet."
+        />
       </div>
 
-      <CategorySummary categories={summary.categories} />
+      <CategorySummary
+        categories={summary.categories}
+        availableBudget={summary.availableBudget}
+        totalBudgeted={summary.totalBudgeted}
+      />
 
       <div className="rounded-lg border border-border bg-surface p-4">
         <h2 className="mb-1 font-display text-lg text-ink">Family contributions</h2>

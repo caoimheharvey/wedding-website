@@ -17,6 +17,11 @@ interface DestinationRow {
   cons: string | null;
   notes: string | null;
   is_selected: boolean;
+  is_shortlisted: boolean;
+  outreach_contacted: boolean;
+  outreach_contacted_date: string | null;
+  outreach_quotes_received: boolean;
+  outreach_notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +40,11 @@ function mapRow(row: DestinationRow): Destination {
     cons: row.cons,
     notes: row.notes,
     isSelected: row.is_selected,
+    isShortlisted: row.is_shortlisted,
+    outreachContacted: row.outreach_contacted,
+    outreachContactedDate: row.outreach_contacted_date,
+    outreachQuotesReceived: row.outreach_quotes_received,
+    outreachNotes: row.outreach_notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

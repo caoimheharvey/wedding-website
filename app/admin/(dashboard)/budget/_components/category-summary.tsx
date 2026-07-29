@@ -2,8 +2,19 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/budget/format";
 import type { BudgetCategorySummary } from "@/lib/budget/types";
 import { AddCategorySection } from "./add-category-section";
+import { CategoryStackedBar } from "./category-stacked-bar";
 
-export function CategorySummary({ categories }: { categories: BudgetCategorySummary[] }) {
+export function CategorySummary({
+  categories,
+  availableBudget,
+  totalBudgeted,
+}: {
+  categories: BudgetCategorySummary[];
+  availableBudget: number | null;
+  totalBudgeted: number;
+}) {
+  const remainingToAllocate = availableBudget !== null ? availableBudget - totalBudgeted : null;
+
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
       <div className="mb-1 flex items-center justify-between">
@@ -13,6 +24,30 @@ export function CategorySummary({ categories }: { categories: BudgetCategorySumm
       <p className="mb-2 text-xs text-foreground/50">
         Click a category for the vendors you&apos;re considering (or booked) for it.
       </p>
+
+      {remainingToAllocate !== null && (
+        <p className="mb-3 text-sm">
+          {remainingToAllocate < 0 ? (
+            <span className="font-medium text-terracotta">
+              {formatCurrency(Math.abs(remainingToAllocate))} allocated over your available budget
+            </span>
+          ) : (
+            <span className="font-medium text-ink">
+              {formatCurrency(remainingToAllocate)}{" "}
+              <span className="font-normal text-foreground/60">left to allocate</span>
+            </span>
+          )}
+        </p>
+      )}
+      <div className="mb-3">
+        <CategoryStackedBar
+          categories={categories}
+          valueKey="budgeted"
+          total={availableBudget ?? totalBudgeted}
+          emptyLabel="No budget allocated to a category yet."
+        />
+      </div>
+
       {categories.length === 0 && (
         <p className="text-sm text-foreground/60">No categories yet — add one above.</p>
       )}

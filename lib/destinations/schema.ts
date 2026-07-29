@@ -21,3 +21,10 @@ export function parseOptionalAmount(value: string | undefined): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
+
+export const outreachFormSchema = z.object({
+  contacted: z.coerce.boolean().default(false),
+  contactedDate: z.string().trim().optional(),
+  quotesReceived: z.coerce.boolean().default(false),
+  notes: z.string().trim().optional(),
+});

@@ -12,6 +12,12 @@ export interface Destination {
   cons: string | null;
   notes: string | null;
   isSelected: boolean;
+  /** Narrowed-down candidate worth contacting vendors/planners about — not exclusive, unlike isSelected. */
+  isShortlisted: boolean;
+  outreachContacted: boolean;
+  outreachContactedDate: string | null;
+  outreachQuotesReceived: boolean;
+  outreachNotes: string | null;
   createdAt: string;
   updatedAt: string;
 }
