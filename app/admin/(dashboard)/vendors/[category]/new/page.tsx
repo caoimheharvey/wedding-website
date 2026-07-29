@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listCategories } from "@/lib/categories/queries";
+import { listDestinations } from "@/lib/destinations/queries";
 import { VendorForm } from "../_components/vendor-form";
 
 export default async function NewVendorPage({
@@ -9,9 +10,10 @@ export default async function NewVendorPage({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
-  const categories = await listCategories();
+  const [categories, destinations] = await Promise.all([listCategories(), listDestinations()]);
   const categoryLabel = categories.find((c) => c.id === category)?.label;
   if (!categoryLabel) notFound();
+  const selectedDestinationId = destinations.find((d) => d.isSelected)?.id ?? null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,7 +25,7 @@ export default async function NewVendorPage({
           Add a {categoryLabel.toLowerCase()} vendor
         </h1>
       </div>
-      <VendorForm category={category} />
+      <VendorForm category={category} destinations={destinations} selectedDestinationId={selectedDestinationId} />
     </div>
   );
 }

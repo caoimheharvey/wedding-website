@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   generateDestinationsAction,
   updateDestinationsWithAiAction,
@@ -27,19 +27,40 @@ function UpdateExistingWithAiForm() {
 }
 
 export function GenerateDestinationsForm() {
+  const [open, setOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(generateDestinationsAction, initialState);
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="self-start rounded-full border border-aegean px-4 py-2 text-sm font-medium text-aegean transition hover:bg-aegean/10"
+      >
+        Research destinations with AI
+      </button>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-aegean/30 bg-aegean-light/5 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="font-display text-lg text-ink">Research destinations with AI</h2>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-xs text-foreground/60 hover:underline"
+        >
+          Close
+        </button>
+      </div>
+
       <form action={formAction} className="flex flex-col gap-3">
-        <div>
-          <h2 className="font-display text-lg text-ink">Research destinations with AI</h2>
-          <p className="text-xs text-foreground/60">
-            List places you&apos;re considering (one per line, or comma-separated) — Claude will fill
-            in the tiles below based on your checklist above, and suggest a few other places worth a
-            look.
-          </p>
-        </div>
+        <p className="text-xs text-foreground/60">
+          List places you&apos;re considering (one per line, or comma-separated) — Claude will fill
+          in the tiles below based on your checklist above, and suggest a few other places worth a
+          look.
+        </p>
         <textarea
           name="candidates"
           required

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Destination } from "@/lib/destinations/types";
+import type { Vendor } from "@/lib/vendors/types";
 import { DestinationCard } from "./destination-card";
 
 function fmtMoney(amount: number | null): string {
@@ -52,7 +53,13 @@ function CompareTable({ a, b }: { a: Destination; b: Destination }) {
   );
 }
 
-export function DestinationList({ destinations }: { destinations: Destination[] }) {
+export function DestinationList({
+  destinations,
+  vendors,
+}: {
+  destinations: Destination[];
+  vendors: Vendor[];
+}) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
   function toggleCompare(destinationId: string) {
@@ -67,8 +74,20 @@ export function DestinationList({ destinations }: { destinations: Destination[] 
     .map((id) => destinations.find((destination) => destination.id === id))
     .filter((destination): destination is Destination => Boolean(destination));
 
+  // Shortlisted destinations already have their own section above — don't
+  // show them a second time here.
+  const visibleDestinations = destinations.filter((destination) => !destination.isShortlisted);
+
   if (destinations.length === 0) {
     return <p className="text-sm text-foreground/60">No destinations yet. Add one above.</p>;
+  }
+
+  if (visibleDestinations.length === 0) {
+    return (
+      <p className="text-sm text-foreground/60">
+        All destinations are shortlisted — see the Shortlisted section above.
+      </p>
+    );
   }
 
   return (
@@ -78,13 +97,14 @@ export function DestinationList({ destinations }: { destinations: Destination[] 
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {destinations.map((destination) => (
+        {visibleDestinations.map((destination) => (
           <DestinationCard
             key={destination.id}
             destination={destination}
             isComparing={compareIds.includes(destination.id)}
             compareDisabled={compareIds.length >= 2 && !compareIds.includes(destination.id)}
             onToggleCompare={() => toggleCompare(destination.id)}
+            vendors={vendors}
           />
         ))}
       </div>

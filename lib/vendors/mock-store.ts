@@ -20,6 +20,7 @@ function makeVendor(overrides: Partial<Vendor> & Pick<Vendor, "category" | "name
     website: null,
     priceQuote: null,
     notes: null,
+    destinationId: null,
     isSelected: false,
     depositPaid: false,
     depositAmount: null,
@@ -121,6 +122,7 @@ export function mockInsertVendor(data: z.infer<typeof vendorFormSchema>): Vendor
     website: data.website || null,
     priceQuote: parseOptionalAmount(data.priceQuote),
     notes: data.notes || null,
+    destinationId: data.destinationId || null,
   });
   vendors.push(vendor);
   return vendor;
@@ -139,6 +141,7 @@ export function mockUpdateVendor(id: string, data: z.infer<typeof vendorFormSche
           website: data.website || null,
           priceQuote: parseOptionalAmount(data.priceQuote),
           notes: data.notes || null,
+          destinationId: data.destinationId || null,
           updatedAt: new Date().toISOString(),
         }
       : vendor,

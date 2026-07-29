@@ -3,23 +3,35 @@
 import { useActionState } from "react";
 import { createVendor, updateVendor, type VendorActionState } from "@/lib/vendors/actions";
 import type { Vendor } from "@/lib/vendors/types";
+import type { Destination } from "@/lib/destinations/types";
 
 const initialState: VendorActionState = undefined;
 
 export function VendorForm({
   category,
   vendor,
+  destinations,
+  selectedDestinationId,
 }: {
   category: string;
   vendor?: Vendor;
+  destinations: Destination[];
+  selectedDestinationId: string | null;
 }) {
   const action = vendor
     ? updateVendor.bind(null, vendor.id, category)
     : createVendor.bind(null, category);
   const [state, formAction, isPending] = useActionState(action, initialState);
 
+  // Once a destination is selected, new vendors are assumed to be for it —
+  // no need to ask. Existing vendors keep whatever they were already tied
+  // to (or left unset) rather than being silently reassigned.
+  const skipDestinationPicker = selectedDestinationId !== null;
+  const autoDestinationId = vendor ? (vendor.destinationId ?? "") : selectedDestinationId;
+
   return (
     <form action={formAction} className="flex flex-col gap-5">
+      {skipDestinationPicker && <input type="hidden" name="destinationId" value={autoDestinationId ?? ""} />}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Vendor name" error={state?.errors?.name?.[0]}>
           <input name="name" defaultValue={vendor?.name} required className="input" />
@@ -52,6 +64,18 @@ export function VendorForm({
             className="input"
           />
         </Field>
+        {!skipDestinationPicker && (
+          <Field label="Destination (optional)" error={state?.errors?.destinationId?.[0]}>
+            <select name="destinationId" defaultValue={vendor?.destinationId ?? ""} className="input">
+              <option value="">Not linked to a destination</option>
+              {destinations.map((destination) => (
+                <option key={destination.id} value={destination.id}>
+                  {destination.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
       </div>
 
       <Field label="Notes" error={state?.errors?.notes?.[0]}>

@@ -13,6 +13,8 @@ export interface Vendor {
   website: string | null;
   priceQuote: number | null;
   notes: string | null;
+  /** Which destination this vendor is for — null means not tied to one yet. */
+  destinationId: string | null;
   isSelected: boolean;
   depositPaid: boolean;
   depositAmount: number | null;

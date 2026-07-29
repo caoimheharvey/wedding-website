@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { listDestinationRequirements, listDestinations } from "@/lib/destinations/queries";
+import { listVendors } from "@/lib/vendors/queries";
 import { DestinationList } from "./_components/destination-list";
 import { DestinationRequirements } from "./_components/destination-requirements";
 import { GenerateDestinationsForm } from "./_components/generate-destinations-form";
+import { ShortlistedDestinations } from "./_components/shortlisted-destinations";
 
 export default async function DestinationPage() {
-  const [destinations, requirements] = await Promise.all([
+  const [destinations, requirements, vendors] = await Promise.all([
     listDestinations(),
     listDestinationRequirements(),
+    listVendors(),
   ]);
 
   return (
@@ -29,8 +32,9 @@ export default async function DestinationPage() {
 
       <DestinationRequirements requirements={requirements} />
       <GenerateDestinationsForm />
+      <ShortlistedDestinations destinations={destinations} vendors={vendors} />
 
-      <DestinationList destinations={destinations} />
+      <DestinationList destinations={destinations} vendors={vendors} />
     </div>
   );
 }

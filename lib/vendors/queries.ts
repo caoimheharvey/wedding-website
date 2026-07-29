@@ -14,6 +14,7 @@ interface VendorRow {
   website: string | null;
   price_quote: number | null;
   notes: string | null;
+  destination_id: string | null;
   is_selected: boolean;
   deposit_paid: boolean;
   deposit_amount: number | null;
@@ -36,6 +37,7 @@ function mapRow(row: VendorRow): Vendor {
     website: row.website,
     priceQuote: row.price_quote,
     notes: row.notes,
+    destinationId: row.destination_id,
     isSelected: row.is_selected,
     depositPaid: row.deposit_paid,
     depositAmount: row.deposit_amount,

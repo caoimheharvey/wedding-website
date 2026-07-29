@@ -4,18 +4,24 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { deleteDestination, setDestinationSelected, setDestinationShortlisted } from "@/lib/destinations/actions";
 import type { Destination } from "@/lib/destinations/types";
+import type { Vendor } from "@/lib/vendors/types";
+import { DestinationVendors } from "./destination-vendors";
 import { OutreachForm } from "./outreach-form";
 
 export function DestinationCard({
   destination,
-  isComparing,
+  isComparing = false,
   onToggleCompare,
-  compareDisabled,
+  compareDisabled = false,
+  vendors = [],
 }: {
   destination: Destination;
-  isComparing: boolean;
-  onToggleCompare: () => void;
-  compareDisabled: boolean;
+  isComparing?: boolean;
+  /** Compare checkbox is hidden entirely when this isn't provided. */
+  onToggleCompare?: () => void;
+  compareDisabled?: boolean;
+  /** All vendors — filtered to this destination internally for the outreach detail. */
+  vendors?: Vendor[];
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -127,21 +133,35 @@ export function DestinationCard({
           />
           Shortlist
         </label>
-        <label
-          className={`flex items-center gap-2 text-sm ${compareDisabled ? "text-foreground/30" : "text-ink"}`}
-        >
-          <input
-            type="checkbox"
-            checked={isComparing}
-            onChange={onToggleCompare}
-            disabled={compareDisabled}
-            className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean disabled:opacity-50"
-          />
-          Compare
-        </label>
+        {onToggleCompare && (
+          <label
+            className={`flex items-center gap-2 text-sm ${compareDisabled ? "text-foreground/30" : "text-ink"}`}
+          >
+            <input
+              type="checkbox"
+              checked={isComparing}
+              onChange={onToggleCompare}
+              disabled={compareDisabled}
+              className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean disabled:opacity-50"
+            />
+            Compare
+          </label>
+        )}
       </div>
 
-      {destination.isShortlisted && <OutreachForm destination={destination} />}
+      {destination.isShortlisted && (
+        <div className="flex flex-col gap-3 border-t border-border pt-3">
+          <div>
+            <p className="mb-1.5 text-xs font-medium tracking-wide text-foreground/50 uppercase">
+              Linked vendors
+            </p>
+            <DestinationVendors
+              vendors={vendors.filter((vendor) => vendor.destinationId === destination.id)}
+            />
+          </div>
+          <OutreachForm destination={destination} />
+        </div>
+      )}
     </div>
   );
 }

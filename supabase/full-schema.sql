@@ -644,3 +644,7 @@ create table wedding_decisions (
 
 alter table wedding_decisions enable row level security;
 
+
+-- >>> supabase/migrations/0029_vendor_destination_link.sql
+alter table vendors add column destination_id uuid references destinations(id) on delete set null;
+

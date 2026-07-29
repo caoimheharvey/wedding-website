@@ -32,6 +32,7 @@ function vendorRowFromForm(data: z.infer<typeof vendorFormSchema>) {
     website: data.website || null,
     price_quote: parseOptionalAmount(data.priceQuote),
     notes: data.notes || null,
+    destination_id: data.destinationId || null,
   };
 }
 

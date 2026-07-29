@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Vendor } from "@/lib/vendors/types";
+import type { Destination } from "@/lib/destinations/types";
 import { getBudgetFit } from "@/lib/vendors/budget-fit";
 import { VendorCard } from "./vendor-card";
 
@@ -73,10 +74,14 @@ export function VendorList({
   vendors,
   category,
   categoryBudgeted,
+  destinations,
+  selectedDestination,
 }: {
   vendors: Vendor[];
   category: string;
   categoryBudgeted: number;
+  destinations: Destination[];
+  selectedDestination: Destination | null;
 }) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
@@ -112,6 +117,12 @@ export function VendorList({
             isComparing={compareIds.includes(vendor.id)}
             compareDisabled={compareIds.length >= 2 && !compareIds.includes(vendor.id)}
             onToggleCompare={() => toggleCompare(vendor.id)}
+            selectedDestination={selectedDestination}
+            vendorDestinationName={
+              vendor.destinationId
+                ? (destinations.find((d) => d.id === vendor.destinationId)?.name ?? null)
+                : null
+            }
           />
         ))}
       </div>

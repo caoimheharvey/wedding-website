@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { deleteVendor, setVendorSelected } from "@/lib/vendors/actions";
 import { getBudgetFit } from "@/lib/vendors/budget-fit";
 import type { Vendor } from "@/lib/vendors/types";
+import type { Destination } from "@/lib/destinations/types";
 import { BookingStatusForm } from "./booking-status-form";
 
 export function VendorCard({
@@ -14,6 +15,8 @@ export function VendorCard({
   isComparing,
   onToggleCompare,
   compareDisabled,
+  selectedDestination,
+  vendorDestinationName,
 }: {
   vendor: Vendor;
   category: string;
@@ -21,9 +24,15 @@ export function VendorCard({
   isComparing: boolean;
   onToggleCompare: () => void;
   compareDisabled: boolean;
+  /** The destination that's been chosen, if any — used to grey out vendors tied elsewhere. */
+  selectedDestination?: Destination | null;
+  vendorDestinationName?: string | null;
 }) {
   const budgetFit = getBudgetFit(vendor.priceQuote, categoryBudgeted);
   const [isPending, startTransition] = useTransition();
+  const isFromOtherDestination = Boolean(
+    selectedDestination && vendor.destinationId && vendor.destinationId !== selectedDestination.id,
+  );
 
   function handleToggleSelected() {
     startTransition(async () => {
@@ -42,7 +51,7 @@ export function VendorCard({
     <div
       className={`flex flex-col gap-3 rounded-lg border p-4 ${
         vendor.isSelected ? "border-olive bg-olive/5" : "border-border bg-surface"
-      }`}
+      } ${isFromOtherDestination ? "opacity-50 grayscale" : ""}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -51,6 +60,11 @@ export function VendorCard({
             {vendor.isSelected && (
               <span className="inline-flex items-center gap-1 rounded-full bg-olive px-2 py-0.5 text-xs font-medium text-whitewash">
                 ✓ Selected vendor
+              </span>
+            )}
+            {isFromOtherDestination && vendorDestinationName && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-sand px-2 py-0.5 text-xs font-medium text-foreground/60">
+                For {vendorDestinationName}
               </span>
             )}
           </div>

@@ -12,6 +12,7 @@ export const vendorFormSchema = z.object({
   // parseOptionalAmount below handles the conversion explicitly instead.
   priceQuote: z.string().trim().optional(),
   notes: z.string().trim().optional(),
+  destinationId: z.union([z.uuid(), z.literal("")]).optional(),
 });
 
 export const bookingStatusFormSchema = z.object({

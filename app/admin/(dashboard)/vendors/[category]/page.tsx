@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listVendorsByCategory } from "@/lib/vendors/queries";
 import { listCategories } from "@/lib/categories/queries";
+import { listDestinations } from "@/lib/destinations/queries";
 import { getCategoryBudgetSummary } from "@/lib/budget/queries";
 import { formatCurrency } from "@/lib/budget/format";
 import { VendorList } from "./_components/vendor-list";
@@ -13,13 +14,15 @@ export default async function VendorCategoryPage({
 }) {
   const { category } = await params;
 
-  const [vendors, budget, categories] = await Promise.all([
+  const [vendors, budget, categories, destinations] = await Promise.all([
     listVendorsByCategory(category),
     getCategoryBudgetSummary(category),
     listCategories(),
+    listDestinations(),
   ]);
   const categoryLabel = categories.find((c) => c.id === category)?.label;
   if (!categoryLabel) notFound();
+  const selectedDestination = destinations.find((d) => d.isSelected) ?? null;
 
   const overBudget = budget.actual > budget.budgeted;
   const hasBudget = budget.budgeted > 0 || budget.actual > 0;
@@ -74,7 +77,13 @@ export default async function VendorCategoryPage({
         </p>
       )}
 
-      <VendorList vendors={vendors} category={category} categoryBudgeted={budget.budgeted} />
+      <VendorList
+        vendors={vendors}
+        category={category}
+        categoryBudgeted={budget.budgeted}
+        destinations={destinations}
+        selectedDestination={selectedDestination}
+      />
     </div>
   );
 }
