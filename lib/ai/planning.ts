@@ -50,7 +50,7 @@ ${description?.trim() ? `Task notes: ${description.trim()}` : ""}`,
     ],
   });
 
-  const block = message.content[0];
+  const block = message.content.find((entry) => entry.type === "text");
   const text = block?.type === "text" ? block.text.trim() : "";
   return parsePhaseId(text) ?? "details";
 }

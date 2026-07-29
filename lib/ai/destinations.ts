@@ -54,12 +54,20 @@ function normalizeDestination(raw: unknown): GeneratedDestination | null {
   };
 }
 
+/**
+ * Pulls out the {...} object from the response text, tolerating any
+ * preamble/trailing commentary or markdown fencing the model adds despite
+ * being asked not to.
+ */
+function extractJsonObject(text: string): string {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end < start) return text;
+  return text.slice(start, end + 1);
+}
+
 function parseGenerateResult(text: string): GenerateDestinationsResult {
-  const cleaned = text
-    .trim()
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/```\s*$/i, "")
-    .trim();
+  const cleaned = extractJsonObject(text.trim());
 
   let parsed: unknown;
   try {
@@ -96,7 +104,7 @@ export async function generateDestinationDetails(
   const client = getClient();
   const message = await client.messages.create({
     model: MODEL,
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [
       {
         role: "user",
@@ -110,7 +118,7 @@ ${candidateList}
 
 For each candidate, give a realistic, specific assessment of hosting a wedding there, weighing it against the requirements above — including a rough estimated total cost in EUR. Then suggest up to 3 additional destinations, not already in the candidate list, that would satisfy the requirements well — skip this if nothing strongly fits.
 
-Reply with JSON only, no markdown code fences, in exactly this shape:
+Respond with the JSON object below and nothing else — no preamble, no explanation, no markdown code fences, no text after it. Your entire reply must be valid JSON starting with { and ending with }, in exactly this shape:
 {
   "destinations": [
     {
@@ -130,7 +138,7 @@ Reply with JSON only, no markdown code fences, in exactly this shape:
     ],
   });
 
-  const block = message.content[0];
+  const block = message.content.find((entry) => entry.type === "text");
   const text = block?.type === "text" ? block.text : "";
   return parseGenerateResult(text);
 }

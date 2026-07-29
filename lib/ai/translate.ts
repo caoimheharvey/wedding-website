@@ -18,7 +18,7 @@ async function complete(prompt: string): Promise<string> {
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
   });
-  const block = message.content[0];
+  const block = message.content.find((entry) => entry.type === "text");
   return block?.type === "text" ? block.text.trim() : "";
 }
 
