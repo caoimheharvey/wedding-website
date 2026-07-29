@@ -1,8 +1,8 @@
 import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
-import { mockGetDestinationById, mockListDestinations } from "./mock-store";
-import type { Destination } from "./types";
+import { mockGetDestinationById, mockListDestinationRequirements, mockListDestinations } from "./mock-store";
+import type { Destination, DestinationRequirement } from "./types";
 
 interface DestinationRow {
   id: string;
@@ -63,4 +63,35 @@ export async function getDestinationById(destinationId: string): Promise<Destina
 
   if (error) throw new Error(`Failed to load destination: ${error.message}`);
   return data ? mapRow(data as DestinationRow) : null;
+}
+
+interface DestinationRequirementRow {
+  id: string;
+  requirement: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapRequirementRow(row: DestinationRequirementRow): DestinationRequirement {
+  return {
+    id: row.id,
+    requirement: row.requirement,
+    orderIndex: row.order_index,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function listDestinationRequirements(): Promise<DestinationRequirement[]> {
+  if (isLocalTestMode()) return mockListDestinationRequirements();
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("destination_requirements")
+    .select("*")
+    .order("order_index", { ascending: true });
+
+  if (error) throw new Error(`Failed to load destination requirements: ${error.message}`);
+  return (data as DestinationRequirementRow[]).map(mapRequirementRow);
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import type * as z from "zod";
-import type { Destination } from "./types";
+import type { Destination, DestinationRequirement } from "./types";
 import { parseOptionalAmount, type destinationFormSchema } from "./schema";
 
 /**
@@ -124,4 +124,29 @@ export function mockSetDestinationSelected(id: string, selected: boolean): void 
     }
     return destination;
   });
+}
+
+let destinationRequirements: DestinationRequirement[] = [];
+
+export function mockListDestinationRequirements(): DestinationRequirement[] {
+  return [...destinationRequirements].sort((a, b) => a.orderIndex - b.orderIndex);
+}
+
+export function mockInsertDestinationRequirement(requirement: string): DestinationRequirement {
+  const now = new Date().toISOString();
+  const item: DestinationRequirement = {
+    id: crypto.randomUUID(),
+    requirement,
+    orderIndex: destinationRequirements.length + 1,
+    createdAt: now,
+    updatedAt: now,
+  };
+  destinationRequirements.push(item);
+  return item;
+}
+
+export function mockDeleteDestinationRequirement(id: string): boolean {
+  const before = destinationRequirements.length;
+  destinationRequirements = destinationRequirements.filter((item) => item.id !== id);
+  return destinationRequirements.length < before;
 }

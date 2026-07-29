@@ -13,3 +13,12 @@ export interface Destination {
   createdAt: string;
   updatedAt: string;
 }
+
+/** One item in the couple's checklist of what they want from a destination. */
+export interface DestinationRequirement {
+  id: string;
+  requirement: string;
+  orderIndex: number;
+  createdAt: string;
+  updatedAt: string;
+}

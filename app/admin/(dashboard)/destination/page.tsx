@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { listDestinations } from "@/lib/destinations/queries";
+import { listDestinationRequirements, listDestinations } from "@/lib/destinations/queries";
 import { DestinationList } from "./_components/destination-list";
+import { DestinationRequirements } from "./_components/destination-requirements";
+import { GenerateDestinationsForm } from "./_components/generate-destinations-form";
 
 export default async function DestinationPage() {
-  const destinations = await listDestinations();
+  const [destinations, requirements] = await Promise.all([
+    listDestinations(),
+    listDestinationRequirements(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -21,6 +26,9 @@ export default async function DestinationPage() {
           Add destination
         </Link>
       </div>
+
+      <DestinationRequirements requirements={requirements} />
+      <GenerateDestinationsForm />
 
       <DestinationList destinations={destinations} />
     </div>

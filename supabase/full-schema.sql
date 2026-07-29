@@ -604,3 +604,15 @@ create unique index guests_wechat_handle_key on guests (wechat_handle) where wec
 
 alter table guests alter column first_name drop not null;
 
+
+-- >>> supabase/migrations/0025_destination_requirements.sql
+create table destination_requirements (
+  id uuid primary key default gen_random_uuid(),
+  requirement text not null,
+  order_index integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table destination_requirements enable row level security;
+

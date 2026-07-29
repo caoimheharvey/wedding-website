@@ -6,12 +6,16 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/dal";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import { generateDestinationDetails, type GeneratedDestination } from "@/lib/ai/destinations";
 import {
   mockDeleteDestination,
+  mockDeleteDestinationRequirement,
   mockInsertDestination,
+  mockInsertDestinationRequirement,
   mockSetDestinationSelected,
   mockUpdateDestination,
 } from "./mock-store";
+import { listDestinationRequirements, listDestinations } from "./queries";
 import { destinationFormSchema, parseOptionalAmount } from "./schema";
 
 export type DestinationActionState =
@@ -121,4 +125,153 @@ export async function setDestinationSelected(
 
   revalidatePath("/admin/destination");
   return {};
+}
+
+export type RequirementActionState = { message?: string } | undefined;
+
+export async function createDestinationRequirement(
+  _prevState: RequirementActionState,
+  formData: FormData,
+): Promise<RequirementActionState> {
+  await requireAdmin();
+
+  const requirement = String(formData.get("requirement") ?? "").trim();
+  if (!requirement) return { message: "Enter a requirement." };
+
+  if (isLocalTestMode()) {
+    mockInsertDestinationRequirement(requirement);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { data: maxRow } = await supabase
+      .from("destination_requirements")
+      .select("order_index")
+      .order("order_index", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { error } = await supabase.from("destination_requirements").insert({
+      requirement,
+      order_index: (maxRow?.order_index ?? 0) + 1,
+    });
+    if (error) return { message: `Could not save requirement: ${error.message}` };
+  }
+
+  revalidatePath("/admin/destination");
+  return { message: "Requirement added." };
+}
+
+export async function deleteDestinationRequirement(
+  requirementId: string,
+): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  if (isLocalTestMode()) {
+    mockDeleteDestinationRequirement(requirementId);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("destination_requirements")
+      .delete()
+      .eq("id", requirementId);
+    if (error) return { message: `Could not remove requirement: ${error.message}` };
+  }
+
+  revalidatePath("/admin/destination");
+  return {};
+}
+
+function formValuesFromGenerated(generated: GeneratedDestination) {
+  return {
+    name: generated.name,
+    location: generated.location ?? undefined,
+    description: generated.description ?? undefined,
+    estimatedCost: generated.estimatedCost != null ? String(generated.estimatedCost) : undefined,
+    travelNotes: generated.travelNotes ?? undefined,
+    guestCapacityNotes: generated.guestCapacityNotes ?? undefined,
+    pros: generated.pros ?? undefined,
+    cons: generated.cons ?? undefined,
+    notes: undefined,
+  };
+}
+
+export type GenerateDestinationsState = { message?: string } | undefined;
+
+/**
+ * Researches candidate destinations with AI, weighed against the couple's
+ * requirements checklist, and creates/updates destination rows for each
+ * result plus any additional AI-suggested destinations. Still fully
+ * editable afterward through the normal destination form.
+ */
+export async function generateDestinationsAction(
+  _prevState: GenerateDestinationsState,
+  formData: FormData,
+): Promise<GenerateDestinationsState> {
+  await requireAdmin();
+
+  const candidates = String(formData.get("candidates") ?? "")
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  if (candidates.length === 0) {
+    return { message: "Enter at least one destination to research." };
+  }
+
+  const requirements = (await listDestinationRequirements()).map((item) => item.requirement);
+
+  let result;
+  try {
+    result = await generateDestinationDetails(candidates, requirements);
+  } catch (error) {
+    return {
+      message: error instanceof Error ? error.message : "Could not generate destinations.",
+    };
+  }
+
+  const generated = [...result.destinations, ...result.suggestions];
+  if (generated.length === 0) {
+    return { message: "The AI didn't return any destinations — try again, or add one manually." };
+  }
+
+  const existingDestinations = await listDestinations();
+  const existingByName = new Map(
+    existingDestinations.map((destination) => [destination.name.toLowerCase(), destination]),
+  );
+
+  for (const entry of generated) {
+    const parsed = destinationFormSchema.safeParse(formValuesFromGenerated(entry));
+    if (!parsed.success) continue;
+
+    const existingMatch = existingByName.get(entry.name.toLowerCase());
+
+    if (isLocalTestMode()) {
+      if (existingMatch) {
+        mockUpdateDestination(existingMatch.id, parsed.data);
+      } else {
+        mockInsertDestination(parsed.data);
+      }
+    } else {
+      const supabase = getSupabaseAdmin();
+      if (existingMatch) {
+        const { error } = await supabase
+          .from("destinations")
+          .update(destinationRowFromForm(parsed.data))
+          .eq("id", existingMatch.id);
+        if (error) return { message: `Could not save ${entry.name}: ${error.message}` };
+      } else {
+        const { error } = await supabase
+          .from("destinations")
+          .insert(destinationRowFromForm(parsed.data));
+        if (error) return { message: `Could not save ${entry.name}: ${error.message}` };
+      }
+    }
+  }
+
+  revalidatePath("/admin/destination");
+  const suggestionNote =
+    result.suggestions.length > 0
+      ? ` and ${result.suggestions.length} additional suggestion(s)`
+      : "";
+  return {
+    message: `Researched ${result.destinations.length} destination(s)${suggestionNote}.`,
+  };
 }
