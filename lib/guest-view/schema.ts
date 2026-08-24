@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { WEDDING_PARTY_ROLES } from "@/lib/guests/types";
+import { extractEmbedUrl } from "./embed-url";
 
 const sectionMetaSchema = z.object({
   title: z.string().trim().optional(),
@@ -44,7 +45,11 @@ export const textSectionFormSchema = z
 
 export const embedItemSchema = z.object({
   provider: z.enum(["google_maps", "pinterest", "other"]),
-  url: z.url({ error: "Enter a valid URL" }),
+  url: z
+    .string()
+    .trim()
+    .transform(extractEmbedUrl)
+    .pipe(z.url({ error: "Enter a valid URL, or paste the embed/iframe HTML snippet" })),
   caption: z.string().trim().optional(),
   columnIndex: z.coerce.number().int().min(0).max(3).default(0),
 });

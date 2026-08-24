@@ -140,12 +140,18 @@ export function EmbedGroupForm({
                 value={row.url}
                 onChange={(event) => updateRow(index, { url: event.target.value })}
                 className="input"
-                placeholder="https://…"
+                placeholder="https://… or paste the embed/iframe HTML"
               />
-              {row.provider === "google_maps" && (
+              <span className="font-normal text-foreground/50">
+                A link works, or paste the whole &quot;embed&quot;/&quot;iframe&quot; HTML snippet
+                the site gives you — either is fine.
+                {row.provider === "google_maps" &&
+                  " For a plain link, use a regular Google Maps link (a place page, or a pinned location) — not a shortened maps.app.goo.gl link, those can't be embedded."}
+              </span>
+              {row.provider === "pinterest" && (
                 <span className="font-normal text-foreground/50">
-                  Paste a regular Google Maps link (a place page, or a pinned location) — not a
-                  shortened maps.app.goo.gl link, those can&apos;t be embedded.
+                  For a plain link, use the board&apos;s URL (e.g.
+                  https://www.pinterest.com/username/board-name/).
                 </span>
               )}
             </label>
