@@ -25,9 +25,9 @@ export function CountdownSectionView({
     return (
       <section className="glass-card p-4 text-center">
         {title ? (
-          <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>
+          <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2>
         ) : (
-          <h2 className="mb-2 font-display text-lg text-ink">{strings.heading}</h2>
+          <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
         )}
         <p className="text-sm text-foreground/60">{strings.unset}</p>
       </section>
@@ -38,8 +38,8 @@ export function CountdownSectionView({
 
   return (
     <section className="glass-card p-4 text-center">
-      {title ? <h2 className="mb-2 font-display text-lg text-ink">{title}</h2> : (
-        <h2 className="mb-2 font-display text-lg text-ink">{strings.heading}</h2>
+      {title ? <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2> : (
+        <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
       )}
       {countdown.isPast ? (
         <p className="font-display text-2xl text-ink">{strings.past(countdown.label)}</p>
@@ -73,9 +73,9 @@ export function WeddingDateSectionView({
     return (
       <section className="glass-card p-4 text-center">
         {title ? (
-          <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>
+          <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2>
         ) : (
-          <h2 className="mb-2 font-display text-lg text-ink">{strings.heading}</h2>
+          <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
         )}
         <p className="text-sm text-foreground/60">{strings.unset}</p>
       </section>
@@ -92,8 +92,8 @@ export function WeddingDateSectionView({
 
   return (
     <section className="glass-card p-4 text-center">
-      {title ? <h2 className="mb-2 font-display text-lg text-ink">{title}</h2> : (
-        <h2 className="mb-2 font-display text-lg text-ink">{strings.heading}</h2>
+      {title ? <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2> : (
+        <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
       )}
       <p className="font-display text-xl text-ink">{formatWeddingDate(weddingDate)}</p>
       {weddingLocation && (

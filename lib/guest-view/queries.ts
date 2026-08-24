@@ -19,6 +19,8 @@ interface SectionRow {
   title_zh: string | null;
   order_index: number;
   visible_to_roles: WeddingPartyRole[] | null;
+  width: GuestViewSection["width"];
+  text_align: GuestViewSection["textAlign"];
   body_en: string | null;
   body_fr: string | null;
   body_zh: string | null;
@@ -102,6 +104,8 @@ export async function listGuestViewSections(): Promise<GuestViewSection[]> {
     titles: { en: row.title, fr: row.title_fr, zh: row.title_zh },
     orderIndex: row.order_index,
     visibleToRoles: row.visible_to_roles ?? [],
+    width: row.width,
+    textAlign: row.text_align,
     body: { en: row.body_en, fr: row.body_fr, zh: row.body_zh },
     bodyColumns: {
       en: parseBodyColumns(row.body_en_columns),

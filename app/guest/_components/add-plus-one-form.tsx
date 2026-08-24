@@ -31,7 +31,7 @@ export function AddPlusOneForm({
   return (
     <form action={formAction} className="glass-card w-full p-4 text-center">
       <div className="mb-4">
-        <h2 className="mb-1 font-display text-lg text-ink">{title || strings.heading}</h2>
+        <h2 className="mb-1 font-display text-lg font-bold text-ink">{title || strings.heading}</h2>
         <p className="text-sm text-foreground/60">{strings.description}</p>
       </div>
 

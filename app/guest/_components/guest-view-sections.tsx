@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { GuestChild } from "@/lib/children/types";
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
@@ -31,6 +32,12 @@ const TEXT_COLS: Record<number, string> = {
   3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
   4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
 };
+
+/** "wide" is only modestly wider than "normal", and only once there's room
+ *  for it — on phones (where most guests will be) it looks identical. */
+function sectionWidthClass(width: GuestViewSection["width"]): string {
+  return width === "wide" ? "w-full sm:-mx-6 sm:w-[calc(100%+3rem)]" : "w-full";
+}
 
 export interface RsvpSectionContext {
   guest: Guest;
@@ -66,26 +73,17 @@ export function GuestViewSections({
     <div className="flex w-full flex-col gap-4 text-left">
       {sections.map((section) => {
         const sectionTitle = localizedSectionTitle(section, language);
+        let content: ReactNode = null;
+
         if (section.type === "text") {
-          return (
-            <TextSectionView
-              key={section.id}
-              section={section}
-              language={language}
-              title={sectionTitle}
-            />
-          );
-        }
-        if (section.type === "embed_group") {
-          return <EmbedGroupView key={section.id} section={section} title={sectionTitle} />;
-        }
-        if (section.type === "image_group") {
-          return <ImageGroupView key={section.id} section={section} title={sectionTitle} />;
-        }
-        if (section.type === "rsvp" && rsvp) {
-          return (
+          content = <TextSectionView section={section} language={language} title={sectionTitle} />;
+        } else if (section.type === "embed_group") {
+          content = <EmbedGroupView section={section} title={sectionTitle} />;
+        } else if (section.type === "image_group") {
+          content = <ImageGroupView section={section} title={sectionTitle} />;
+        } else if (section.type === "rsvp" && rsvp) {
+          content = (
             <RsvpForm
-              key={section.id}
               rsvpSubmittees={rsvp.rsvpSubmittees}
               rsvpDelegatedBy={rsvp.rsvpDelegatedBy}
               language={language}
@@ -94,22 +92,18 @@ export function GuestViewSections({
               title={sectionTitle}
             />
           );
-        }
-        if (section.type === "rsvp_status" && rsvp) {
-          return (
+        } else if (section.type === "rsvp_status" && rsvp) {
+          content = (
             <RsvpStatusDisplay
-              key={section.id}
               language={language}
               effectiveStatus={rsvp.effectiveStatus}
               effectiveDeadline={rsvp.effectiveDeadline}
               title={sectionTitle}
             />
           );
-        }
-        if (section.type === "contact_info" && rsvp) {
-          return (
+        } else if (section.type === "contact_info" && rsvp) {
+          content = (
             <ContactInfoForm
-              key={section.id}
               guest={rsvp.guest}
               allGuests={rsvp.allGuests}
               delegatePairs={rsvp.delegatePairs}
@@ -118,62 +112,60 @@ export function GuestViewSections({
               title={sectionTitle}
             />
           );
-        }
-        if (section.type === "countdown") {
-          return (
+        } else if (section.type === "countdown") {
+          content = (
             <CountdownSectionView
-              key={section.id}
               language={language}
               weddingDate={siteSettings.weddingDate}
               title={sectionTitle ?? GUEST_SITE_STRINGS[language].countdownSection.heading}
             />
           );
-        }
-        if (section.type === "wedding_date") {
-          return (
+        } else if (section.type === "wedding_date") {
+          content = (
             <WeddingDateSectionView
-              key={section.id}
               language={language}
               siteSettings={siteSettings}
               title={sectionTitle ?? GUEST_SITE_STRINGS[language].weddingDateSection.heading}
             />
           );
-        }
-        if (section.type === "dietary_restrictions" && rsvp) {
-          return (
+        } else if (section.type === "dietary_restrictions" && rsvp) {
+          content = (
             <DietaryRestrictionsForm
-              key={section.id}
               people={rsvp.rsvpSubmittees}
               language={language}
               previewGuestId={rsvp.previewGuestId}
               title={sectionTitle}
             />
           );
+        } else if (section.type === "plus_one" && rsvp) {
+          if (guestNeedsPlusOneForm(rsvp.guest, rsvp.allGuests)) {
+            content = (
+              <AddPlusOneForm
+                language={language}
+                previewGuestId={rsvp.previewGuestId}
+                title={sectionTitle}
+              />
+            );
+          }
+        } else if (section.type === "children" && rsvp) {
+          if (rsvp.guest.childrenAllowed) {
+            content = (
+              <ChildrenForm
+                childrenList={rsvp.children}
+                language={language}
+                previewGuestId={rsvp.previewGuestId}
+                title={sectionTitle}
+              />
+            );
+          }
         }
-        if (section.type === "plus_one" && rsvp) {
-          if (!guestNeedsPlusOneForm(rsvp.guest, rsvp.allGuests)) return null;
-          return (
-            <AddPlusOneForm
-              key={section.id}
-              language={language}
-              previewGuestId={rsvp.previewGuestId}
-              title={sectionTitle}
-            />
-          );
-        }
-        if (section.type === "children" && rsvp) {
-          if (!rsvp.guest.childrenAllowed) return null;
-          return (
-            <ChildrenForm
-              key={section.id}
-              childrenList={rsvp.children}
-              language={language}
-              previewGuestId={rsvp.previewGuestId}
-              title={sectionTitle}
-            />
-          );
-        }
-        return null;
+
+        if (!content) return null;
+        return (
+          <div key={section.id} className={sectionWidthClass(section.width)}>
+            {content}
+          </div>
+        );
       })}
     </div>
   );
@@ -192,22 +184,16 @@ function TextSectionView({
   const columns = textSectionColumns(section, language);
   if (columns.every((column) => !column.trim())) return null;
   const gridClass = TEXT_COLS[columnCount] ?? TEXT_COLS[1];
+  const alignClass = section.textAlign === "center" ? "text-center" : "text-left";
 
   return (
-    <div className="glass-card p-4 text-center">
-      {title && <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>}
+    <div className={`glass-card p-4 ${alignClass}`}>
+      {title && <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2>}
       <div className={`grid gap-4 ${gridClass}`}>
         {columns.map((columnText, columnIndex) => (
-          <div key={columnIndex} className="text-left">
-            {columnText
-              .split("\n")
-              .filter(Boolean)
-              .map((paragraph, index) => (
-                <p key={index} className="mt-1 text-sm text-foreground/70 first:mt-0">
-                  {paragraph}
-                </p>
-              ))}
-          </div>
+          <p key={columnIndex} className="text-sm whitespace-pre-line text-foreground/70">
+            {columnText}
+          </p>
         ))}
       </div>
     </div>
@@ -222,7 +208,7 @@ function ImageGroupView({ section, title }: { section: GuestViewSection; title: 
 
   return (
     <div className="glass-card p-4">
-      {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
+      {title && <h2 className="mb-3 font-display text-lg font-bold text-ink">{title}</h2>}
       <div className={`grid gap-4 ${gridClass}`}>
         {columns.map((items, columnIndex) => (
           <div key={columnIndex} className="flex flex-col gap-4">
@@ -252,7 +238,7 @@ function EmbedGroupView({ section, title }: { section: GuestViewSection; title: 
 
   return (
     <div className="glass-card p-4">
-      {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
+      {title && <h2 className="mb-3 font-display text-lg font-bold text-ink">{title}</h2>}
       <div className={`grid gap-4 ${gridClass}`}>
         {columns.map((items, columnIndex) => (
           <div key={columnIndex} className="flex flex-col gap-4">

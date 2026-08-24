@@ -54,6 +54,8 @@ function parseTextSectionForm(formData: FormData) {
     titleFr: formData.get("titleFr"),
     titleZh: formData.get("titleZh"),
     visibleToRoles: parseVisibleToRoles(formData),
+    width: formData.get("width"),
+    textAlign: formData.get("textAlign"),
     columnCount,
   };
 
@@ -187,6 +189,7 @@ export async function createImageGroupSection(
         title: parsed.data.title || null,
         order_index: orderIndex,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
         column_count: parsed.data.columnCount,
       })
       .select("id")
@@ -240,6 +243,7 @@ export async function updateImageGroupSection(
       .update({
         title: parsed.data.title || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
         column_count: parsed.data.columnCount,
       })
       .eq("id", sectionId);
@@ -293,7 +297,9 @@ export async function createTextSection(
       title_zh: parsed.data.titleZh || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
+      width: parsed.data.width,
       ...bodyFields,
+      text_align: parsed.data.textAlign,
       column_count: parsed.data.columnCount,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
@@ -325,7 +331,9 @@ export async function updateTextSection(
         title_fr: parsed.data.titleFr || null,
         title_zh: parsed.data.titleZh || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
         ...bodyFields,
+        text_align: parsed.data.textAlign,
         column_count: parsed.data.columnCount,
       })
       .eq("id", sectionId);
@@ -360,6 +368,7 @@ export async function createRsvpSection(
       title: parsed.data.title || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
+      width: parsed.data.width,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
   }
@@ -390,6 +399,7 @@ export async function updateRsvpSection(
       .update({
         title: parsed.data.title || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
       })
       .eq("id", sectionId);
     if (error) return { message: `Could not save section: ${error.message}` };
@@ -423,6 +433,7 @@ export async function createRsvpStatusSection(
       title: parsed.data.title || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
+      width: parsed.data.width,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
   }
@@ -453,6 +464,7 @@ export async function updateRsvpStatusSection(
       .update({
         title: parsed.data.title || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
       })
       .eq("id", sectionId);
     if (error) return { message: `Could not save section: ${error.message}` };
@@ -486,6 +498,7 @@ export async function createContactInfoSection(
       title: parsed.data.title || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
+      width: parsed.data.width,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
   }
@@ -516,6 +529,7 @@ export async function updateContactInfoSection(
       .update({
         title: parsed.data.title || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
       })
       .eq("id", sectionId);
     if (error) return { message: `Could not save section: ${error.message}` };
@@ -552,6 +566,7 @@ export async function createEmbedGroupSection(
         title: parsed.data.title || null,
         order_index: orderIndex,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
         column_count: parsed.data.columnCount,
       })
       .select("id")
@@ -601,6 +616,7 @@ export async function updateEmbedGroupSection(
       .update({
         title: parsed.data.title || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
         column_count: parsed.data.columnCount,
       })
       .eq("id", sectionId);
@@ -717,6 +733,7 @@ async function createBuiltinSection(
       title: parsed.data.title || null,
       order_index: orderIndex,
       visible_to_roles: parsed.data.visibleToRoles,
+      width: parsed.data.width,
     });
     if (error) return { message: `Could not save section: ${error.message}` };
   }
@@ -746,6 +763,7 @@ async function updateBuiltinSection(
       .update({
         title: parsed.data.title || null,
         visible_to_roles: parsed.data.visibleToRoles,
+        width: parsed.data.width,
       })
       .eq("id", sectionId)
       .eq("type", type);

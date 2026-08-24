@@ -13,6 +13,11 @@ export type GuestViewSectionType =
   | "plus_one"
   | "children";
 export type EmbedProvider = "google_maps" | "pinterest" | "other";
+/** "wide" is only modestly wider than "normal" on larger screens — on
+ *  phones (the common case) there's no room for it to differ. */
+export type SectionWidth = "normal" | "wide";
+/** Only meaningful for 'text' sections. */
+export type SectionTextAlign = "left" | "center";
 
 export interface GuestViewEmbed {
   id: string;
@@ -38,6 +43,9 @@ export interface GuestViewSection {
   orderIndex: number;
   /** Empty = visible to everyone; otherwise only guests holding one of these roles. */
   visibleToRoles: WeddingPartyRole[];
+  width: SectionWidth;
+  /** Only used by 'text' sections. */
+  textAlign: SectionTextAlign;
   /** Only used by 'text' sections. Legacy single-block body per language. */
   body: Record<PreferredLanguage, string | null>;
   /** Per-column text bodies when columnCount > 1. */

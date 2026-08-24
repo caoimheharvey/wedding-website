@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import type { GuestViewSectionActionState } from "@/lib/guest-view/actions";
 import { WEDDING_PARTY_ROLE_LABELS, WEDDING_PARTY_ROLES } from "@/lib/guests/types";
 import type { GuestViewSection } from "@/lib/guest-view/types";
+import { SectionWidthField } from "./section-width-field";
 
 const initialState: GuestViewSectionActionState = undefined;
 
@@ -73,6 +74,8 @@ export function BuiltinGuestViewSectionForm({
         </div>
         <span className="text-xs text-foreground/50">Leave all unchecked to show everyone.</span>
       </fieldset>
+
+      <SectionWidthField defaultValue={section?.width ?? "normal"} />
 
       {state?.message && <p className="text-sm text-terracotta">{state.message}</p>}
 

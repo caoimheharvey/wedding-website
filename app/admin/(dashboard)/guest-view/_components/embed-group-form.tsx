@@ -8,6 +8,7 @@ import {
 } from "@/lib/guest-view/actions";
 import { WEDDING_PARTY_ROLE_LABELS, WEDDING_PARTY_ROLES } from "@/lib/guests/types";
 import type { EmbedProvider, GuestViewSection } from "@/lib/guest-view/types";
+import { SectionWidthField } from "./section-width-field";
 
 const initialState: GuestViewSectionActionState = undefined;
 
@@ -90,6 +91,8 @@ export function EmbedGroupForm({
         </div>
         <span className="text-xs text-foreground/50">Leave all unchecked to show everyone.</span>
       </fieldset>
+
+      <SectionWidthField defaultValue={section?.width ?? "normal"} />
 
       <label className="flex flex-col gap-1 text-sm text-ink">
         Columns

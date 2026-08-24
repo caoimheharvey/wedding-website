@@ -62,7 +62,7 @@ export function RsvpForm({
       onSubmit={handleSubmit}
       className="glass-card w-full p-4 text-left"
     >
-      <h2 className="mb-3 font-display text-lg text-ink">{title || strings.heading}</h2>
+      <h2 className="mb-3 font-display text-lg font-bold text-ink">{title || strings.heading}</h2>
       {delegateNames.length > 0 && (
         <p className="mb-3 text-xs text-foreground/50">{strings.delegateNote(delegateNames)}</p>
       )}

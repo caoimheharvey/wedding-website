@@ -17,7 +17,7 @@ export function RsvpStatusDisplay({
 
   return (
     <div className="glass-card w-full px-4 py-4 text-left">
-      <p className="text-sm font-medium text-ink">{title || strings.yourRsvp}</p>
+      <p className="text-sm font-bold text-ink">{title || strings.yourRsvp}</p>
       <p className="mt-1 text-sm text-foreground/70">
         {strings.rsvpStatusLabels[effectiveStatus]}
       </p>

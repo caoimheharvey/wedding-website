@@ -6,6 +6,7 @@ import { aiRewriteSection, aiTranslateSection } from "@/lib/guest-view/ai-action
 import { initialColumnTexts, padColumnTexts } from "@/lib/guest-view/columns";
 import { WEDDING_PARTY_ROLE_LABELS, WEDDING_PARTY_ROLES } from "@/lib/guests/types";
 import type { GuestViewSection } from "@/lib/guest-view/types";
+import { SectionWidthField } from "./section-width-field";
 
 const initialState: GuestViewSectionActionState = undefined;
 
@@ -211,6 +212,20 @@ export function TextSectionForm({
         </div>
         <span className="text-xs text-foreground/50">Leave all unchecked to show everyone.</span>
       </fieldset>
+
+      <SectionWidthField defaultValue={section?.width ?? "normal"} />
+
+      <label className="flex flex-col gap-1 text-sm text-ink">
+        Text alignment
+        <select
+          name="textAlign"
+          defaultValue={section?.textAlign ?? "left"}
+          className="input w-auto"
+        >
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+        </select>
+      </label>
 
       <label className="flex flex-col gap-1 text-sm text-ink">
         Columns
