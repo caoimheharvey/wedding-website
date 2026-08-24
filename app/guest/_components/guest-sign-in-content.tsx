@@ -13,7 +13,7 @@ export function GuestSignInContent({ language }: { language: PreferredLanguage }
       <p className="text-sm tracking-[0.3em] text-aegean uppercase">Guests</p>
       <h1 className="font-display text-4xl text-ink">Caoimhe &amp; Alexandre</h1>
 
-      <div className="w-full rounded-lg border border-border bg-surface p-4 text-left">
+      <div className="glass-card w-full p-4 text-left">
         <p className="mb-3 text-sm text-foreground/70">{strings.description}</p>
         <QuickSignInForm language={language} />
       </div>

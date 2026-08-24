@@ -46,7 +46,7 @@ export function DietaryRestrictionsForm({
   return (
     <form
       action={formAction}
-      className="w-full rounded-lg border border-border bg-surface p-4 text-center"
+      className="glass-card w-full p-4 text-center"
     >
       <div className="mb-4">
         <h2 className="mb-1 font-display text-lg text-ink">{title || strings.heading}</h2>
@@ -72,7 +72,7 @@ export function DietaryRestrictionsForm({
               }
               rows={2}
               placeholder={strings.placeholder}
-              className="input resize-y text-center"
+              className="glass-input resize-y text-center"
             />
           </div>
         ))}

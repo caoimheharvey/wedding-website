@@ -648,3 +648,12 @@ alter table wedding_decisions enable row level security;
 -- >>> supabase/migrations/0029_vendor_destination_link.sql
 alter table vendors add column destination_id uuid references destinations(id) on delete set null;
 
+
+-- >>> supabase/migrations/0030_guest_plus_one_allowed.sql
+alter table guests
+  add column plus_one_allowed boolean not null default false;
+
+
+-- >>> supabase/migrations/0031_site_settings_background_image.sql
+alter table site_settings add column background_image_url text;
+

@@ -6,6 +6,7 @@ import { getChecklistSummary } from "@/lib/planning/queries";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { GuestStats } from "../guests/_components/guest-stats";
+import { BackgroundImageEditor } from "./_components/background-image-editor";
 import { CountdownCard } from "./_components/countdown-card";
 import { DietaryRequirementsCard } from "./_components/dietary-requirements-card";
 import { OverviewBudgetCard } from "./_components/overview-budget-card";
@@ -76,6 +77,8 @@ export default async function OverviewPage() {
       </section>
 
       <DietaryRequirementsCard guests={guests} />
+
+      <BackgroundImageEditor imageUrl={siteSettings.backgroundImageUrl} />
     </article>
   );
 }

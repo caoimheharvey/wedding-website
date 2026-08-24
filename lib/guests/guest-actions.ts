@@ -14,8 +14,9 @@ import {
   type ContactInfoEntry,
 } from "./contact-info";
 import { DIETARY_SUCCESS_MESSAGE } from "./dietary-info";
+import { PLUS_ONE_SUCCESS_MESSAGE } from "./plus-one";
 import { formatStoredPhoneForCountry } from "@/lib/phone/format";
-import { mockUpdateGuest } from "./mock-store";
+import { mockInsertGuest, mockUpdateGuest } from "./mock-store";
 import { getGuestById, listGuests, listRsvpDelegatePairs } from "./queries";
 import { rsvpSubmitteesFor } from "./rsvp-delegates";
 
@@ -183,4 +184,91 @@ export async function submitDietaryRestrictions(
   revalidatePath("/guest");
   revalidatePath("/admin/guests");
   return { message: DIETARY_SUCCESS_MESSAGE };
+}
+
+/**
+ * Guest-facing "add your plus-one" form — creates a brand new guest record
+ * for a plus-one whose name isn't on file yet, linked via isPlusOneOf. Only
+ * usable once (per acting guest) — a second attempt after the plus-one has
+ * been added is rejected below.
+ */
+export async function addPlusOne(
+  _prevState: { message?: string } | undefined,
+  formData: FormData,
+): Promise<{ message?: string }> {
+  const session = await getGuestSession();
+  const canPreview = await canPreviewGuestView();
+  const previewGuestId = String(formData.get("previewGuestId") ?? "").trim() || undefined;
+  const actingGuestId = canPreview && previewGuestId ? previewGuestId : session?.guestId;
+  if (!actingGuestId) return { message: "Your session has expired — please sign in again." };
+
+  const actingGuest = await getGuestById(actingGuestId);
+  if (!actingGuest) return { message: "Your session has expired — please sign in again." };
+  if (!actingGuest.plusOneAllowed) return { message: "You don't have a plus-one to add." };
+
+  const allGuests = await listGuests();
+  if (allGuests.some((guest) => guest.isPlusOneOf === actingGuestId)) {
+    return { message: "You've already added your plus-one." };
+  }
+
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const phoneCountryId = String(formData.get("phoneCountryId") ?? "");
+  const phoneNational = String(formData.get("phoneNational") ?? "").trim();
+
+  if (!firstName) return { message: "Enter your plus-one's first name." };
+
+  const formattedPhone = phoneNational ? formatStoredPhoneForCountry(phoneCountryId, phoneNational) : null;
+  if (phoneNational && !formattedPhone) {
+    return { message: "Enter a valid phone number for your selected country." };
+  }
+  if (email && !EMAIL_PATTERN.test(email)) return { message: "Enter a valid email address." };
+
+  const fields = {
+    firstName,
+    lastName: lastName || null,
+    email: email || null,
+    phone: formattedPhone,
+    wechatHandle: null,
+    relationshipPriority: 5 as const,
+    preferredLanguage: actingGuest.preferredLanguage,
+    partyRoles: [],
+    isPlusOneOf: actingGuestId,
+    plusOneStatus: null,
+    plusOneRequestedRelationship: null,
+    plusOneAllowed: false,
+    invitedBy: actingGuest.invitedBy,
+    rsvpDeadlineOverride: actingGuest.rsvpDeadlineOverride,
+    rsvpStatus: "invited" as const,
+    notes: null,
+    dietaryRestrictions: null,
+  };
+
+  if (isLocalTestMode()) {
+    mockInsertGuest(fields);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from("guests").insert({
+      first_name: fields.firstName,
+      last_name: fields.lastName,
+      email: fields.email,
+      phone: fields.phone,
+      wechat_handle: null,
+      relationship_priority: fields.relationshipPriority,
+      preferred_language: fields.preferredLanguage,
+      party_roles: [],
+      is_plus_one_of: actingGuestId,
+      plus_one_allowed: false,
+      invited_by: fields.invitedBy,
+      rsvp_deadline_override: fields.rsvpDeadlineOverride,
+      rsvp_status: "invited",
+    });
+    if (error) return { message: `Could not save your plus-one: ${error.message}` };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/guest");
+  revalidatePath("/admin/guests");
+  return { message: PLUS_ONE_SUCCESS_MESSAGE };
 }

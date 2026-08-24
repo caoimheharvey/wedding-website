@@ -163,7 +163,7 @@ function TextSectionView({
   const gridClass = TEXT_COLS[columnCount] ?? TEXT_COLS[1];
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4 text-center">
+    <div className="glass-card p-4 text-center">
       {title && <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>}
       <div className={`grid gap-4 ${gridClass}`}>
         {columns.map((columnText, columnIndex) => (
@@ -190,7 +190,7 @@ function ImageGroupView({ section, title }: { section: GuestViewSection; title: 
   const columns = groupItemsByColumn(section.images, columnCount);
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
+    <div className="glass-card p-4">
       {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
       <div className={`grid gap-4 ${gridClass}`}>
         {columns.map((items, columnIndex) => (
@@ -220,7 +220,7 @@ function EmbedGroupView({ section, title }: { section: GuestViewSection; title: 
   const columns = groupItemsByColumn(section.embeds, columnCount);
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
+    <div className="glass-card p-4">
       {title && <h2 className="mb-3 font-display text-lg text-ink">{title}</h2>}
       <div className={`grid gap-4 ${gridClass}`}>
         {columns.map((items, columnIndex) => (

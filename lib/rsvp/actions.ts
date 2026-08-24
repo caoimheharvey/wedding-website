@@ -7,7 +7,12 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { mockSetGuestRsvpStatus, mockSetRsvpDeadlineOverrides } from "@/lib/guests/mock-store";
 import { RSVP_STATUS_OPTIONS, type RsvpStatus } from "@/lib/guests/types";
-import { mockUpdateDefaultRsvpDeadline, mockUpdateWeddingDate, mockUpdateWeddingLocation } from "./mock-store";
+import {
+  mockUpdateBackgroundImage,
+  mockUpdateDefaultRsvpDeadline,
+  mockUpdateWeddingDate,
+  mockUpdateWeddingLocation,
+} from "./mock-store";
 
 const deadlineSchema = z.union([z.iso.date(), z.literal("")]).optional();
 
@@ -82,6 +87,71 @@ export async function updateWeddingLocation(
 
   revalidatePath("/admin/overview");
   revalidatePath("/");
+  return {};
+}
+
+/** Translucent backdrop for the guest-facing site — reuses the same storage
+ *  bucket as Guest View images, in its own "site-background" folder. */
+export async function updateBackgroundImage(
+  _prevState: { message?: string } | undefined,
+  formData: FormData,
+): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const file = formData.get("backgroundImage");
+  let url: string | null = null;
+
+  if (file instanceof File && file.size > 0) {
+    if (isLocalTestMode()) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      url = `data:${file.type || "image/jpeg"};base64,${buffer.toString("base64")}`;
+    } else {
+      const supabase = getSupabaseAdmin();
+      const extension = file.name.split(".").pop() || "jpg";
+      const path = `site-background/${crypto.randomUUID()}.${extension}`;
+      const { error } = await supabase.storage
+        .from("guest-view-images")
+        .upload(path, file, { contentType: file.type || undefined, upsert: true });
+      if (error) return { message: `Could not upload image: ${error.message}` };
+      const { data } = supabase.storage.from("guest-view-images").getPublicUrl(path);
+      url = data.publicUrl;
+    }
+  }
+
+  if (isLocalTestMode()) {
+    mockUpdateBackgroundImage(url);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ background_image_url: url })
+      .eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/overview");
+  revalidatePath("/");
+  revalidatePath("/guest");
+  return { message: "Background image updated." };
+}
+
+export async function removeBackgroundImage(): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  if (isLocalTestMode()) {
+    mockUpdateBackgroundImage(null);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ background_image_url: null })
+      .eq("id", 1);
+    if (error) return { message: `Could not remove image: ${error.message}` };
+  }
+
+  revalidatePath("/admin/overview");
+  revalidatePath("/");
+  revalidatePath("/guest");
   return {};
 }
 

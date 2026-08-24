@@ -9,6 +9,7 @@ let settings: SiteSettings = {
   defaultRsvpDeadline: "2027-04-01",
   weddingDate: "2028-07-15",
   weddingLocation: "Villa Cimbrone, Ravello",
+  backgroundImageUrl: null,
 };
 
 export function mockGetSiteSettings(): SiteSettings {
@@ -27,5 +28,10 @@ export function mockUpdateWeddingDate(date: string | null): SiteSettings {
 
 export function mockUpdateWeddingLocation(location: string | null): SiteSettings {
   settings = { ...settings, weddingLocation: location };
+  return settings;
+}
+
+export function mockUpdateBackgroundImage(url: string | null): SiteSettings {
+  settings = { ...settings, backgroundImageUrl: url };
   return settings;
 }

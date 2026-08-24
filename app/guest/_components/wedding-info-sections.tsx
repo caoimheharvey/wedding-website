@@ -23,7 +23,7 @@ export function CountdownSectionView({
 
   if (!weddingDate) {
     return (
-      <section className="rounded-lg border border-border bg-surface p-4 text-center">
+      <section className="glass-card p-4 text-center">
         {title ? (
           <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>
         ) : (
@@ -37,7 +37,7 @@ export function CountdownSectionView({
   const countdown = getWeddingCountdown(weddingDate);
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-4 text-center">
+    <section className="glass-card p-4 text-center">
       {title ? <h2 className="mb-2 font-display text-lg text-ink">{title}</h2> : (
         <h2 className="mb-2 font-display text-lg text-ink">{strings.heading}</h2>
       )}
@@ -71,7 +71,7 @@ export function WeddingDateSectionView({
 
   if (!weddingDate) {
     return (
-      <section className="rounded-lg border border-border bg-surface p-4 text-center">
+      <section className="glass-card p-4 text-center">
         {title ? (
           <h2 className="mb-2 font-display text-lg text-ink">{title}</h2>
         ) : (
@@ -91,7 +91,7 @@ export function WeddingDateSectionView({
   const googleUrl = buildGoogleCalendarUrl(calendarEvent);
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-4 text-center">
+    <section className="glass-card p-4 text-center">
       {title ? <h2 className="mb-2 font-display text-lg text-ink">{title}</h2> : (
         <h2 className="mb-2 font-display text-lg text-ink">{strings.heading}</h2>
       )}

@@ -16,7 +16,7 @@ export function RsvpStatusDisplay({
   const strings = GUEST_SITE_STRINGS[language];
 
   return (
-    <div className="w-full rounded-lg border border-border bg-surface px-4 py-4 text-left">
+    <div className="glass-card w-full px-4 py-4 text-left">
       <p className="text-sm font-medium text-ink">{title || strings.yourRsvp}</p>
       <p className="mt-1 text-sm text-foreground/70">
         {strings.rsvpStatusLabels[effectiveStatus]}

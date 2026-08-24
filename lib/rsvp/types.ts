@@ -5,4 +5,6 @@ export interface SiteSettings {
   weddingDate: string | null;
   /** Venue or city shown on the guest site and calendar download. */
   weddingLocation: string | null;
+  /** Translucent backdrop shown behind the guest-facing site. Null falls back to a decorative pattern. */
+  backgroundImageUrl: string | null;
 }

@@ -15,9 +15,12 @@ import { getPreviewPersona } from "@/lib/guest-site/preview-personas";
 import { plusOnePartyNames } from "@/lib/guest-site/party-names";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { guestNeedsContactOnboarding, guestNeedsFirstName } from "@/lib/guests/contact-info";
+import { guestNeedsPlusOneForm } from "@/lib/guests/plus-one";
 import { AdminViewLink } from "./guest/_components/admin-view-link";
 import { GuestSignInContent } from "./guest/_components/guest-sign-in-content";
 import { ContactInfoForm } from "./guest/_components/contact-info-form";
+import { AddPlusOneForm } from "./guest/_components/add-plus-one-form";
+import { GuestPageShell } from "./guest/_components/guest-page-shell";
 import { GuestSiteView } from "./guest/_components/guest-site-view";
 import { GuestViewSections } from "./guest/_components/guest-view-sections";
 import { LanguageTabs, isPreferredLanguage } from "./guest/_components/language-tabs";
@@ -48,9 +51,10 @@ export default async function Home({
       const rsvpDelegatedBy = rsvpDelegatesForGuest(guest, allGuests, delegatePairs);
       const needsContactOnboarding =
         guestNeedsContactOnboarding(guest) || guestNeedsFirstName(guest);
+      const needsPlusOneForm = guestNeedsPlusOneForm(guest, allGuests);
 
       return (
-        <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
+        <GuestPageShell backgroundImageUrl={siteSettings.backgroundImageUrl}>
           <form action={signOutGuest} className="flex w-full justify-end">
             <button
               type="submit"
@@ -76,23 +80,26 @@ export default async function Home({
               onboarding
             />
           ) : (
-            <GuestViewSections
-              sections={sections}
-              language={language}
-              siteSettings={siteSettings}
-              rsvp={{
-                guest,
-                allGuests,
-                delegatePairs,
-                rsvpSubmittees,
-                rsvpDelegatedBy,
-                deadlinePassed: effectiveStatus === "deadline_missed",
-                effectiveStatus,
-                effectiveDeadline,
-              }}
-            />
+            <>
+              {needsPlusOneForm && <AddPlusOneForm language={language} />}
+              <GuestViewSections
+                sections={sections}
+                language={language}
+                siteSettings={siteSettings}
+                rsvp={{
+                  guest,
+                  allGuests,
+                  delegatePairs,
+                  rsvpSubmittees,
+                  rsvpDelegatedBy,
+                  deadlinePassed: effectiveStatus === "deadline_missed",
+                  effectiveStatus,
+                  effectiveDeadline,
+                }}
+              />
+            </>
           )}
-        </main>
+        </GuestPageShell>
       );
     }
   }
@@ -109,7 +116,10 @@ export default async function Home({
     const sections = visibleSectionsFor(allSections, persona.partyRoles);
 
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
+      <GuestPageShell
+        backgroundImageUrl={siteSettings.backgroundImageUrl}
+        mainClassName="relative z-10 mx-auto flex min-h-screen w-full max-w-lg flex-col items-center gap-6 px-6 py-12 text-center"
+      >
         <AdminViewLink />
 
         {isLocalTestMode() && (
@@ -134,12 +144,17 @@ export default async function Home({
           delegateFor={persona.delegateFor}
         />
         <GuestViewSections sections={sections} language={language} siteSettings={siteSettings} />
-      </main>
+      </GuestPageShell>
     );
   }
 
+  const siteSettings = await getSiteSettings();
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
+    <GuestPageShell
+      backgroundImageUrl={siteSettings.backgroundImageUrl}
+      mainClassName="relative z-10 mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 text-center"
+    >
       <AdminViewLink />
 
       {isLocalTestMode() && (
@@ -166,6 +181,6 @@ export default async function Home({
       ) : (
         <GuestSignInContent language={language} />
       )}
-    </main>
+    </GuestPageShell>
   );
 }

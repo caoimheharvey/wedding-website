@@ -26,7 +26,7 @@ export function PhoneInput({
         <select
           value={countryId}
           onChange={(event) => onCountryChange(event.target.value)}
-          className="input w-auto max-w-[46%] shrink-0 text-center text-sm"
+          className="glass-input w-auto max-w-[46%] shrink-0 text-center text-sm"
           aria-label="Country code"
         >
           {PHONE_COUNTRIES.map((country) => (
@@ -40,7 +40,7 @@ export function PhoneInput({
           value={national}
           onChange={(event) => onNationalChange(event.target.value)}
           placeholder={placeholder}
-          className="input min-w-0 flex-1 text-center"
+          className="glass-input min-w-0 flex-1 text-center"
           autoComplete="tel-national"
           inputMode="tel"
         />

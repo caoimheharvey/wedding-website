@@ -10,8 +10,11 @@ import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { canPreviewGuestView } from "@/lib/guest-preview";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { plusOnePartyNames } from "@/lib/guest-site/party-names";
+import { guestNeedsPlusOneForm } from "@/lib/guests/plus-one";
+import { GuestPageShell } from "../_components/guest-page-shell";
 import { GuestSiteView } from "../_components/guest-site-view";
 import { GuestViewSections } from "../_components/guest-view-sections";
+import { AddPlusOneForm } from "../_components/add-plus-one-form";
 import { LanguageTabs, isPreferredLanguage } from "../_components/language-tabs";
 
 export default async function GuestPreviewPage({
@@ -43,7 +46,7 @@ export default async function GuestPreviewPage({
   const rsvpDelegatedBy = rsvpDelegatesForGuest(guest, allGuests, delegatePairs);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center">
+    <GuestPageShell backgroundImageUrl={siteSettings.backgroundImageUrl}>
       <div className="flex w-full flex-wrap items-center justify-between gap-2 rounded-lg bg-terracotta px-4 py-2 text-xs font-medium text-whitewash">
         <Link href="/admin/guests" className="underline">
           ← Back to admin
@@ -66,6 +69,10 @@ export default async function GuestPreviewPage({
         language={language}
       />
 
+      {guestNeedsPlusOneForm(guest, allGuests) && (
+        <AddPlusOneForm language={language} previewGuestId={guest.id} />
+      )}
+
       <GuestViewSections
         sections={sections}
         language={language}
@@ -82,6 +89,6 @@ export default async function GuestPreviewPage({
           previewGuestId: guest.id,
         }}
       />
-    </main>
+    </GuestPageShell>
   );
 }

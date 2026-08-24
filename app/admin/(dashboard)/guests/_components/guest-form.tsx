@@ -145,6 +145,20 @@ export function GuestForm({
         <GuestPicker name="isPlusOneOf" guests={otherGuests} defaultGuestId={guest?.isPlusOneOf} />
       </Field>
 
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          name="plusOneAllowed"
+          value="true"
+          defaultChecked={guest?.plusOneAllowed ?? false}
+          className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean"
+        />
+        Plus-one allowed
+        <span className="text-xs font-normal text-foreground/50">
+          — lets this guest add their plus-one&apos;s name and details themselves, once they sign in.
+        </span>
+      </label>
+
       <Field label="RSVP handled by" error={state?.errors?.rsvpDelegateIds?.[0]}>
         <GuestDelegatesPicker
           guests={otherGuests}

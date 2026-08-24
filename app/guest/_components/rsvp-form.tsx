@@ -60,7 +60,7 @@ export function RsvpForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-lg border border-border bg-surface p-4 text-left"
+      className="glass-card w-full p-4 text-left"
     >
       <h2 className="mb-3 font-display text-lg text-ink">{title || strings.heading}</h2>
       {delegateNames.length > 0 && (
@@ -99,7 +99,7 @@ export function RsvpForm({
                   [person.id]: event.target.value as RsvpStatus,
                 }))
               }
-              className="input w-auto"
+              className="glass-input w-auto"
             >
               {RSVP_STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>

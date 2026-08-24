@@ -75,8 +75,11 @@ export function DestinationList({
     .filter((destination): destination is Destination => Boolean(destination));
 
   // Shortlisted destinations already have their own section above — don't
-  // show them a second time here.
-  const visibleDestinations = destinations.filter((destination) => !destination.isShortlisted);
+  // show them a second time here. The selected destination (if any) leads
+  // the list, since it's the decision that matters most at a glance.
+  const visibleDestinations = destinations
+    .filter((destination) => !destination.isShortlisted)
+    .sort((a, b) => Number(b.isSelected) - Number(a.isSelected));
 
   if (destinations.length === 0) {
     return <p className="text-sm text-foreground/60">No destinations yet. Add one above.</p>;

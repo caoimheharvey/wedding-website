@@ -85,6 +85,16 @@ interface GuestSiteStrings {
     submit: string;
     saved: string;
   };
+  addPlusOne: {
+    heading: string;
+    description: string;
+    firstNamePlaceholder: string;
+    lastNamePlaceholder: string;
+    emailPlaceholder: string;
+    phonePlaceholder: string;
+    submit: string;
+    saved: string;
+  };
 }
 
 export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
@@ -183,6 +193,16 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       submit: "Save dietary details",
       saved: "Dietary details saved.",
     },
+    addPlusOne: {
+      heading: "Add your plus-one",
+      description: "You're welcome to bring a plus-one. Add their details below whenever you're ready.",
+      firstNamePlaceholder: "Their first name",
+      lastNamePlaceholder: "Their last name",
+      emailPlaceholder: "Their email address",
+      phonePlaceholder: "Their mobile number",
+      submit: "Add plus-one",
+      saved: "Thanks — we've added your plus-one!",
+    },
   },
   fr: {
     phaseLabel: "Réservez la date",
@@ -279,6 +299,17 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       submit: "Enregistrer",
       saved: "Informations enregistrées.",
     },
+    addPlusOne: {
+      heading: "Ajoutez votre accompagnant·e",
+      description:
+        "Vous pouvez venir accompagné·e. Ajoutez ses coordonnées ci-dessous quand vous serez prêt·e.",
+      firstNamePlaceholder: "Son prénom",
+      lastNamePlaceholder: "Son nom de famille",
+      emailPlaceholder: "Son adresse email",
+      phonePlaceholder: "Son numéro de téléphone",
+      submit: "Ajouter",
+      saved: "Merci — votre accompagnant·e a été ajouté·e !",
+    },
   },
   zh: {
     phaseLabel: "预留日期",
@@ -369,6 +400,16 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       placeholder: "例如：素食、坚果过敏、无麸质",
       submit: "保存饮食信息",
       saved: "饮食信息已保存。",
+    },
+    addPlusOne: {
+      heading: "添加您的同行嘉宾",
+      description: "您可以携伴出席。请在准备好后填写同行嘉宾的信息。",
+      firstNamePlaceholder: "对方的名字",
+      lastNamePlaceholder: "对方的姓氏",
+      emailPlaceholder: "对方的电子邮件地址",
+      phonePlaceholder: "对方的电话号码",
+      submit: "添加同行嘉宾",
+      saved: "谢谢——已为您添加同行嘉宾！",
     },
   },
 };

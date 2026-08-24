@@ -21,7 +21,7 @@ function NameSignInForm({ language }: { language: PreferredLanguage }) {
           required
           autoComplete="given-name"
           placeholder={strings.firstNamePlaceholder}
-          className="input"
+          className="glass-input"
         />
         <input
           type="text"
@@ -29,7 +29,7 @@ function NameSignInForm({ language }: { language: PreferredLanguage }) {
           required
           autoComplete="family-name"
           placeholder={strings.lastNamePlaceholder}
-          className="input"
+          className="glass-input"
         />
       </div>
       <input
@@ -37,7 +37,7 @@ function NameSignInForm({ language }: { language: PreferredLanguage }) {
         name="contact"
         autoComplete="email tel"
         placeholder={strings.contactPlaceholder}
-        className="input"
+        className="glass-input"
       />
       <button
         type="submit"
@@ -64,7 +64,7 @@ function WechatSignInForm({ language }: { language: PreferredLanguage }) {
         required
         autoComplete="off"
         placeholder={strings.wechatPlaceholder}
-        className="input"
+        className="glass-input"
       />
       <button
         type="submit"

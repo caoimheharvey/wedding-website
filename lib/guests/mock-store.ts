@@ -26,6 +26,7 @@ function makeGuest(overrides: GuestOverrides): Guest {
     isPlusOneOf: null,
     plusOneStatus: null,
     plusOneRequestedRelationship: null,
+    plusOneAllowed: false,
     invitedBy: "joint",
     rsvpDeadlineOverride: null,
     rsvpStatus: "invited",

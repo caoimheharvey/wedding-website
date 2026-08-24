@@ -33,6 +33,7 @@ interface GuestRow {
   is_plus_one_of: string | null;
   plus_one_status: Guest["plusOneStatus"];
   plus_one_requested_relationship: string | null;
+  plus_one_allowed: boolean;
   invited_by: Guest["invitedBy"];
   rsvp_deadline_override: string | null;
   rsvp_status: Guest["rsvpStatus"];
@@ -57,6 +58,7 @@ function mapRow(row: GuestRow): Guest {
     isPlusOneOf: row.is_plus_one_of,
     plusOneStatus: row.plus_one_status,
     plusOneRequestedRelationship: row.plus_one_requested_relationship,
+    plusOneAllowed: row.plus_one_allowed,
     invitedBy: row.invited_by,
     rsvpDeadlineOverride: row.rsvp_deadline_override,
     rsvpStatus: row.rsvp_status,
