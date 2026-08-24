@@ -142,6 +142,12 @@ export function EmbedGroupForm({
                 className="input"
                 placeholder="https://…"
               />
+              {row.provider === "google_maps" && (
+                <span className="font-normal text-foreground/50">
+                  Paste a regular Google Maps link (a place page, or a pinned location) — not a
+                  shortened maps.app.goo.gl link, those can&apos;t be embedded.
+                </span>
+              )}
             </label>
             <label className="flex flex-col gap-1 text-xs text-ink">
               Caption

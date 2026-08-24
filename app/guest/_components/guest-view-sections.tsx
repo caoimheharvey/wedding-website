@@ -7,6 +7,7 @@ import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import type { SiteSettings } from "@/lib/rsvp/types";
 import { localizedSectionTitle } from "@/lib/guest-view/section-title";
 import { groupItemsByColumn, textSectionColumns } from "@/lib/guest-view/columns";
+import { toGoogleMapsEmbedUrl } from "@/lib/guest-view/google-maps-embed";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
@@ -261,7 +262,11 @@ function EmbedGroupView({ section, title }: { section: GuestViewSection; title: 
                   <PinterestBoardEmbed key={embed.url} url={embed.url} />
                 ) : (
                   <iframe
-                    src={embed.url}
+                    src={
+                      embed.provider === "google_maps"
+                        ? toGoogleMapsEmbedUrl(embed.url)
+                        : embed.url
+                    }
                     className="h-52 w-full rounded-md border border-border"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
