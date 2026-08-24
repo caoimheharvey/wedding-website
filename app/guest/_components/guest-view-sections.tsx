@@ -14,6 +14,7 @@ import { ContactInfoForm } from "./contact-info-form";
 import { DietaryRestrictionsForm } from "./dietary-restrictions-form";
 import { AddPlusOneForm } from "./add-plus-one-form";
 import { ChildrenForm } from "./children-form";
+import { PinterestBoardEmbed } from "./pinterest-board-embed";
 import { CountdownSectionView, WeddingDateSectionView } from "./wedding-info-sections";
 
 const GRID_COLS: Record<number, string> = {
@@ -257,14 +258,7 @@ function EmbedGroupView({ section, title }: { section: GuestViewSection; title: 
             {items.map((embed) => (
               <div key={embed.id} className="flex flex-col gap-2">
                 {embed.provider === "pinterest" ? (
-                  <a
-                    href={embed.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-40 items-center justify-center rounded-md border border-border bg-sand/40 text-sm font-medium text-aegean hover:underline"
-                  >
-                    View on Pinterest
-                  </a>
+                  <PinterestBoardEmbed key={embed.url} url={embed.url} />
                 ) : (
                   <iframe
                     src={embed.url}
