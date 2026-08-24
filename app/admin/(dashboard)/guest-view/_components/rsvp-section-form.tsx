@@ -26,7 +26,7 @@ export function RsvpSectionForm({
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-3 glass-card p-4"
     >
       <p className="text-sm text-foreground/60">
         Places the RSVP form here in the guest&apos;s view. Guests can always change their answer

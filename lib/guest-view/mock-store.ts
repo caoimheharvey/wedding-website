@@ -376,7 +376,10 @@ function toMockImages(images: MockImageInput[]): GuestViewImage[] {
 }
 
 export function mockCreateBuiltinSection(
-  type: Extract<GuestViewSectionType, "countdown" | "wedding_date" | "dietary_restrictions">,
+  type: Extract<
+    GuestViewSectionType,
+    "countdown" | "wedding_date" | "dietary_restrictions" | "plus_one" | "children"
+  >,
   data: z.infer<typeof builtinSectionFormSchema>,
   orderIndex: number,
 ): GuestViewSection {

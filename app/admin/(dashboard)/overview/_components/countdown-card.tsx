@@ -3,7 +3,7 @@ import { getWeddingCountdown } from "@/lib/planning/countdown";
 export function CountdownCard({ weddingDate }: { weddingDate: string | null }) {
   if (!weddingDate) {
     return (
-      <section className="rounded-lg border border-border bg-surface p-4">
+      <section className="glass-card p-4">
         <p className="text-xs font-medium tracking-wide text-foreground/50 uppercase">
           Countdown
         </p>
@@ -17,7 +17,7 @@ export function CountdownCard({ weddingDate }: { weddingDate: string | null }) {
   const countdown = getWeddingCountdown(weddingDate);
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-4">
+    <section className="glass-card p-4">
       <p className="text-xs font-medium tracking-wide text-foreground/50 uppercase">Countdown</p>
       {countdown.isPast ? (
         <p className="mt-2 font-display text-2xl text-ink">Your wedding was {countdown.label}</p>

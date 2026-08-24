@@ -1,10 +1,12 @@
 import Link from "next/link";
+import type { GuestChild } from "@/lib/children/types";
 import { PREFERRED_LANGUAGE_LABELS, type GuestWithPlusOnes } from "@/lib/guests/types";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { PriorityBadge } from "./priority-badge";
 import { RoleBadge } from "./role-badge";
 import { InvitedByBadge } from "./invited-by-badge";
+import { GrantBadge } from "./grant-badge";
 import { RsvpStatusSelect } from "./rsvp-status-select";
 import { DeleteGuestButton } from "./delete-guest-button";
 
@@ -15,10 +17,12 @@ function guestName(guest: { firstName: string | null; lastName: string | null })
 function GuestMeta({
   guest,
   plusOneOfName,
+  childrenList,
   isNested,
 }: {
   guest: GuestWithPlusOnes;
   plusOneOfName?: string;
+  childrenList?: GuestChild[];
   isNested?: boolean;
 }) {
   return (
@@ -33,6 +37,11 @@ function GuestMeta({
       {/* When nested under their primary, indentation already conveys this. */}
       {!isNested && guest.isPlusOneOf && plusOneOfName && (
         <div className="mt-1 text-xs text-foreground/50">Plus-one of {plusOneOfName}</div>
+      )}
+      {childrenList && childrenList.length > 0 && (
+        <div className="mt-1 text-xs text-foreground/60">
+          Children: {childrenList.map((child) => [child.firstName, child.lastName].filter(Boolean).join(" ")).join(", ")}
+        </div>
       )}
       {guest.rsvpDelegateFor.length > 0 && (
         <div className="mt-1 text-xs text-aegean">
@@ -89,6 +98,7 @@ export function GuestRow({
   guest,
   linkedPlusOneCount,
   plusOneOfName,
+  childrenList,
   effectiveStatus,
   isNested = false,
   selected,
@@ -97,6 +107,7 @@ export function GuestRow({
   guest: GuestWithPlusOnes;
   linkedPlusOneCount: number;
   plusOneOfName?: string;
+  childrenList?: GuestChild[];
   effectiveStatus: EffectiveRsvpStatus;
   isNested?: boolean;
   selected?: boolean;
@@ -121,6 +132,7 @@ export function GuestRow({
         <GuestMeta
           guest={guest}
           plusOneOfName={plusOneOfName}
+          childrenList={childrenList}
           isNested={isNested}
         />
       </td>
@@ -128,6 +140,8 @@ export function GuestRow({
         <div className="flex flex-col items-start gap-1">
           <PriorityBadge priority={guest.relationshipPriority} />
           <InvitedByBadge invitedBy={guest.invitedBy} />
+          {guest.plusOneAllowed && <GrantBadge label="Plus one granted" />}
+          {guest.childrenAllowed && <GrantBadge label="Allowed children" />}
         </div>
       </td>
       <td className="py-3 pr-4">
@@ -165,6 +179,7 @@ export function GuestCard({
   guest,
   linkedPlusOneCount,
   plusOneOfName,
+  childrenList,
   effectiveStatus,
   isNested = false,
   selected,
@@ -173,13 +188,14 @@ export function GuestCard({
   guest: GuestWithPlusOnes;
   linkedPlusOneCount: number;
   plusOneOfName?: string;
+  childrenList?: GuestChild[];
   effectiveStatus: EffectiveRsvpStatus;
   isNested?: boolean;
   selected?: boolean;
   onToggleSelect?: (guestId: string) => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
+    <div className="glass-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2">
           <SelectCheckbox guestId={guest.id} selected={selected} onToggleSelect={onToggleSelect} />
@@ -188,6 +204,7 @@ export function GuestCard({
             <GuestMeta
               guest={guest}
               plusOneOfName={plusOneOfName}
+              childrenList={childrenList}
               isNested={isNested}
             />
           </div>
@@ -195,6 +212,8 @@ export function GuestCard({
         <div className="flex flex-col items-end gap-1">
           <PriorityBadge priority={guest.relationshipPriority} />
           <InvitedByBadge invitedBy={guest.invitedBy} />
+          {guest.plusOneAllowed && <GrantBadge label="Plus one granted" />}
+          {guest.childrenAllowed && <GrantBadge label="Allowed children" />}
           <RsvpStatusSelect
             guestId={guest.id}
             status={guest.rsvpStatus}

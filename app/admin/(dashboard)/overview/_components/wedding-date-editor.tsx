@@ -40,7 +40,7 @@ export function WeddingDateEditor({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+    <div className="flex flex-col gap-3 glass-card p-4">
       <label htmlFor="weddingDate" className="text-sm font-medium text-ink">
         Wedding date
       </label>

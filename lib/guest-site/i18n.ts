@@ -90,10 +90,16 @@ interface GuestSiteStrings {
     description: string;
     firstNamePlaceholder: string;
     lastNamePlaceholder: string;
-    emailPlaceholder: string;
-    phonePlaceholder: string;
     submit: string;
     saved: string;
+  };
+  children: {
+    heading: string;
+    description: string;
+    firstNamePlaceholder: string;
+    lastNamePlaceholder: string;
+    submit: string;
+    remove: string;
   };
 }
 
@@ -195,13 +201,19 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
     addPlusOne: {
       heading: "Add your plus-one",
-      description: "You're welcome to bring a plus-one. Add their details below whenever you're ready.",
+      description: "You're welcome to bring a plus-one. Add their name below whenever you're ready.",
       firstNamePlaceholder: "Their first name",
       lastNamePlaceholder: "Their last name",
-      emailPlaceholder: "Their email address",
-      phonePlaceholder: "Their mobile number",
       submit: "Add plus-one",
       saved: "Thanks — we've added your plus-one!",
+    },
+    children: {
+      heading: "Bringing children?",
+      description: "You're welcome to bring your kids — add their names below.",
+      firstNamePlaceholder: "Child's first name",
+      lastNamePlaceholder: "Child's last name",
+      submit: "Add child",
+      remove: "Remove",
     },
   },
   fr: {
@@ -302,13 +314,20 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     addPlusOne: {
       heading: "Ajoutez votre accompagnant·e",
       description:
-        "Vous pouvez venir accompagné·e. Ajoutez ses coordonnées ci-dessous quand vous serez prêt·e.",
+        "Vous pouvez venir accompagné·e. Ajoutez son nom ci-dessous quand vous serez prêt·e.",
       firstNamePlaceholder: "Son prénom",
       lastNamePlaceholder: "Son nom de famille",
-      emailPlaceholder: "Son adresse email",
-      phonePlaceholder: "Son numéro de téléphone",
       submit: "Ajouter",
       saved: "Merci — votre accompagnant·e a été ajouté·e !",
+    },
+    children: {
+      heading: "Vous venez avec des enfants ?",
+      description:
+        "Vous êtes les bienvenus avec vos enfants — ajoutez leurs prénoms ci-dessous.",
+      firstNamePlaceholder: "Prénom de l'enfant",
+      lastNamePlaceholder: "Nom de l'enfant",
+      submit: "Ajouter un enfant",
+      remove: "Retirer",
     },
   },
   zh: {
@@ -403,13 +422,19 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
     addPlusOne: {
       heading: "添加您的同行嘉宾",
-      description: "您可以携伴出席。请在准备好后填写同行嘉宾的信息。",
+      description: "您可以携伴出席。请在准备好后填写同行嘉宾的姓名。",
       firstNamePlaceholder: "对方的名字",
       lastNamePlaceholder: "对方的姓氏",
-      emailPlaceholder: "对方的电子邮件地址",
-      phonePlaceholder: "对方的电话号码",
       submit: "添加同行嘉宾",
       saved: "谢谢——已为您添加同行嘉宾！",
+    },
+    children: {
+      heading: "携带儿童？",
+      description: "欢迎携带您的孩子出席——请在下方添加他们的姓名。",
+      firstNamePlaceholder: "孩子的名字",
+      lastNamePlaceholder: "孩子的姓氏",
+      submit: "添加孩子",
+      remove: "移除",
     },
   },
 };

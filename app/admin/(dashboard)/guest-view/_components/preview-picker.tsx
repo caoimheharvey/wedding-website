@@ -22,7 +22,7 @@ export function PreviewPicker({ guests }: { guests: Guest[] }) {
   }, [guests, query]);
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
+    <div className="glass-card p-4">
       <h2 className="mb-1 font-display text-lg text-ink">Preview</h2>
       <p className="mb-3 text-xs text-foreground/50">
         Role and language are what actually determine what a guest is served — preview by those,

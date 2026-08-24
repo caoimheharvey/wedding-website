@@ -15,11 +15,10 @@ import { getPreviewPersona } from "@/lib/guest-site/preview-personas";
 import { plusOnePartyNames } from "@/lib/guest-site/party-names";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { guestNeedsContactOnboarding, guestNeedsFirstName } from "@/lib/guests/contact-info";
-import { guestNeedsPlusOneForm } from "@/lib/guests/plus-one";
+import { listChildrenForGuest } from "@/lib/children/queries";
 import { AdminViewLink } from "./guest/_components/admin-view-link";
 import { GuestSignInContent } from "./guest/_components/guest-sign-in-content";
 import { ContactInfoForm } from "./guest/_components/contact-info-form";
-import { AddPlusOneForm } from "./guest/_components/add-plus-one-form";
 import { GuestPageShell } from "./guest/_components/guest-page-shell";
 import { GuestSiteView } from "./guest/_components/guest-site-view";
 import { GuestViewSections } from "./guest/_components/guest-view-sections";
@@ -36,11 +35,12 @@ export default async function Home({
   if (session) {
     const guest = await getGuestById(session.guestId);
     if (guest) {
-      const [siteSettings, allSections, allGuests, delegatePairs] = await Promise.all([
+      const [siteSettings, allSections, allGuests, delegatePairs, children] = await Promise.all([
         getSiteSettings(),
         listGuestViewSections(),
         listGuests(),
         listRsvpDelegatePairs(),
+        listChildrenForGuest(guest.id),
       ]);
 
       const language = isPreferredLanguage(lang) ? lang : guest.preferredLanguage;
@@ -51,7 +51,6 @@ export default async function Home({
       const rsvpDelegatedBy = rsvpDelegatesForGuest(guest, allGuests, delegatePairs);
       const needsContactOnboarding =
         guestNeedsContactOnboarding(guest) || guestNeedsFirstName(guest);
-      const needsPlusOneForm = guestNeedsPlusOneForm(guest, allGuests);
 
       return (
         <GuestPageShell backgroundImageUrl={siteSettings.backgroundImageUrl}>
@@ -80,24 +79,22 @@ export default async function Home({
               onboarding
             />
           ) : (
-            <>
-              {needsPlusOneForm && <AddPlusOneForm language={language} />}
-              <GuestViewSections
-                sections={sections}
-                language={language}
-                siteSettings={siteSettings}
-                rsvp={{
-                  guest,
-                  allGuests,
-                  delegatePairs,
-                  rsvpSubmittees,
-                  rsvpDelegatedBy,
-                  deadlinePassed: effectiveStatus === "deadline_missed",
-                  effectiveStatus,
-                  effectiveDeadline,
-                }}
-              />
-            </>
+            <GuestViewSections
+              sections={sections}
+              language={language}
+              siteSettings={siteSettings}
+              rsvp={{
+                guest,
+                allGuests,
+                delegatePairs,
+                rsvpSubmittees,
+                rsvpDelegatedBy,
+                deadlinePassed: effectiveStatus === "deadline_missed",
+                effectiveStatus,
+                effectiveDeadline,
+                children,
+              }}
+            />
           )}
         </GuestPageShell>
       );

@@ -1,6 +1,8 @@
+import type { GuestChild } from "@/lib/children/types";
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import type { Guest, PreferredLanguage } from "@/lib/guests/types";
 import type { RsvpDelegatePair } from "@/lib/guests/rsvp-delegates";
+import { guestNeedsPlusOneForm } from "@/lib/guests/plus-one";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import type { SiteSettings } from "@/lib/rsvp/types";
 import { localizedSectionTitle } from "@/lib/guest-view/section-title";
@@ -10,6 +12,8 @@ import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
 import { ContactInfoForm } from "./contact-info-form";
 import { DietaryRestrictionsForm } from "./dietary-restrictions-form";
+import { AddPlusOneForm } from "./add-plus-one-form";
+import { ChildrenForm } from "./children-form";
 import { CountdownSectionView, WeddingDateSectionView } from "./wedding-info-sections";
 
 const GRID_COLS: Record<number, string> = {
@@ -35,6 +39,8 @@ export interface RsvpSectionContext {
   deadlinePassed: boolean;
   effectiveStatus: EffectiveRsvpStatus;
   effectiveDeadline?: string | null;
+  /** The signed-in guest's own children, for the 'children' section type. */
+  children: GuestChild[];
   /** Local-test-only: lets the admin preview route submit without a real session. */
   previewGuestId?: string;
 }
@@ -136,6 +142,29 @@ export function GuestViewSections({
             <DietaryRestrictionsForm
               key={section.id}
               people={rsvp.rsvpSubmittees}
+              language={language}
+              previewGuestId={rsvp.previewGuestId}
+              title={sectionTitle}
+            />
+          );
+        }
+        if (section.type === "plus_one" && rsvp) {
+          if (!guestNeedsPlusOneForm(rsvp.guest, rsvp.allGuests)) return null;
+          return (
+            <AddPlusOneForm
+              key={section.id}
+              language={language}
+              previewGuestId={rsvp.previewGuestId}
+              title={sectionTitle}
+            />
+          );
+        }
+        if (section.type === "children" && rsvp) {
+          if (!rsvp.guest.childrenAllowed) return null;
+          return (
+            <ChildrenForm
+              key={section.id}
+              childrenList={rsvp.children}
               language={language}
               previewGuestId={rsvp.previewGuestId}
               title={sectionTitle}

@@ -55,7 +55,7 @@ export function ChecklistSection({ checklist }: { checklist: ChecklistSummary })
 
   return (
     <article className="flex flex-col gap-6">
-      <section className="rounded-lg border border-border bg-surface p-4">
+      <section className="glass-card p-4">
         <p className="text-sm text-foreground/60">
           {checklist.completedCount} of {checklist.totalCount} tasks complete
           {checklist.currentPhase ? ` · Current phase: ${checklist.currentPhase.label}` : ""}

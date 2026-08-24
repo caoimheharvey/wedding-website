@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getBudgetSummary } from "@/lib/budget/queries";
+import { listChildren } from "@/lib/children/queries";
 import { listGuestsWithPlusOnes } from "@/lib/guests/queries";
 import type { Guest } from "@/lib/guests/types";
 import { getChecklistSummary } from "@/lib/planning/queries";
@@ -14,11 +15,12 @@ import { PlanningPhaseCard } from "./_components/planning-phase-card";
 import { WeddingDateEditor } from "./_components/wedding-date-editor";
 
 export default async function OverviewPage() {
-  const [guests, siteSettings, budget, checklist] = await Promise.all([
+  const [guests, siteSettings, budget, checklist, children] = await Promise.all([
     listGuestsWithPlusOnes(),
     getSiteSettings(),
     getBudgetSummary(),
     getChecklistSummary(),
+    listChildren(),
   ]);
 
   const effectiveStatusById: Record<string, EffectiveRsvpStatus> = {};
@@ -48,7 +50,7 @@ export default async function OverviewPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <CountdownCard weddingDate={siteSettings.weddingDate} />
-        <section className="rounded-lg border border-border bg-surface p-4">
+        <section className="glass-card p-4">
           <WeddingDateEditor
             weddingDate={siteSettings.weddingDate}
             weddingLocation={siteSettings.weddingLocation}
@@ -73,7 +75,7 @@ export default async function OverviewPage() {
             Manage guests
           </Link>
         </header>
-        <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
+        <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} childCount={children.length} />
       </section>
 
       <DietaryRequirementsCard guests={guests} />

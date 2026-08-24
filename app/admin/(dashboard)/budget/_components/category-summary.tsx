@@ -16,7 +16,7 @@ export function CategorySummary({
   const remainingToAllocate = availableBudget !== null ? availableBudget - totalBudgeted : null;
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4">
+    <div className="glass-card p-4">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="font-display text-lg text-ink">By category</h2>
         <AddCategorySection />

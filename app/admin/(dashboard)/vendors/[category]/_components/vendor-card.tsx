@@ -49,8 +49,8 @@ export function VendorCard({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-lg border p-4 ${
-        vendor.isSelected ? "border-olive bg-olive/5" : "border-border bg-surface"
+      className={`flex flex-col gap-3 rounded-lg border p-4 backdrop-blur-xl backdrop-saturate-150 ${
+        vendor.isSelected ? "border-olive bg-olive/10" : "border-white/50 bg-white/45"
       } ${isFromOtherDestination ? "opacity-50 grayscale" : ""}`}
     >
       <div className="flex items-start justify-between gap-3">

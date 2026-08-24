@@ -213,23 +213,14 @@ export async function addPlusOne(
 
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phoneCountryId = String(formData.get("phoneCountryId") ?? "");
-  const phoneNational = String(formData.get("phoneNational") ?? "").trim();
 
   if (!firstName) return { message: "Enter your plus-one's first name." };
-
-  const formattedPhone = phoneNational ? formatStoredPhoneForCountry(phoneCountryId, phoneNational) : null;
-  if (phoneNational && !formattedPhone) {
-    return { message: "Enter a valid phone number for your selected country." };
-  }
-  if (email && !EMAIL_PATTERN.test(email)) return { message: "Enter a valid email address." };
 
   const fields = {
     firstName,
     lastName: lastName || null,
-    email: email || null,
-    phone: formattedPhone,
+    email: null,
+    phone: null,
     wechatHandle: null,
     relationshipPriority: 5 as const,
     preferredLanguage: actingGuest.preferredLanguage,
@@ -238,6 +229,7 @@ export async function addPlusOne(
     plusOneStatus: null,
     plusOneRequestedRelationship: null,
     plusOneAllowed: false,
+    childrenAllowed: false,
     invitedBy: actingGuest.invitedBy,
     rsvpDeadlineOverride: actingGuest.rsvpDeadlineOverride,
     rsvpStatus: "invited" as const,
@@ -252,14 +244,15 @@ export async function addPlusOne(
     const { error } = await supabase.from("guests").insert({
       first_name: fields.firstName,
       last_name: fields.lastName,
-      email: fields.email,
-      phone: fields.phone,
+      email: null,
+      phone: null,
       wechat_handle: null,
       relationship_priority: fields.relationshipPriority,
       preferred_language: fields.preferredLanguage,
       party_roles: [],
       is_plus_one_of: actingGuestId,
       plus_one_allowed: false,
+      children_allowed: false,
       invited_by: fields.invitedBy,
       rsvp_deadline_override: fields.rsvpDeadlineOverride,
       rsvp_status: "invited",

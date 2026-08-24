@@ -44,7 +44,7 @@ export default async function BudgetPage() {
         totalBudgeted={summary.totalBudgeted}
       />
 
-      <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="glass-card p-4">
         <h2 className="mb-1 font-display text-lg text-ink">Family contributions</h2>
         <p className="mb-3 text-xs text-foreground/50">
           Extra money from family, counted toward your available budget above.

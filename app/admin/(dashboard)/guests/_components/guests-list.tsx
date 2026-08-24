@@ -1,3 +1,4 @@
+import type { GuestChild } from "@/lib/children/types";
 import type { GuestWithPlusOnes } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { GuestRow, GuestCard } from "./guest-list-items";
@@ -6,6 +7,7 @@ export function GuestsList({
   guests,
   nestedIds,
   nameById,
+  childrenByGuestId,
   effectiveStatusById,
   selected,
   onToggleSelect,
@@ -13,6 +15,7 @@ export function GuestsList({
   guests: GuestWithPlusOnes[];
   nestedIds: Set<string>;
   nameById: Record<string, string>;
+  childrenByGuestId: Record<string, GuestChild[]>;
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
   selected: Set<string>;
   onToggleSelect?: (guestId: string) => void;
@@ -44,6 +47,7 @@ export function GuestsList({
               guest={guest}
               linkedPlusOneCount={guest.plusOnes.length}
               plusOneOfName={nameFor(guest.isPlusOneOf)}
+              childrenList={childrenByGuestId[guest.id]}
               effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
               isNested={nestedIds.has(guest.id)}
               selected={selected.has(guest.id)}
@@ -62,6 +66,7 @@ export function GuestsList({
               guest={guest}
               linkedPlusOneCount={guest.plusOnes.length}
               plusOneOfName={nameFor(guest.isPlusOneOf)}
+              childrenList={childrenByGuestId[guest.id]}
               effectiveStatus={effectiveStatusById[guest.id] ?? "invited"}
               isNested={isNested}
               selected={selected.has(guest.id)}

@@ -10,11 +10,10 @@ import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { canPreviewGuestView } from "@/lib/guest-preview";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
 import { plusOnePartyNames } from "@/lib/guest-site/party-names";
-import { guestNeedsPlusOneForm } from "@/lib/guests/plus-one";
+import { listChildrenForGuest } from "@/lib/children/queries";
 import { GuestPageShell } from "../_components/guest-page-shell";
 import { GuestSiteView } from "../_components/guest-site-view";
 import { GuestViewSections } from "../_components/guest-view-sections";
-import { AddPlusOneForm } from "../_components/add-plus-one-form";
 import { LanguageTabs, isPreferredLanguage } from "../_components/language-tabs";
 
 export default async function GuestPreviewPage({
@@ -37,6 +36,8 @@ export default async function GuestPreviewPage({
     listRsvpDelegatePairs(),
   ]);
   if (!guest) notFound();
+
+  const children = await listChildrenForGuest(guest.id);
 
   const language = isPreferredLanguage(lang) ? lang : guest.preferredLanguage;
   const effectiveDeadline = guest.rsvpDeadlineOverride ?? siteSettings.defaultRsvpDeadline;
@@ -69,10 +70,6 @@ export default async function GuestPreviewPage({
         language={language}
       />
 
-      {guestNeedsPlusOneForm(guest, allGuests) && (
-        <AddPlusOneForm language={language} previewGuestId={guest.id} />
-      )}
-
       <GuestViewSections
         sections={sections}
         language={language}
@@ -86,6 +83,7 @@ export default async function GuestPreviewPage({
           deadlinePassed: effectiveStatus === "deadline_missed",
           effectiveStatus,
           effectiveDeadline,
+          children,
           previewGuestId: guest.id,
         }}
       />

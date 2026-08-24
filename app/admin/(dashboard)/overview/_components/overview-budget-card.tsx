@@ -14,7 +14,7 @@ export function OverviewBudgetCard({
   totalActual: number;
 }) {
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+    <section className="flex flex-col gap-3 glass-card p-4">
       <header className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium tracking-wide text-foreground/50 uppercase">Budget</p>
         <Link href="/admin/budget" className="text-xs font-medium text-aegean hover:underline">

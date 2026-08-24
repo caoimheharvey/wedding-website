@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { setGuestRsvpDeadlineOverrides } from "@/lib/rsvp/actions";
+import type { GuestChild } from "@/lib/children/types";
 import type { GuestWithPlusOnes } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
@@ -47,11 +48,13 @@ function idsMatchingSearch(flat: GuestWithPlusOnes[], query: string): Set<string
 export function GuestsSection({
   guests,
   nameById,
+  childrenByGuestId,
   effectiveStatusById,
   defaultDeadline,
 }: {
   guests: GuestWithPlusOnes[];
   nameById: Record<string, string>;
+  childrenByGuestId: Record<string, GuestChild[]>;
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
   defaultDeadline: string | null;
 }) {
@@ -202,6 +205,7 @@ export function GuestsSection({
         guests={orderedGuests}
         nestedIds={nestedIds}
         nameById={nameById}
+        childrenByGuestId={childrenByGuestId}
         effectiveStatusById={effectiveStatusById}
         selected={selected}
         onToggleSelect={selectMode ? toggleSelect : undefined}

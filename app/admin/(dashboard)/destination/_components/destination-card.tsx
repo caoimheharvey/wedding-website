@@ -46,8 +46,8 @@ export function DestinationCard({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-lg border p-4 ${
-        destination.isSelected ? "border-olive bg-olive/5" : "border-border bg-surface"
+      className={`flex flex-col gap-3 rounded-lg border p-4 backdrop-blur-xl backdrop-saturate-150 ${
+        destination.isSelected ? "border-olive bg-olive/10" : "border-white/50 bg-white/45"
       }`}
     >
       <div className="flex items-start justify-between gap-3">

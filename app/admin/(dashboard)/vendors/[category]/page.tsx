@@ -45,7 +45,7 @@ export default async function VendorCategoryPage({
       </div>
 
       {hasBudget ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-4 text-sm">
+        <div className="flex flex-wrap items-center gap-3 glass-card p-4 text-sm">
           <span className="text-foreground/70">
             Budgeted <span className="font-medium text-ink">{formatCurrency(budget.budgeted)}</span>
           </span>

@@ -95,6 +95,8 @@ export interface Guest {
   plusOneRequestedRelationship: string | null;
   /** Admin-granted: this guest may add a plus-one whose name isn't on file yet. */
   plusOneAllowed: boolean;
+  /** Admin-granted: this guest may bring children and add their names themselves. */
+  childrenAllowed: boolean;
   invitedBy: InvitedBy;
   /** ISO date (YYYY-MM-DD). Overrides the site-wide default RSVP deadline for this guest only. */
   rsvpDeadlineOverride: string | null;

@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import {
+  createChildrenSection,
   createCountdownSection,
   createDietaryRestrictionsSection,
+  createPlusOneSection,
   createWeddingDateSection,
+  updateChildrenSection,
   updateCountdownSection,
   updateDietaryRestrictionsSection,
+  updatePlusOneSection,
   updateWeddingDateSection,
 } from "@/lib/guest-view/actions";
 import type { GuestViewSection } from "@/lib/guest-view/types";
@@ -29,6 +33,8 @@ type AddingType =
   | "countdown"
   | "wedding_date"
   | "dietary_restrictions"
+  | "plus_one"
+  | "children"
   | null;
 
 function sectionExists(sections: GuestViewSection[], type: GuestViewSection["type"]) {
@@ -78,6 +84,24 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
           onDone={() => setAddingType(null)}
         />
       )}
+      {addingType === "plus_one" && (
+        <BuiltinGuestViewSectionForm
+          description="Lets a guest add their plus-one's first and last name, once they've been granted a plus-one from the Guests tab. Only shown to guests with that granted, and only until they've added one."
+          titlePlaceholder='Defaults to "Add your plus-one"'
+          createAction={createPlusOneSection}
+          updateAction={updatePlusOneSection}
+          onDone={() => setAddingType(null)}
+        />
+      )}
+      {addingType === "children" && (
+        <BuiltinGuestViewSectionForm
+          description="Lets a guest add the names of children they're bringing, once granted from the Guests tab. Only shown to guests with that granted."
+          titlePlaceholder='Defaults to "Bringing children?"'
+          createAction={createChildrenSection}
+          updateAction={updateChildrenSection}
+          onDone={() => setAddingType(null)}
+        />
+      )}
 
       {!addingType && (
         <div className="flex flex-wrap gap-3">
@@ -118,6 +142,16 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
           {!sectionExists(sections, "dietary_restrictions") && (
             <button type="button" onClick={() => setAddingType("dietary_restrictions")} className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light">
               + Dietary section
+            </button>
+          )}
+          {!sectionExists(sections, "plus_one") && (
+            <button type="button" onClick={() => setAddingType("plus_one")} className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light">
+              + Plus-one section
+            </button>
+          )}
+          {!sectionExists(sections, "children") && (
+            <button type="button" onClick={() => setAddingType("children")} className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light">
+              + Children section
             </button>
           )}
         </div>
@@ -167,6 +201,26 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
                   titlePlaceholder='Defaults to "Dietary requirements"'
                   createAction={createDietaryRestrictionsSection}
                   updateAction={updateDietaryRestrictionsSection}
+                  onDone={() => setEditingId(null)}
+                />
+              ) : section.type === "plus_one" ? (
+                <BuiltinGuestViewSectionForm
+                  key={section.id}
+                  section={section}
+                  description="Lets a guest add their plus-one's first and last name, once granted."
+                  titlePlaceholder='Defaults to "Add your plus-one"'
+                  createAction={createPlusOneSection}
+                  updateAction={updatePlusOneSection}
+                  onDone={() => setEditingId(null)}
+                />
+              ) : section.type === "children" ? (
+                <BuiltinGuestViewSectionForm
+                  key={section.id}
+                  section={section}
+                  description="Lets a guest add the names of children they're bringing, once granted."
+                  titlePlaceholder='Defaults to "Bringing children?"'
+                  createAction={createChildrenSection}
+                  updateAction={updateChildrenSection}
                   onDone={() => setEditingId(null)}
                 />
               ) : (

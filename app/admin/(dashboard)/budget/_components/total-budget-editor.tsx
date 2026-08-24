@@ -32,7 +32,7 @@ export function TotalBudgetEditor({ totalBudget }: { totalBudget: number | null 
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+    <div className="flex flex-wrap items-center gap-3 glass-card px-4 py-3">
       <label htmlFor="totalBudget" className="text-sm font-medium text-ink">
         Total budget (€)
       </label>

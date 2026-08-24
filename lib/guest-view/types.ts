@@ -9,7 +9,9 @@ export type GuestViewSectionType =
   | "contact_info"
   | "countdown"
   | "wedding_date"
-  | "dietary_restrictions";
+  | "dietary_restrictions"
+  | "plus_one"
+  | "children";
 export type EmbedProvider = "google_maps" | "pinterest" | "other";
 
 export interface GuestViewEmbed {

@@ -9,7 +9,7 @@ export function DietaryRequirementsCard({ guests }: { guests: GuestWithPlusOnes[
     .sort((a, b) => guestDisplayName(a).localeCompare(guestDisplayName(b)));
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+    <div className="flex flex-col gap-3 glass-card p-4">
       <header className="flex items-center justify-between gap-2">
         <h2 className="font-display text-lg text-ink">Dietary requirements</h2>
         <Link href="/admin/guests" className="text-xs font-medium text-aegean hover:underline">

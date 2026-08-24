@@ -22,7 +22,7 @@ export default async function VendorsPage() {
             <Link
               key={category.id}
               href={`/admin/vendors/${category.id}`}
-              className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-4 transition hover:border-aegean"
+              className="flex flex-col gap-1 glass-card p-4 transition hover:border-aegean"
             >
               <span className="font-display text-lg text-ink">{category.label}</span>
               <span className="text-xs text-foreground/50">

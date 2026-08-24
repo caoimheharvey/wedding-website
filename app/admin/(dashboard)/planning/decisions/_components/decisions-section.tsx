@@ -113,14 +113,14 @@ function DecisionCard({ decision }: { decision: WeddingDecision }) {
 
   if (editing) {
     return (
-      <article className="rounded-lg border border-border bg-surface p-4 text-left">
+      <article className="glass-card p-4 text-left">
         <EditDecisionForm decision={decision} onDone={() => setEditing(false)} />
       </article>
     );
   }
 
   return (
-    <article className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 text-left">
+    <article className="flex flex-col gap-2 glass-card p-4 text-left">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-medium text-ink">{decision.title}</h2>
@@ -175,7 +175,7 @@ function AddDecisionForm({ onDone }: { onDone: () => void }) {
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-3 glass-card p-4"
     >
       <DecisionFormFields errors={state?.errors} />
       <div className="flex flex-wrap gap-2">

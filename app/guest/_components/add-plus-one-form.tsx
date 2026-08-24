@@ -1,25 +1,23 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { addPlusOne } from "@/lib/guests/guest-actions";
 import { PLUS_ONE_SUCCESS_MESSAGE } from "@/lib/guests/plus-one";
 import type { PreferredLanguage } from "@/lib/guests/types";
-import { defaultPhoneCountryId } from "@/lib/phone/countries";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
-import { PhoneInput } from "./phone-input";
 
 const initialState: { message?: string } | undefined = undefined;
 
 export function AddPlusOneForm({
   language,
   previewGuestId,
+  title,
 }: {
   language: PreferredLanguage;
   previewGuestId?: string;
+  title?: string | null;
 }) {
   const [state, formAction, isPending] = useActionState(addPlusOne, initialState);
-  const [phoneCountryId, setPhoneCountryId] = useState(defaultPhoneCountryId(language));
-  const [phoneNational, setPhoneNational] = useState("");
   const strings = GUEST_SITE_STRINGS[language].addPlusOne;
 
   if (state?.message === PLUS_ONE_SUCCESS_MESSAGE) {
@@ -33,11 +31,11 @@ export function AddPlusOneForm({
   return (
     <form action={formAction} className="glass-card w-full p-4 text-center">
       <div className="mb-4">
-        <h2 className="mb-1 font-display text-lg text-ink">{strings.heading}</h2>
+        <h2 className="mb-1 font-display text-lg text-ink">{title || strings.heading}</h2>
         <p className="text-sm text-foreground/60">{strings.description}</p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {previewGuestId && <input type="hidden" name="previewGuestId" value={previewGuestId} />}
         <input
           type="text"
@@ -52,21 +50,6 @@ export function AddPlusOneForm({
           placeholder={strings.lastNamePlaceholder}
           className="glass-input text-center"
         />
-        <input
-          type="email"
-          name="email"
-          placeholder={strings.emailPlaceholder}
-          className="glass-input text-center"
-        />
-        <PhoneInput
-          countryId={phoneCountryId}
-          national={phoneNational}
-          onCountryChange={setPhoneCountryId}
-          onNationalChange={setPhoneNational}
-          placeholder={strings.phonePlaceholder}
-        />
-        <input type="hidden" name="phoneCountryId" value={phoneCountryId} />
-        <input type="hidden" name="phoneNational" value={phoneNational} />
       </div>
 
       <button

@@ -657,3 +657,39 @@ alter table guests
 -- >>> supabase/migrations/0031_site_settings_background_image.sql
 alter table site_settings add column background_image_url text;
 
+
+-- >>> supabase/migrations/0032_guest_children.sql
+alter table guests
+  add column children_allowed boolean not null default false;
+
+create table guest_children (
+  id uuid primary key default gen_random_uuid(),
+  guest_id uuid not null references guests(id) on delete cascade,
+  first_name text not null,
+  last_name text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index guest_children_guest_id_idx on guest_children (guest_id);
+
+alter table guest_children enable row level security;
+
+
+-- >>> supabase/migrations/0033_guest_view_plus_one_children_sections.sql
+alter table guest_view_sections drop constraint guest_view_sections_type_check;
+alter table guest_view_sections add constraint guest_view_sections_type_check
+  check (type in (
+    'text',
+    'embed_group',
+    'rsvp',
+    'image_group',
+    'contact_info',
+    'rsvp_status',
+    'countdown',
+    'wedding_date',
+    'dietary_restrictions',
+    'plus_one',
+    'children'
+  ));
+

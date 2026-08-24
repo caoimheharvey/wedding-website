@@ -152,7 +152,7 @@ export function TextSectionForm({
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-3 glass-card p-4"
     >
       <label className="flex flex-col gap-1 text-sm text-ink">
         Section title — English (optional)

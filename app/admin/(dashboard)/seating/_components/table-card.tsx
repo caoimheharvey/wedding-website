@@ -64,7 +64,7 @@ export function TableCard({
     return (
       <form
         action={formAction}
-        className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+        className="flex flex-col gap-3 glass-card p-4"
       >
         <input
           name="name"
@@ -104,7 +104,7 @@ export function TableCard({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+    <div className="flex flex-col gap-3 glass-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h3 className="font-display text-lg text-ink">{table.name}</h3>

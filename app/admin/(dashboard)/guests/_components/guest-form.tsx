@@ -159,6 +159,20 @@ export function GuestForm({
         </span>
       </label>
 
+      <label className="flex items-center gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          name="childrenAllowed"
+          value="true"
+          defaultChecked={guest?.childrenAllowed ?? false}
+          className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean"
+        />
+        Children allowed
+        <span className="text-xs font-normal text-foreground/50">
+          — lets this guest add the names of children they&apos;re bringing, once they sign in.
+        </span>
+      </label>
+
       <Field label="RSVP handled by" error={state?.errors?.rsvpDelegateIds?.[0]}>
         <GuestDelegatesPicker
           guests={otherGuests}

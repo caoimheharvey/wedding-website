@@ -685,7 +685,7 @@ export async function moveGuestViewSection(
 
 type BuiltinSectionType = Extract<
   GuestViewSectionType,
-  "countdown" | "wedding_date" | "dietary_restrictions"
+  "countdown" | "wedding_date" | "dietary_restrictions" | "plus_one" | "children"
 >;
 
 function parseBuiltinSectionForm(formData: FormData) {
@@ -800,4 +800,34 @@ export async function updateDietaryRestrictionsSection(
   formData: FormData,
 ): Promise<GuestViewSectionActionState> {
   return updateBuiltinSection("dietary_restrictions", sectionId, prevState, formData);
+}
+
+export async function createPlusOneSection(
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return createBuiltinSection("plus_one", prevState, formData);
+}
+
+export async function updatePlusOneSection(
+  sectionId: string,
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return updateBuiltinSection("plus_one", sectionId, prevState, formData);
+}
+
+export async function createChildrenSection(
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return createBuiltinSection("children", prevState, formData);
+}
+
+export async function updateChildrenSection(
+  sectionId: string,
+  prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  return updateBuiltinSection("children", sectionId, prevState, formData);
 }

@@ -20,7 +20,7 @@ function IdeaCard({ idea }: { idea: WeddingIdea }) {
   const [promoteMessage, setPromoteMessage] = useState<string | null>(null);
 
   return (
-    <article className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 text-left">
+    <article className="flex flex-col gap-2 glass-card p-4 text-left">
       <div className="flex items-start justify-between gap-3">
         <h2 className="font-medium text-ink">{idea.title}</h2>
         <div className="flex shrink-0 items-center gap-3">
@@ -107,7 +107,7 @@ function AddIdeaForm({ onDone }: { onDone: () => void }) {
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-3 glass-card p-4"
     >
       <label className="flex flex-col gap-1 text-left text-sm">
         <span className="font-medium text-ink">Idea</span>

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { listChildren } from "@/lib/children/queries";
+import type { GuestChild } from "@/lib/children/types";
 import { listGuestsWithPlusOnes } from "@/lib/guests/queries";
 import type { Guest } from "@/lib/guests/types";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
@@ -9,10 +11,16 @@ import { GuestStats } from "./_components/guest-stats";
 import { GuestsSection } from "./_components/guests-section";
 
 export default async function GuestsPage() {
-  const [guests, siteSettings] = await Promise.all([
+  const [guests, siteSettings, children] = await Promise.all([
     listGuestsWithPlusOnes(),
     getSiteSettings(),
+    listChildren(),
   ]);
+
+  const childrenByGuestId: Record<string, GuestChild[]> = {};
+  for (const child of children) {
+    (childrenByGuestId[child.guestId] ??= []).push(child);
+  }
 
   const nameById: Record<string, string> = {};
   const effectiveStatusById: Record<string, EffectiveRsvpStatus> = {};
@@ -47,11 +55,12 @@ export default async function GuestsPage() {
         </div>
       </div>
 
-      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
+      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} childCount={children.length} />
 
       <GuestsSection
         guests={guests}
         nameById={nameById}
+        childrenByGuestId={childrenByGuestId}
         effectiveStatusById={effectiveStatusById}
         defaultDeadline={siteSettings.defaultRsvpDeadline}
       />

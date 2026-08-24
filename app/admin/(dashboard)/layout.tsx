@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { isLocalTestMode, LOCAL_TEST_USER } from "@/lib/local-test";
+import { getSiteSettings } from "@/lib/rsvp/queries";
+import { GuestBackgroundLayer } from "@/app/guest/_components/guest-background-layer";
 import { NavLink } from "./_components/nav-link";
 
 const NAV_ITEMS = [
@@ -26,14 +28,17 @@ export default async function AdminLayout({
     redirect("/admin/sign-in");
   }
 
+  const siteSettings = await getSiteSettings();
+
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="relative isolate flex min-h-screen flex-col">
+      <GuestBackgroundLayer imageUrl={siteSettings.backgroundImageUrl} />
       {testMode && (
-        <div className="bg-terracotta px-4 py-1.5 text-center text-xs font-medium text-whitewash">
+        <div className="relative z-10 bg-terracotta px-4 py-1.5 text-center text-xs font-medium text-whitewash">
           Local test mode — auth is bypassed. Never set this in production.
         </div>
       )}
-      <header className="border-b border-border bg-surface">
+      <header className="glass-card relative z-10 rounded-none border-x-0 border-t-0">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
           <span className="font-display text-xl text-ink">
             Caoimhe &amp; Alexandre
@@ -67,7 +72,7 @@ export default async function AdminLayout({
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
+      <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
         {children}
       </main>
     </div>

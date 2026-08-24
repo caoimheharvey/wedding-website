@@ -24,6 +24,10 @@ function sectionTypeLabel(type: GuestViewSection["type"]): string {
       return "Wedding date";
     case "dietary_restrictions":
       return "Dietary";
+    case "plus_one":
+      return "Plus-one";
+    case "children":
+      return "Children";
     case "rsvp":
       return "RSVP";
   }
@@ -47,6 +51,10 @@ function sectionTypeDescription(section: GuestViewSection): string {
       return "Wedding date, location, and add-to-calendar buttons.";
     case "dietary_restrictions":
       return "Guests can record dietary requirements for their party.";
+    case "plus_one":
+      return "Guests granted a plus-one can add their first and last name.";
+    case "children":
+      return "Guests granted children can add their names.";
     case "rsvp":
       return "Guests submit or update their RSVP here.";
   }
@@ -66,6 +74,10 @@ function sectionDefaultTitle(section: GuestViewSection): string | null {
       return "Wedding date";
     case "dietary_restrictions":
       return "Dietary requirements";
+    case "plus_one":
+      return "Add your plus-one";
+    case "children":
+      return "Bringing children?";
     default:
       return null;
   }
@@ -102,7 +114,7 @@ export function SectionListItem({
   }
 
   return (
-    <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-surface p-4">
+    <div className="flex items-start justify-between gap-3 glass-card p-4">
       <div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-sand px-2 py-0.5 text-xs font-medium text-ink/60">
