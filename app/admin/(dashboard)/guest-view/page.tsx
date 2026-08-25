@@ -1,13 +1,26 @@
 import { listGuestViewSections } from "@/lib/guest-view/queries";
 import { listGuests } from "@/lib/guests/queries";
+import { getSiteSettings } from "@/lib/rsvp/queries";
+import { sitePhase } from "@/lib/guest-site/phase";
+import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
+import { formatWeddingDate } from "@/lib/planning/countdown";
+import { BackgroundImageEditor } from "./_components/background-image-editor";
 import { GuestViewManager } from "./_components/guest-view-manager";
+import { HeaderLabelEditor } from "./_components/header-label-editor";
 import { PreviewPicker } from "./_components/preview-picker";
 
 export default async function GuestViewPage() {
-  const [sections, guests] = await Promise.all([
+  const [sections, guests, siteSettings] = await Promise.all([
     listGuestViewSections(),
     listGuests(),
+    getSiteSettings(),
   ]);
+
+  const phase = sitePhase(siteSettings.weddingDate, siteSettings.defaultRsvpDeadline);
+  const autoHeaderLabel = GUEST_SITE_STRINGS.en.phaseLabel(
+    phase,
+    siteSettings.defaultRsvpDeadline ? formatWeddingDate(siteSettings.defaultRsvpDeadline) : null,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -19,6 +32,12 @@ export default async function GuestViewPage() {
           separate &quot;extra&quot; page.
         </p>
       </div>
+
+      <section className="glass-card p-4">
+        <HeaderLabelEditor headerLabel={siteSettings.headerLabel} autoLabel={autoHeaderLabel} />
+      </section>
+
+      <BackgroundImageEditor imageUrl={siteSettings.backgroundImageUrl} />
 
       <PreviewPicker guests={guests} />
 

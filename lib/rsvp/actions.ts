@@ -107,7 +107,7 @@ export async function updateHeaderLabel(label: string | null): Promise<{ message
     if (error) return { message: `Could not save: ${error.message}` };
   }
 
-  revalidatePath("/admin/overview");
+  revalidatePath("/admin/guest-view");
   revalidatePath("/");
   return {};
 }
@@ -151,7 +151,7 @@ export async function updateBackgroundImage(
     if (error) return { message: `Could not save: ${error.message}` };
   }
 
-  revalidatePath("/admin/overview");
+  revalidatePath("/admin/guest-view");
   revalidatePath("/");
   revalidatePath("/guest");
   return { message: "Background image updated." };
@@ -171,7 +171,7 @@ export async function removeBackgroundImage(): Promise<{ message?: string }> {
     if (error) return { message: `Could not remove image: ${error.message}` };
   }
 
-  revalidatePath("/admin/overview");
+  revalidatePath("/admin/guest-view");
   revalidatePath("/");
   revalidatePath("/guest");
   return {};

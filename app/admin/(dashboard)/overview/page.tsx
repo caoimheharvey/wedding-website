@@ -5,14 +5,9 @@ import type { Guest } from "@/lib/guests/types";
 import { getChecklistSummary } from "@/lib/planning/queries";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
-import { sitePhase } from "@/lib/guest-site/phase";
-import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
-import { formatWeddingDate } from "@/lib/planning/countdown";
 import { GuestStats } from "../guests/_components/guest-stats";
-import { BackgroundImageEditor } from "./_components/background-image-editor";
 import { CountdownCard } from "./_components/countdown-card";
 import { DietaryRequirementsCard } from "./_components/dietary-requirements-card";
-import { HeaderLabelEditor } from "./_components/header-label-editor";
 import { OverviewBudgetCard } from "./_components/overview-budget-card";
 import { PlanningPhaseCard } from "./_components/planning-phase-card";
 import { WeddingDateEditor } from "./_components/wedding-date-editor";
@@ -41,12 +36,6 @@ export default async function OverviewPage() {
     }
   }
 
-  const phase = sitePhase(siteSettings.weddingDate, siteSettings.defaultRsvpDeadline);
-  const autoHeaderLabel = GUEST_SITE_STRINGS.en.phaseLabel(
-    phase,
-    siteSettings.defaultRsvpDeadline ? formatWeddingDate(siteSettings.defaultRsvpDeadline) : null,
-  );
-
   return (
     <article className="flex flex-col gap-6">
       <header>
@@ -64,10 +53,6 @@ export default async function OverviewPage() {
             weddingLocation={siteSettings.weddingLocation}
           />
         </section>
-      </section>
-
-      <section className="glass-card p-4">
-        <HeaderLabelEditor headerLabel={siteSettings.headerLabel} autoLabel={autoHeaderLabel} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
@@ -91,8 +76,6 @@ export default async function OverviewPage() {
       </section>
 
       <DietaryRequirementsCard guests={guests} />
-
-      <BackgroundImageEditor imageUrl={siteSettings.backgroundImageUrl} />
     </article>
   );
 }
