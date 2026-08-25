@@ -26,6 +26,19 @@ export function guestContactIsComplete(guest: {
   return !guestNeedsFirstName(guest) && !guestNeedsContactOnboarding(guest);
 }
 
+/**
+ * Whether it's fine to leave this guest's contact info blank for now — true
+ * for plus-ones once we at least have their name. We don't need a plus-one's
+ * phone or email up front; the guest who added them can fill it in later if
+ * they want to.
+ */
+export function guestContactCanBeSkipped(guest: {
+  isPlusOneOf: string | null;
+  firstName: string | null;
+}): boolean {
+  return Boolean(guest.isPlusOneOf) && !guestNeedsFirstName(guest);
+}
+
 export interface ContactInfoEntry {
   guestId: string;
   firstName: string;

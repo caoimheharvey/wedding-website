@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   CONTACT_INFO_SUCCESS_MESSAGE,
+  guestContactCanBeSkipped,
   guestContactIsComplete,
   guestNeedsFirstName,
   guestNeedsLastName,
@@ -27,6 +28,10 @@ interface ContactFields {
   email: string;
   phoneCountryId: string;
   phoneNational: string;
+}
+
+function needsForcedEditing(person: Guest): boolean {
+  return !guestContactIsComplete(person) && !guestContactCanBeSkipped(person);
 }
 
 function fieldsFromGuest(guest: Guest, language: PreferredLanguage): ContactFields {
@@ -84,7 +89,7 @@ export function ContactInfoForm({
     Object.fromEntries(people.map((person) => [person.id, fieldsFromGuest(person, language)])),
   );
   const [editingGuestIds, setEditingGuestIds] = useState<Set<string>>(
-    () => new Set(people.filter((person) => !guestContactIsComplete(person)).map((person) => person.id)),
+    () => new Set(people.filter(needsForcedEditing).map((person) => person.id)),
   );
 
   // Adjust state during render (React's recommended alternative to an
@@ -168,7 +173,7 @@ export function ContactInfoForm({
       <div className="flex flex-col gap-5">
         {people.map((person) => {
           const isEditing = editingGuestIds.has(person.id);
-          const wasComplete = guestContactIsComplete(person);
+          const canCancel = !needsForcedEditing(person);
 
           return (
             <div
@@ -246,7 +251,7 @@ export function ContactInfoForm({
                     }
                     placeholder={strings.phonePlaceholder}
                   />
-                  {wasComplete && (
+                  {canCancel && (
                     <button
                       type="button"
                       onClick={() => stopEditing(person.id)}
