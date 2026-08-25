@@ -1,5 +1,6 @@
 import type { PreferredLanguage, RsvpStatus } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
+import type { SitePhase } from "./phase";
 
 function formatNameList(names: string[], conjunction: string): string {
   if (names.length === 0) return "";
@@ -9,7 +10,8 @@ function formatNameList(names: string[], conjunction: string): string {
 }
 
 interface GuestSiteStrings {
-  phaseLabel: string;
+  /** formattedDeadline is only used for the 'rsvp' phase. */
+  phaseLabel: (phase: SitePhase, formattedDeadline: string | null) => string;
   greeting: (names: string[]) => string;
   guestSignIn: {
     description: string;
@@ -105,7 +107,18 @@ interface GuestSiteStrings {
 
 export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
   en: {
-    phaseLabel: "Save the date",
+    phaseLabel: (phase, deadline) => {
+      switch (phase) {
+        case "invited":
+          return "You're Invited";
+        case "save_the_date":
+          return "Save the Date";
+        case "rsvp":
+          return deadline ? `Please RSVP by ${deadline}` : "Please RSVP";
+        case "countdown":
+          return "Almost Time!";
+      }
+    },
     greeting: (names) => `Hello, ${formatNameList(names, "and")}!`,
     guestSignIn: {
       description:
@@ -217,7 +230,18 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
   },
   fr: {
-    phaseLabel: "Réservez la date",
+    phaseLabel: (phase, deadline) => {
+      switch (phase) {
+        case "invited":
+          return "Vous êtes invité·e";
+        case "save_the_date":
+          return "Réservez la date";
+        case "rsvp":
+          return deadline ? `Merci de répondre avant le ${deadline}` : "Merci de répondre";
+        case "countdown":
+          return "Plus que quelques jours !";
+      }
+    },
     greeting: (names) => `Bonjour, ${formatNameList(names, "et")} !`,
     guestSignIn: {
       description:
@@ -331,7 +355,18 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     },
   },
   zh: {
-    phaseLabel: "预留日期",
+    phaseLabel: (phase, deadline) => {
+      switch (phase) {
+        case "invited":
+          return "诚挚邀请";
+        case "save_the_date":
+          return "预留日期";
+        case "rsvp":
+          return deadline ? `请于 ${deadline} 前回复` : "请回复邀请";
+        case "countdown":
+          return "婚礼将至！";
+      }
+    },
     greeting: (names) => `你好，${formatNameList(names, "和")}！`,
     guestSignIn: {
       description:

@@ -68,6 +68,8 @@ export default async function Home({
           <GuestSiteView
             greetingNames={plusOnePartyNames(guest, allGuests)}
             language={language}
+            weddingDate={siteSettings.weddingDate}
+            rsvpDeadline={effectiveDeadline}
           />
 
           {needsContactOnboarding ? (
@@ -139,6 +141,8 @@ export default async function Home({
           greetingNames={[`${persona.firstName} ${persona.lastName}`]}
           language={language}
           delegateFor={persona.delegateFor}
+          weddingDate={siteSettings.weddingDate}
+          rsvpDeadline={siteSettings.defaultRsvpDeadline}
         />
         <GuestViewSections sections={sections} language={language} siteSettings={siteSettings} />
       </GuestPageShell>

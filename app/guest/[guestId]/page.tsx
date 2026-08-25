@@ -68,6 +68,8 @@ export default async function GuestPreviewPage({
       <GuestSiteView
         greetingNames={plusOnePartyNames(guest, allGuests)}
         language={language}
+        weddingDate={siteSettings.weddingDate}
+        rsvpDeadline={effectiveDeadline}
       />
 
       <GuestViewSections

@@ -33,10 +33,10 @@ const TEXT_COLS: Record<number, string> = {
   4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
 };
 
-/** "wide" is only modestly wider than "normal", and only once there's room
- *  for it — on phones (where most guests will be) it looks identical. */
+/** "wide" is noticeably wider than "normal", but only once there's room for
+ *  it — on phones (where most guests will be) it looks identical. */
 function sectionWidthClass(width: GuestViewSection["width"]): string {
-  return width === "wide" ? "w-full sm:-mx-6 sm:w-[calc(100%+3rem)]" : "w-full";
+  return width === "wide" ? "section-wide" : "w-full";
 }
 
 export interface RsvpSectionContext {

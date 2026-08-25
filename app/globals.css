@@ -54,4 +54,20 @@ body {
     background-image: radial-gradient(circle, color-mix(in srgb, var(--color-aegean) 25%, transparent) 1px, transparent 1px);
     background-size: 26px 26px;
   }
+
+  /* Full-bleed-with-cap: breaks out to the viewport center regardless of the
+     narrow centered container it sits in, capped so it's "wider", not
+     edge-to-edge. Left untouched below sm (640px) — on phones there's no
+     spare room for "wide" to mean anything, so it matches "normal". */
+  .section-wide {
+    @apply w-full;
+  }
+  @media (min-width: 640px) {
+    .section-wide {
+      width: 100vw;
+      max-width: 48rem;
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+  }
 }
