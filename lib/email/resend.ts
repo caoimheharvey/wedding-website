@@ -24,8 +24,9 @@ async function sendOne(
   subject: string,
   html: string,
   from: string,
+  scheduledAt?: string,
 ): Promise<CampaignSendResult> {
-  const { data, error } = await client.emails.send({ from, to, subject, html });
+  const { data, error } = await client.emails.send({ from, to, subject, html, scheduledAt });
   if (error) return { recipientId, error: error.message };
   return { recipientId, resendId: data?.id };
 }
@@ -35,6 +36,7 @@ export async function sendCampaignEmails(
   subject: string,
   html: string,
   fromEmail: string,
+  scheduledAt?: string,
 ): Promise<CampaignSendResult[]> {
   const client = getResendClient();
   const results: CampaignSendResult[] = [];
@@ -42,7 +44,9 @@ export async function sendCampaignEmails(
   for (let i = 0; i < recipients.length; i += SEND_CONCURRENCY) {
     const chunk = recipients.slice(i, i + SEND_CONCURRENCY);
     const settled = await Promise.allSettled(
-      chunk.map((recipient) => sendOne(client, recipient.id, recipient.email, subject, html, fromEmail)),
+      chunk.map((recipient) =>
+        sendOne(client, recipient.id, recipient.email, subject, html, fromEmail, scheduledAt),
+      ),
     );
     settled.forEach((outcome, index) => {
       const recipientId = chunk[index].id;
@@ -55,4 +59,28 @@ export async function sendCampaignEmails(
   }
 
   return results;
+}
+
+export interface CampaignCancelResult {
+  recipientId: string;
+  canceled: boolean;
+  error?: string;
+}
+
+export async function cancelScheduledEmails(
+  recipients: { id: string; resendEmailId: string }[],
+): Promise<CampaignCancelResult[]> {
+  const client = getResendClient();
+  const settled = await Promise.allSettled(
+    recipients.map(async (recipient) => {
+      const { error } = await client.emails.cancel(recipient.resendEmailId);
+      if (error) return { recipientId: recipient.id, canceled: false, error: error.message };
+      return { recipientId: recipient.id, canceled: true };
+    }),
+  );
+  return settled.map((outcome, index) =>
+    outcome.status === "fulfilled"
+      ? outcome.value
+      : { recipientId: recipients[index].id, canceled: false, error: String(outcome.reason) },
+  );
 }

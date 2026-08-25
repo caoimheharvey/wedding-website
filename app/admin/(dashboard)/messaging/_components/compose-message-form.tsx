@@ -8,6 +8,13 @@ import { RecipientPicker } from "./recipient-picker";
 
 const initialState: ComposeMessageState = undefined;
 
+function toLocalDateTimeInputMin(): string {
+  const now = new Date();
+  now.setSeconds(0, 0);
+  const offsetMs = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
 export function ComposeMessageForm({
   guests,
   effectiveStatusById,
@@ -19,6 +26,7 @@ export function ComposeMessageForm({
   const [subject, setSubject] = useState("");
   const [html, setHtml] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [scheduledAtLocal, setScheduledAtLocal] = useState("");
   const [confirming, setConfirming] = useState(false);
 
   // Adjust state during render (React's recommended alternative to an
@@ -26,13 +34,15 @@ export function ComposeMessageForm({
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
-    if (state?.message?.startsWith("Sent to")) {
+    if (state?.message?.startsWith("Sent to") || state?.message?.startsWith("Scheduled to send")) {
       setSubject("");
       setHtml("");
       setSelected(new Set());
+      setScheduledAtLocal("");
     }
   }
 
+  const scheduledAtIso = scheduledAtLocal ? new Date(scheduledAtLocal).toISOString() : "";
   const canReview = subject.trim().length > 0 && html.trim().length > 0 && selected.size > 0;
 
   return (
@@ -95,6 +105,35 @@ export function ComposeMessageForm({
         onChange={setSelected}
       />
 
+      <div className="flex flex-col gap-1">
+        <label htmlFor="scheduledAtLocal" className="text-sm font-medium text-ink">
+          Send later (optional)
+        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            id="scheduledAtLocal"
+            type="datetime-local"
+            value={scheduledAtLocal}
+            min={toLocalDateTimeInputMin()}
+            onChange={(event) => setScheduledAtLocal(event.target.value)}
+            className="input w-auto"
+          />
+          {scheduledAtLocal && (
+            <button
+              type="button"
+              onClick={() => setScheduledAtLocal("")}
+              className="text-xs font-medium text-foreground/40 hover:text-aegean"
+            >
+              Send now instead
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-foreground/50">
+          Leave blank to send as soon as you confirm.
+        </p>
+        <input type="hidden" name="scheduledAt" value={scheduledAtIso} />
+      </div>
+
       {!confirming ? (
         <button
           type="button"
@@ -102,19 +141,21 @@ export function ComposeMessageForm({
           onClick={() => setConfirming(true)}
           className="self-start rounded-full bg-aegean px-5 py-2 text-sm font-medium text-whitewash transition hover:bg-aegean-dark disabled:opacity-50"
         >
-          Review &amp; send
+          Review &amp; {scheduledAtLocal ? "schedule" : "send"}
         </button>
       ) : (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-sand/40 px-4 py-3">
           <span className="text-sm font-medium text-ink">
-            Send &quot;{subject}&quot; to {selected.size} recipient{selected.size === 1 ? "" : "s"}?
+            {scheduledAtLocal
+              ? `Schedule "${subject}" to send to ${selected.size} recipient${selected.size === 1 ? "" : "s"} at ${new Date(scheduledAtIso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}?`
+              : `Send "${subject}" to ${selected.size} recipient${selected.size === 1 ? "" : "s"}?`}
           </span>
           <button
             type="submit"
             disabled={isPending}
             className="rounded-full bg-terracotta px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-terracotta-light disabled:opacity-50"
           >
-            {isPending ? "Sending…" : "Confirm send"}
+            {isPending ? "Sending…" : scheduledAtLocal ? "Schedule send" : "Confirm send"}
           </button>
           <button
             type="button"

@@ -12,4 +12,14 @@ export const composeMessageFormSchema = z.object({
   recipientIds: z
     .array(z.string())
     .min(1, { error: "Select at least one recipient" }),
+  scheduledAt: z
+    .string()
+    .trim()
+    .optional()
+    .refine((value) => !value || !Number.isNaN(Date.parse(value)), {
+      error: "Enter a valid date and time",
+    })
+    .refine((value) => !value || Date.parse(value) > Date.now(), {
+      error: "Scheduled time must be in the future",
+    }),
 });

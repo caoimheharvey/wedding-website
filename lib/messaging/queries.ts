@@ -20,6 +20,7 @@ interface CampaignRow {
   status: CampaignStatus;
   created_at: string;
   sent_at: string | null;
+  scheduled_at: string | null;
 }
 
 interface RecipientRow {
@@ -47,6 +48,7 @@ function mapCampaignRow(row: CampaignRow): MessageCampaign {
     status: row.status,
     createdAt: row.created_at,
     sentAt: row.sent_at,
+    scheduledAt: row.scheduled_at,
   };
 }
 
@@ -69,7 +71,17 @@ function mapRecipientRow(row: RecipientRow): MessageRecipient {
 }
 
 function emptyStatusCounts(): RecipientStatusCounts {
-  return { queued: 0, sent: 0, delivered: 0, bounced: 0, complained: 0, failed: 0, delayed: 0 };
+  return {
+    queued: 0,
+    scheduled: 0,
+    sent: 0,
+    delivered: 0,
+    bounced: 0,
+    complained: 0,
+    failed: 0,
+    delayed: 0,
+    canceled: 0,
+  };
 }
 
 function summarize(campaign: MessageCampaign, recipients: MessageRecipient[]): MessageCampaignSummary {

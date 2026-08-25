@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { RecipientStatus } from "@/lib/messaging/types";
 
 const EVENT_STATUS: Partial<Record<string, RecipientStatus>> = {
+  "email.scheduled": "scheduled",
   "email.sent": "sent",
   "email.delivered": "delivered",
   "email.delivery_delayed": "delayed",

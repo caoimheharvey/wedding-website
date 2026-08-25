@@ -744,3 +744,17 @@ alter table message_recipients enable row level security;
 -- All access goes through the server-side service-role client (Server
 -- Actions), so no policies grant access to the anon/authenticated roles.
 
+
+-- >>> supabase/migrations/0037_messaging_scheduling.sql
+alter table message_campaigns add column scheduled_at timestamptz;
+
+alter table message_campaigns drop constraint message_campaigns_status_check;
+alter table message_campaigns add constraint message_campaigns_status_check
+  check (status in ('sending', 'scheduled', 'sent', 'failed', 'canceled'));
+
+alter table message_recipients drop constraint message_recipients_status_check;
+alter table message_recipients add constraint message_recipients_status_check
+  check (status in (
+    'queued', 'scheduled', 'sent', 'delivered', 'bounced', 'complained', 'failed', 'delayed', 'canceled'
+  ));
+

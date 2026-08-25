@@ -1,22 +1,26 @@
-export type CampaignStatus = "sending" | "sent" | "failed";
+export type CampaignStatus = "sending" | "scheduled" | "sent" | "failed" | "canceled";
 
 export type RecipientStatus =
   | "queued"
+  | "scheduled"
   | "sent"
   | "delivered"
   | "bounced"
   | "complained"
   | "failed"
-  | "delayed";
+  | "delayed"
+  | "canceled";
 
 export const RECIPIENT_STATUS_LABELS: Record<RecipientStatus, string> = {
   queued: "Queued",
+  scheduled: "Scheduled",
   sent: "Sent",
   delivered: "Delivered",
   bounced: "Bounced",
   complained: "Marked as spam",
   failed: "Failed",
   delayed: "Delayed",
+  canceled: "Canceled",
 };
 
 export interface MessageRecipient {
@@ -37,12 +41,14 @@ export interface MessageRecipient {
 
 export interface RecipientStatusCounts {
   queued: number;
+  scheduled: number;
   sent: number;
   delivered: number;
   bounced: number;
   complained: number;
   failed: number;
   delayed: number;
+  canceled: number;
 }
 
 export interface MessageCampaign {
@@ -53,6 +59,7 @@ export interface MessageCampaign {
   status: CampaignStatus;
   createdAt: string;
   sentAt: string | null;
+  scheduledAt: string | null;
 }
 
 export interface MessageCampaignSummary extends MessageCampaign {

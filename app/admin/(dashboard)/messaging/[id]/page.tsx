@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getCampaignWithRecipients } from "@/lib/messaging/queries";
 import { RECIPIENT_STATUS_LABELS } from "@/lib/messaging/types";
 import { CampaignStatusPoller } from "../_components/campaign-status-poller";
+import { CancelCampaignButton } from "../_components/cancel-campaign-button";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -22,14 +23,21 @@ export default async function CampaignDetailPage({
     <div className="flex flex-col gap-6">
       <CampaignStatusPoller statuses={campaign.recipients.map((recipient) => recipient.status)} />
 
-      <div>
-        <Link href="/admin/messaging" className="text-xs font-medium text-aegean hover:underline">
-          ← Back to messaging
-        </Link>
-        <h1 className="font-display text-2xl text-ink">{campaign.subject}</h1>
-        <p className="mt-1 text-sm text-foreground/60">
-          Sent {formatDate(campaign.sentAt)} from {campaign.fromEmail}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Link href="/admin/messaging" className="text-xs font-medium text-aegean hover:underline">
+            ← Back to messaging
+          </Link>
+          <h1 className="font-display text-2xl text-ink">{campaign.subject}</h1>
+          <p className="mt-1 text-sm text-foreground/60">
+            {campaign.status === "scheduled"
+              ? `Scheduled to send ${formatDate(campaign.scheduledAt)} from ${campaign.fromEmail}`
+              : campaign.status === "canceled"
+                ? `Canceled — was scheduled for ${formatDate(campaign.scheduledAt)} from ${campaign.fromEmail}`
+                : `Sent ${formatDate(campaign.sentAt)} from ${campaign.fromEmail}`}
+          </p>
+        </div>
+        {campaign.status === "scheduled" && <CancelCampaignButton campaignId={campaign.id} />}
       </div>
 
       <div className="glass-card p-2">
