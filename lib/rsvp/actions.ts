@@ -10,6 +10,7 @@ import { RSVP_STATUS_OPTIONS, type RsvpStatus } from "@/lib/guests/types";
 import {
   mockUpdateBackgroundImage,
   mockUpdateDefaultRsvpDeadline,
+  mockUpdateHeaderLabel,
   mockUpdateWeddingDate,
   mockUpdateWeddingLocation,
 } from "./mock-store";
@@ -81,6 +82,27 @@ export async function updateWeddingLocation(
     const { error } = await supabase
       .from("site_settings")
       .update({ wedding_location: value })
+      .eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/overview");
+  revalidatePath("/");
+  return {};
+}
+
+export async function updateHeaderLabel(label: string | null): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const value = label?.trim() || null;
+
+  if (isLocalTestMode()) {
+    mockUpdateHeaderLabel(value);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ header_label: value })
       .eq("id", 1);
     if (error) return { message: `Could not save: ${error.message}` };
   }

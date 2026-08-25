@@ -70,6 +70,7 @@ export default async function GuestPreviewPage({
         language={language}
         weddingDate={siteSettings.weddingDate}
         rsvpDeadline={effectiveDeadline}
+        headerLabelOverride={siteSettings.headerLabel}
       />
 
       <GuestViewSections

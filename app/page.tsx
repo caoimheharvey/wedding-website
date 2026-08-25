@@ -70,6 +70,7 @@ export default async function Home({
             language={language}
             weddingDate={siteSettings.weddingDate}
             rsvpDeadline={effectiveDeadline}
+            headerLabelOverride={siteSettings.headerLabel}
           />
 
           {needsContactOnboarding ? (
@@ -143,6 +144,7 @@ export default async function Home({
           delegateFor={persona.delegateFor}
           weddingDate={siteSettings.weddingDate}
           rsvpDeadline={siteSettings.defaultRsvpDeadline}
+          headerLabelOverride={siteSettings.headerLabel}
         />
         <GuestViewSections sections={sections} language={language} siteSettings={siteSettings} />
       </GuestPageShell>

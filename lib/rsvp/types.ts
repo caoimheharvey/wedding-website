@@ -7,4 +7,6 @@ export interface SiteSettings {
   weddingLocation: string | null;
   /** Translucent backdrop shown behind the guest-facing site. Null falls back to a decorative pattern. */
   backgroundImageUrl: string | null;
+  /** Overrides the guest site's top header label (e.g. "Save the Date"). Null uses the automatic phase-based label. */
+  headerLabel: string | null;
 }

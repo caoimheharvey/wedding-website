@@ -701,3 +701,7 @@ alter table guest_view_sections
 alter table guest_view_sections
   add column text_align text not null default 'left' check (text_align in ('left', 'center'));
 
+
+-- >>> supabase/migrations/0035_site_settings_header_label.sql
+alter table site_settings add column header_label text;
+

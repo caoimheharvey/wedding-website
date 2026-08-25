@@ -10,7 +10,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("site_settings")
-    .select("default_rsvp_deadline, wedding_date, wedding_location, background_image_url")
+    .select("default_rsvp_deadline, wedding_date, wedding_location, background_image_url, header_label")
     .eq("id", 1)
     .single();
 
@@ -20,5 +20,6 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     weddingDate: data.wedding_date,
     weddingLocation: data.wedding_location,
     backgroundImageUrl: data.background_image_url,
+    headerLabel: data.header_label,
   };
 }
