@@ -122,12 +122,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     greeting: (names) => `Hello, ${formatNameList(names, "and")}!`,
     guestSignIn: {
       description:
-        "Enter your first and last name as shown on your invitation. If we already have your email or phone number, enter that too — otherwise you'll be asked for contact details next.",
+        "Enter your first and last name as shown on your invitation. If someone else on the list shares your name, we'll ask for an email or phone to tell you apart.",
       nameTab: "Sign in with name",
       wechatTab: "Sign in with WeChat",
       firstNamePlaceholder: "First name",
       lastNamePlaceholder: "Last name",
-      contactPlaceholder: "Email or phone (if we have it on file)",
+      contactPlaceholder: "Email or phone (only if asked)",
       wechatPlaceholder: "WeChat handle",
       continue: "Continue",
       checking: "Checking…",
@@ -135,7 +135,8 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         missingName: "Enter your first and last name as shown on your invitation.",
         noMatch:
           "We couldn't find a match for those details. Double-check your first and last name, or ask whoever sent your invitation.",
-        contactRequired: "Enter the email or phone number we have on file for you.",
+        contactRequired:
+          "A few guests share that name — enter the email or phone number we have on file to tell you apart.",
         missingWechat: "Enter your WeChat handle.",
         wechatNoMatch:
           "We couldn't find that WeChat handle. Double-check it, or ask whoever sent your invitation.",
@@ -245,12 +246,12 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     greeting: (names) => `Bonjour, ${formatNameList(names, "et")} !`,
     guestSignIn: {
       description:
-        "Entrez votre prénom et votre nom tels qu'ils figurent sur votre invitation. Si nous avons déjà votre email ou votre numéro de téléphone, indiquez-le aussi — sinon nous vous demanderons vos coordonnées ensuite.",
+        "Entrez votre prénom et votre nom tels qu'ils figurent sur votre invitation. Si une autre personne sur la liste porte le même nom, nous vous demanderons un email ou un numéro de téléphone pour vous distinguer.",
       nameTab: "Se connecter avec un nom",
       wechatTab: "Se connecter avec WeChat",
       firstNamePlaceholder: "Prénom",
       lastNamePlaceholder: "Nom de famille",
-      contactPlaceholder: "Email ou téléphone (si nous l'avons)",
+      contactPlaceholder: "Email ou téléphone (seulement si demandé)",
       wechatPlaceholder: "Identifiant WeChat",
       continue: "Continuer",
       checking: "Vérification…",
@@ -258,7 +259,8 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
         missingName: "Entrez votre prénom et votre nom tels qu'ils figurent sur votre invitation.",
         noMatch:
           "Nous n'avons pas trouvé de correspondance. Vérifiez votre prénom et votre nom, ou contactez la personne qui vous a invité·e.",
-        contactRequired: "Entrez l'email ou le numéro de téléphone que nous avons pour vous.",
+        contactRequired:
+          "Plusieurs invités portent ce nom — entrez l'email ou le numéro de téléphone que nous avons pour vous distinguer.",
         missingWechat: "Entrez votre identifiant WeChat.",
         wechatNoMatch:
           "Nous n'avons pas trouvé cet identifiant WeChat. Vérifiez-le, ou contactez la personne qui vous a invité·e.",
@@ -370,19 +372,19 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
     greeting: (names) => `你好，${formatNameList(names, "和")}！`,
     guestSignIn: {
       description:
-        "请输入邀请函上的名字和姓氏。如果我们已经有您的电子邮件或电话号码，也请一并填写——否则我们稍后会请您提供联系方式。",
+        "请输入邀请函上的名字和姓氏。如果名单上有人和您同名，我们会请您提供电子邮件或电话号码以作区分。",
       nameTab: "使用姓名登录",
       wechatTab: "使用微信登录",
       firstNamePlaceholder: "名字",
       lastNamePlaceholder: "姓氏",
-      contactPlaceholder: "电子邮件或电话（如果我们已有记录）",
+      contactPlaceholder: "电子邮件或电话（仅在需要时填写）",
       wechatPlaceholder: "微信号",
       continue: "继续",
       checking: "正在核对…",
       errors: {
         missingName: "请输入邀请函上的名字和姓氏。",
         noMatch: "未能找到匹配的信息，请检查您的姓名，或联系邀请您的人。",
-        contactRequired: "请输入我们记录中您的电子邮件或电话号码。",
+        contactRequired: "有多位宾客同名——请输入我们记录中您的电子邮件或电话号码以作区分。",
         missingWechat: "请输入您的微信号。",
         wechatNoMatch: "未能找到该微信号，请检查后重试，或联系邀请您的人。",
       },

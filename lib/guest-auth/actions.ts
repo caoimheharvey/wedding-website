@@ -17,10 +17,9 @@ function parseLanguage(value: FormDataEntryValue | null): PreferredLanguage {
 export type QuickSignInState = { message?: string } | undefined;
 
 /**
- * Sign-in for guests — matches first and last name (case-insensitive). When we
- * already have an email or phone on file, that detail must match too. Guests
- * with no contact info on file can sign in by name alone and are prompted to
- * add details before viewing the rest of the site.
+ * Sign-in for guests — matches first and last name (case-insensitive). Contact
+ * is only asked for when more than one guest shares that name, to tell them
+ * apart.
  */
 export async function quickGuestSignIn(
   _prevState: QuickSignInState,

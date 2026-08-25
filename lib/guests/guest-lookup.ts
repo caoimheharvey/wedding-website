@@ -31,10 +31,6 @@ export function guestMatchesName(guest: Guest, firstName: string, lastName: stri
   return !inputLast;
 }
 
-export function guestHasContactOnFile(guest: Guest): boolean {
-  return Boolean(guest.email?.trim() || guest.phone?.trim());
-}
-
 /** Case-insensitive email match; phone match ignores formatting. */
 export function guestContactMatches(guest: Guest, contact: string): boolean {
   const normalizedContact = contact.trim().toLowerCase();
@@ -86,8 +82,9 @@ function uniqueGuestWithFirstNameOnly(guests: Guest[], firstName: string): Guest
 }
 
 /**
- * Resolves a guest for quick sign-in: name match first, then contact when needed
- * to verify identity or disambiguate duplicates.
+ * Resolves a guest for quick sign-in: first/last name is enough on its own.
+ * Contact is only asked for as a disambiguator when more than one guest
+ * shares the same name.
  */
 export function resolveGuestForQuickSignIn(
   guests: Guest[],
@@ -119,11 +116,6 @@ export function resolveGuestForQuickSignIn(
     if (!contact.trim()) return "contact_required";
     guest = matches.find((candidate) => guestContactMatches(candidate, contact));
     if (!guest) return "contact_mismatch";
-  }
-
-  if (guestHasContactOnFile(guest)) {
-    if (!contact.trim()) return "contact_required";
-    if (!guestContactMatches(guest, contact)) return "contact_mismatch";
   }
 
   return guest;

@@ -15,7 +15,6 @@ import type { Guest, GuestWithPlusOnes, RelationshipPriority } from "./types";
 import {
   findGuestsByName,
   guestContactMatches,
-  guestHasContactOnFile,
   guestMatchesName,
   resolveGuestForQuickSignIn,
 } from "./guest-lookup";
@@ -171,7 +170,7 @@ export async function findGuestByNameAndContact(
   return result && typeof result === "object" ? result : null;
 }
 
-export { findGuestsByName, guestContactMatches, guestHasContactOnFile, guestMatchesName };
+export { findGuestsByName, guestContactMatches, guestMatchesName };
 
 export async function countLinkedPlusOnes(guestId: string): Promise<number> {
   if (isLocalTestMode()) return mockCountLinkedPlusOnes(guestId);
