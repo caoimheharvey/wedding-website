@@ -17,24 +17,32 @@ export interface CampaignSendResult {
   error?: string;
 }
 
+export interface CampaignRecipient {
+  id: string;
+  email: string;
+  subject: string;
+  html: string;
+}
+
 async function sendOne(
   client: Resend,
-  recipientId: string,
-  to: string,
-  subject: string,
-  html: string,
+  recipient: CampaignRecipient,
   from: string,
   scheduledAt?: string,
 ): Promise<CampaignSendResult> {
-  const { data, error } = await client.emails.send({ from, to, subject, html, scheduledAt });
-  if (error) return { recipientId, error: error.message };
-  return { recipientId, resendId: data?.id };
+  const { data, error } = await client.emails.send({
+    from,
+    to: recipient.email,
+    subject: recipient.subject,
+    html: recipient.html,
+    scheduledAt,
+  });
+  if (error) return { recipientId: recipient.id, error: error.message };
+  return { recipientId: recipient.id, resendId: data?.id };
 }
 
 export async function sendCampaignEmails(
-  recipients: { id: string; email: string }[],
-  subject: string,
-  html: string,
+  recipients: CampaignRecipient[],
   fromEmail: string,
   scheduledAt?: string,
 ): Promise<CampaignSendResult[]> {
@@ -44,9 +52,7 @@ export async function sendCampaignEmails(
   for (let i = 0; i < recipients.length; i += SEND_CONCURRENCY) {
     const chunk = recipients.slice(i, i + SEND_CONCURRENCY);
     const settled = await Promise.allSettled(
-      chunk.map((recipient) =>
-        sendOne(client, recipient.id, recipient.email, subject, html, fromEmail, scheduledAt),
-      ),
+      chunk.map((recipient) => sendOne(client, recipient, fromEmail, scheduledAt)),
     );
     settled.forEach((outcome, index) => {
       const recipientId = chunk[index].id;

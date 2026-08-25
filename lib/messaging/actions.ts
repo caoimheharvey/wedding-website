@@ -10,6 +10,7 @@ import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { cancelScheduledEmails, sendCampaignEmails } from "@/lib/email/resend";
 import { mockCancelCampaign, mockCreateCampaignAndSend } from "./mock-store";
 import { composeMessageFormSchema } from "./schema";
+import { contentForLanguage, type MessageCampaignContent } from "./types";
 
 const DEFAULT_FROM_EMAIL = "onboarding@resend.dev";
 
@@ -25,14 +26,26 @@ export async function createAndSendCampaign(
   await requireAdmin();
 
   const parsed = composeMessageFormSchema.safeParse({
-    subject: formData.get("subject"),
-    html: formData.get("html"),
+    subjectEn: formData.get("subjectEn"),
+    htmlEn: formData.get("htmlEn"),
+    subjectFr: formData.get("subjectFr") || undefined,
+    htmlFr: formData.get("htmlFr") || undefined,
+    subjectZh: formData.get("subjectZh") || undefined,
+    htmlZh: formData.get("htmlZh") || undefined,
     recipientIds: formData.getAll("recipientIds"),
     scheduledAt: formData.get("scheduledAt") || undefined,
   });
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
 
-  const { subject, html, recipientIds, scheduledAt } = parsed.data;
+  const { recipientIds, scheduledAt, ...fields } = parsed.data;
+  const content: MessageCampaignContent = {
+    subjectEn: fields.subjectEn,
+    htmlEn: fields.htmlEn,
+    subjectFr: fields.subjectFr || null,
+    htmlFr: fields.htmlFr || null,
+    subjectZh: fields.subjectZh || null,
+    htmlZh: fields.htmlZh || null,
+  };
   const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_FROM_EMAIL;
   const scheduledAtIso = scheduledAt ? new Date(scheduledAt).toISOString() : null;
 
@@ -45,6 +58,7 @@ export async function createAndSendCampaign(
       guestId: guest.id,
       email: guest.email!.trim(),
       guestName: guestDisplayName(guest) || null,
+      language: guest.preferredLanguage,
     }));
 
   if (recipients.length === 0) {
@@ -52,7 +66,7 @@ export async function createAndSendCampaign(
   }
 
   if (isLocalTestMode()) {
-    mockCreateCampaignAndSend({ subject, html, fromEmail, scheduledAt: scheduledAtIso, recipients });
+    mockCreateCampaignAndSend({ ...content, fromEmail, scheduledAt: scheduledAtIso, recipients });
     revalidatePath("/admin/messaging");
     return {
       message: scheduledAtIso
@@ -66,8 +80,12 @@ export async function createAndSendCampaign(
   const { data: campaignRow, error: campaignError } = await supabase
     .from("message_campaigns")
     .insert({
-      subject,
-      html,
+      subject_en: content.subjectEn,
+      html_en: content.htmlEn,
+      subject_fr: content.subjectFr,
+      html_fr: content.htmlFr,
+      subject_zh: content.subjectZh,
+      html_zh: content.htmlZh,
       from_email: fromEmail,
       status: scheduledAtIso ? "scheduled" : "sending",
       scheduled_at: scheduledAtIso,
@@ -86,18 +104,21 @@ export async function createAndSendCampaign(
         guest_id: recipient.guestId,
         email: recipient.email,
         guest_name: recipient.guestName,
+        language: recipient.language,
         status: "queued",
       })),
     )
-    .select("id, email");
+    .select("id, email, language");
   if (recipientError) return { message: `Could not queue recipients: ${recipientError.message}` };
 
   let sendResults;
   try {
     sendResults = await sendCampaignEmails(
-      (recipientRows as { id: string; email: string }[]).map((row) => ({ id: row.id, email: row.email })),
-      subject,
-      html,
+      (recipientRows as { id: string; email: string; language: "en" | "fr" | "zh" }[]).map((row) => ({
+        id: row.id,
+        email: row.email,
+        ...contentForLanguage(content, row.language),
+      })),
       fromEmail,
       scheduledAtIso ?? undefined,
     );

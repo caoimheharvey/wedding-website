@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import type { PreferredLanguage } from "@/lib/guests/types";
 import { mockGetCampaignWithRecipients, mockListCampaigns, mockListRecipientsForCampaign } from "./mock-store";
 import type {
   CampaignStatus,
@@ -14,8 +15,12 @@ import type {
 
 interface CampaignRow {
   id: string;
-  subject: string;
-  html: string;
+  subject_en: string;
+  html_en: string;
+  subject_fr: string | null;
+  html_fr: string | null;
+  subject_zh: string | null;
+  html_zh: string | null;
   from_email: string;
   status: CampaignStatus;
   created_at: string;
@@ -29,6 +34,7 @@ interface RecipientRow {
   guest_id: string | null;
   email: string;
   guest_name: string | null;
+  language: PreferredLanguage;
   resend_email_id: string | null;
   status: RecipientStatus;
   status_detail: string | null;
@@ -42,8 +48,12 @@ interface RecipientRow {
 function mapCampaignRow(row: CampaignRow): MessageCampaign {
   return {
     id: row.id,
-    subject: row.subject,
-    html: row.html,
+    subjectEn: row.subject_en,
+    htmlEn: row.html_en,
+    subjectFr: row.subject_fr,
+    htmlFr: row.html_fr,
+    subjectZh: row.subject_zh,
+    htmlZh: row.html_zh,
     fromEmail: row.from_email,
     status: row.status,
     createdAt: row.created_at,
@@ -59,6 +69,7 @@ function mapRecipientRow(row: RecipientRow): MessageRecipient {
     guestId: row.guest_id,
     email: row.email,
     guestName: row.guest_name,
+    language: row.language,
     resendEmailId: row.resend_email_id,
     status: row.status,
     statusDetail: row.status_detail,

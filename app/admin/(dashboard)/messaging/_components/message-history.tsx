@@ -26,7 +26,7 @@ export function MessageHistory({ campaigns }: { campaigns: MessageCampaignSummar
             className="glass-card flex flex-col gap-1 p-4 transition hover:bg-sand/40"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-medium text-ink">{campaign.subject}</span>
+              <span className="font-medium text-ink">{campaign.subjectEn}</span>
               <span className="text-xs text-foreground/50">
                 {isScheduled
                   ? `Scheduled for ${formatDate(campaign.scheduledAt!)}`

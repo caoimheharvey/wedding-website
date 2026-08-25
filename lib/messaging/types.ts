@@ -1,3 +1,5 @@
+import type { PreferredLanguage } from "@/lib/guests/types";
+
 export type CampaignStatus = "sending" | "scheduled" | "sent" | "failed" | "canceled";
 
 export type RecipientStatus =
@@ -29,6 +31,8 @@ export interface MessageRecipient {
   guestId: string | null;
   email: string;
   guestName: string | null;
+  /** The language variant actually sent to this recipient, snapshotted at send time. */
+  language: PreferredLanguage;
   resendEmailId: string | null;
   status: RecipientStatus;
   statusDetail: string | null;
@@ -51,10 +55,19 @@ export interface RecipientStatusCounts {
   canceled: number;
 }
 
-export interface MessageCampaign {
+/** One subject/HTML pair per supported guest language. English is required;
+ *  French/Mandarin fall back to the English content when left blank. */
+export interface MessageCampaignContent {
+  subjectEn: string;
+  htmlEn: string;
+  subjectFr: string | null;
+  htmlFr: string | null;
+  subjectZh: string | null;
+  htmlZh: string | null;
+}
+
+export interface MessageCampaign extends MessageCampaignContent {
   id: string;
-  subject: string;
-  html: string;
   fromEmail: string;
   status: CampaignStatus;
   createdAt: string;
@@ -69,4 +82,17 @@ export interface MessageCampaignSummary extends MessageCampaign {
 
 export interface MessageCampaignDetail extends MessageCampaign {
   recipients: MessageRecipient[];
+}
+
+export function contentForLanguage(
+  campaign: MessageCampaignContent,
+  language: PreferredLanguage,
+): { subject: string; html: string } {
+  if (language === "fr" && campaign.subjectFr && campaign.htmlFr) {
+    return { subject: campaign.subjectFr, html: campaign.htmlFr };
+  }
+  if (language === "zh" && campaign.subjectZh && campaign.htmlZh) {
+    return { subject: campaign.subjectZh, html: campaign.htmlZh };
+  }
+  return { subject: campaign.subjectEn, html: campaign.htmlEn };
 }

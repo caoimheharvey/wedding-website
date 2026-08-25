@@ -1,4 +1,5 @@
 import "server-only";
+import type { PreferredLanguage } from "@/lib/guests/types";
 import type { MessageCampaign, MessageCampaignDetail, MessageRecipient, RecipientStatus } from "./types";
 
 /**
@@ -31,18 +32,31 @@ export function mockListRecipientsForCampaign(campaignId: string): MessageRecipi
 }
 
 export function mockCreateCampaignAndSend(input: {
-  subject: string;
-  html: string;
+  subjectEn: string;
+  htmlEn: string;
+  subjectFr: string | null;
+  htmlFr: string | null;
+  subjectZh: string | null;
+  htmlZh: string | null;
   fromEmail: string;
   scheduledAt: string | null;
-  recipients: { guestId: string; email: string; guestName: string | null }[];
+  recipients: {
+    guestId: string;
+    email: string;
+    guestName: string | null;
+    language: PreferredLanguage;
+  }[];
 }): MessageCampaignDetail {
   const now = new Date().toISOString();
   const isScheduled = Boolean(input.scheduledAt);
   const campaign: MessageCampaign = {
     id: crypto.randomUUID(),
-    subject: input.subject,
-    html: input.html,
+    subjectEn: input.subjectEn,
+    htmlEn: input.htmlEn,
+    subjectFr: input.subjectFr,
+    htmlFr: input.htmlFr,
+    subjectZh: input.subjectZh,
+    htmlZh: input.htmlZh,
     fromEmail: input.fromEmail,
     status: isScheduled ? "scheduled" : "sent",
     createdAt: now,
@@ -58,6 +72,7 @@ export function mockCreateCampaignAndSend(input: {
     guestId: recipient.guestId,
     email: recipient.email,
     guestName: recipient.guestName,
+    language: recipient.language,
     resendEmailId: `local-test-${crypto.randomUUID()}`,
     status,
     statusDetail: null,

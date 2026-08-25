@@ -1,14 +1,15 @@
 import * as z from "zod";
 
+const subjectField = z.string().trim().max(200, { error: "Keep the subject under 200 characters" });
+const htmlField = z.string().trim().max(500_000, { error: "That HTML is too large — keep it under 500KB" });
+
 export const composeMessageFormSchema = z.object({
-  subject: z.string().trim().min(1, { error: "Subject is required" }).max(200, {
-    error: "Keep the subject under 200 characters",
-  }),
-  html: z
-    .string()
-    .trim()
-    .min(1, { error: "Paste the email HTML" })
-    .max(500_000, { error: "That HTML is too large — keep it under 500KB" }),
+  subjectEn: subjectField.min(1, { error: "Subject is required" }),
+  htmlEn: htmlField.min(1, { error: "Paste the email HTML" }),
+  subjectFr: subjectField.optional(),
+  htmlFr: htmlField.optional(),
+  subjectZh: subjectField.optional(),
+  htmlZh: htmlField.optional(),
   recipientIds: z
     .array(z.string())
     .min(1, { error: "Select at least one recipient" }),

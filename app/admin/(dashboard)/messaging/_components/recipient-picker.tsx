@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Guest } from "@/lib/guests/types";
+import { PREFERRED_LANGUAGE_LABELS, type Guest } from "@/lib/guests/types";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import {
@@ -122,6 +122,9 @@ export function RecipientPicker({
               />
               <span className="text-ink">{guestDisplayName(guest) || "Unnamed guest"}</span>
               <span className="text-foreground/50">{guest.email}</span>
+              <span className="ml-auto text-xs text-foreground/40">
+                {PREFERRED_LANGUAGE_LABELS[guest.preferredLanguage]}
+              </span>
             </label>
           ))
         )}

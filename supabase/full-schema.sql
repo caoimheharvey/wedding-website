@@ -758,3 +758,15 @@ alter table message_recipients add constraint message_recipients_status_check
     'queued', 'scheduled', 'sent', 'delivered', 'bounced', 'complained', 'failed', 'delayed', 'canceled'
   ));
 
+
+-- >>> supabase/migrations/0038_messaging_languages.sql
+alter table message_campaigns rename column subject to subject_en;
+alter table message_campaigns rename column html to html_en;
+alter table message_campaigns add column subject_fr text;
+alter table message_campaigns add column html_fr text;
+alter table message_campaigns add column subject_zh text;
+alter table message_campaigns add column html_zh text;
+
+alter table message_recipients add column language text not null default 'en'
+  check (language in ('en', 'fr', 'zh'));
+
