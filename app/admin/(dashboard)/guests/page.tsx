@@ -55,7 +55,7 @@ export default async function GuestsPage() {
         </div>
       </div>
 
-      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} childCount={children.length} />
+      <GuestStats guests={guests} effectiveStatusById={effectiveStatusById} />
 
       <GuestsSection
         guests={guests}

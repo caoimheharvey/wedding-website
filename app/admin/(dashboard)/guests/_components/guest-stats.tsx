@@ -13,16 +13,6 @@ interface Segment {
   dotClass: string;
 }
 
-function CountCard({ title, value, hint }: { title: string; value: number; hint?: string }) {
-  return (
-    <div className="flex flex-col gap-2 glass-card p-3">
-      <p className="text-xs font-medium tracking-wide text-foreground/50 uppercase">{title}</p>
-      <p className="font-display text-2xl text-ink">{value}</p>
-      {hint && <p className="text-xs text-foreground/50">{hint}</p>}
-    </div>
-  );
-}
-
 function StatCard({ title, segments }: { title: string; segments: Segment[] }) {
   const total = segments.reduce((sum, segment) => sum + segment.count, 0);
   const nonEmpty = segments.filter((segment) => segment.count > 0);
@@ -61,12 +51,9 @@ function StatCard({ title, segments }: { title: string; segments: Segment[] }) {
 export function GuestStats({
   guests,
   effectiveStatusById,
-  childCount,
 }: {
   guests: GuestWithPlusOnes[];
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
-  /** Total children added across all guests — omit to hide the children stat card. */
-  childCount?: number;
 }) {
   const all = guests.flatMap((guest) => [guest, ...guest.plusOnes]);
 
@@ -79,8 +66,6 @@ export function GuestStats({
   const languageCounts: Record<string, number> = {};
   const priorityCounts: Record<number, number> = {};
   const invitedByCounts: Record<string, number> = {};
-  let plusOneAllowedCount = 0;
-  let childrenAllowedCount = 0;
 
   for (const guest of all) {
     const status = effectiveStatusById[guest.id] ?? "invited";
@@ -88,8 +73,6 @@ export function GuestStats({
     languageCounts[guest.preferredLanguage] = (languageCounts[guest.preferredLanguage] ?? 0) + 1;
     priorityCounts[guest.relationshipPriority] = (priorityCounts[guest.relationshipPriority] ?? 0) + 1;
     invitedByCounts[guest.invitedBy] = (invitedByCounts[guest.invitedBy] ?? 0) + 1;
-    if (guest.plusOneAllowed) plusOneAllowedCount++;
-    if (guest.childrenAllowed) childrenAllowedCount++;
   }
 
   const rsvpBar: Record<EffectiveRsvpStatus, { bar: string; dot: string }> = {
@@ -154,37 +137,6 @@ export function GuestStats({
           dotClass: invitedByBar[invitedBy].dot,
         }))}
       />
-      <StatCard
-        title="Plus-one granted"
-        segments={[
-          { label: "Granted", count: plusOneAllowedCount, barClass: "bg-aegean", dotClass: "bg-aegean" },
-          {
-            label: "Not granted",
-            count: all.length - plusOneAllowedCount,
-            barClass: "bg-ink/20",
-            dotClass: "bg-ink/30",
-          },
-        ]}
-      />
-      <StatCard
-        title="Children allowed"
-        segments={[
-          { label: "Allowed", count: childrenAllowedCount, barClass: "bg-terracotta", dotClass: "bg-terracotta" },
-          {
-            label: "Not set",
-            count: all.length - childrenAllowedCount,
-            barClass: "bg-ink/20",
-            dotClass: "bg-ink/30",
-          },
-        ]}
-      />
-      {childCount !== undefined && (
-        <CountCard
-          title="Children added"
-          value={childCount}
-          hint={`Across ${childrenAllowedCount} guest(s) allowed to bring children`}
-        />
-      )}
     </div>
   );
 }
