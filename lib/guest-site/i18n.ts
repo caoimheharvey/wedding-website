@@ -13,6 +13,8 @@ interface GuestSiteStrings {
   /** formattedDeadline is only used for the 'rsvp' phase. */
   phaseLabel: (phase: SitePhase, formattedDeadline: string | null) => string;
   greeting: (names: string[]) => string;
+  /** Small label above the title on the sign-in page. */
+  guestsLabel: string;
   guestSignIn: {
     description: string;
     nameTab: string;
@@ -120,6 +122,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       }
     },
     greeting: (names) => `Hello, ${formatNameList(names, "and")}!`,
+    guestsLabel: "Guests",
     guestSignIn: {
       description:
         "Enter your first and last name as shown on your invitation. If someone else on the list shares your name, we'll ask for an email or phone to tell you apart.",
@@ -244,6 +247,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       }
     },
     greeting: (names) => `Bonjour, ${formatNameList(names, "et")} !`,
+    guestsLabel: "Invités",
     guestSignIn: {
       description:
         "Entrez votre prénom et votre nom tels qu'ils figurent sur votre invitation. Si une autre personne sur la liste porte le même nom, nous vous demanderons un email ou un numéro de téléphone pour vous distinguer.",
@@ -370,6 +374,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       }
     },
     greeting: (names) => `你好，${formatNameList(names, "和")}！`,
+    guestsLabel: "宾客",
     guestSignIn: {
       description:
         "请输入邀请函上的名字和姓氏。如果名单上有人和您同名，我们会请您提供电子邮件或电话号码以作区分。",

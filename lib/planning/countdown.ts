@@ -25,9 +25,11 @@ function pluralize(count: number, singular: string, plural = `${singular}s`): st
   return count === 1 ? `1 ${singular}` : `${count} ${plural}`;
 }
 
-export function formatWeddingDate(iso: string): string {
+const DATE_LOCALES = { en: "en-IE", fr: "fr-FR", zh: "zh-CN" } as const;
+
+export function formatWeddingDate(iso: string, language: keyof typeof DATE_LOCALES = "en"): string {
   const date = parseIsoDate(iso);
-  return new Intl.DateTimeFormat("en-IE", {
+  return new Intl.DateTimeFormat(DATE_LOCALES[language], {
     weekday: "long",
     day: "numeric",
     month: "long",

@@ -18,7 +18,7 @@ export function GuestSignInContent({
       <WebsiteLink url={websiteUrl} language={language} />
       <LanguageTabs currentLanguage={language} hrefFor={(code) => `/?lang=${code}`} />
 
-      <p className="text-sm tracking-[0.3em] text-aegean uppercase">Guests</p>
+      <p className="text-sm tracking-[0.3em] text-aegean uppercase">{GUEST_SITE_STRINGS[language].guestsLabel}</p>
       <h1 className="font-display text-4xl text-ink">Caoimhe &amp; Alexandre</h1>
 
       <div className="glass-card w-full p-4 text-left">

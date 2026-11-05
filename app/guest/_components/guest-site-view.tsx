@@ -9,7 +9,7 @@ export function GuestSiteView({
   delegateFor,
   weddingDate = null,
   rsvpDeadline = null,
-  headerLabelOverride = null,
+  headerLabelOverrides = null,
   heroImageUrl = null,
 }: {
   greetingNames: string[];
@@ -18,15 +18,17 @@ export function GuestSiteView({
   /** Drive the automatic header label (You're Invited / Save the Date / Please RSVP / Almost Time!). */
   weddingDate?: string | null;
   rsvpDeadline?: string | null;
-  /** Admin-set override — used verbatim instead of the automatic label when set. */
-  headerLabelOverride?: string | null;
+  /** Admin-set override per language — used verbatim instead of the automatic label when set. */
+  headerLabelOverrides?: Record<PreferredLanguage, string | null> | null;
   /** Designed banner that replaces the label and names. */
   heroImageUrl?: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language];
   const phase = sitePhase(weddingDate, rsvpDeadline);
-  const formattedDeadline = rsvpDeadline ? formatWeddingDate(rsvpDeadline) : null;
-  const headerLabel = headerLabelOverride?.trim() || strings.phaseLabel(phase, formattedDeadline);
+  const formattedDeadline = rsvpDeadline ? formatWeddingDate(rsvpDeadline, language) : null;
+  // An English-only override must not leak into FR/ZH — fall back to the translated automatic label.
+  const headerLabel =
+    headerLabelOverrides?.[language]?.trim() || strings.phaseLabel(phase, formattedDeadline);
 
   return (
     <>

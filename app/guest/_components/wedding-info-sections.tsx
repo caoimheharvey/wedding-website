@@ -95,7 +95,7 @@ export function WeddingDateSectionView({
       {title ? <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2> : (
         <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
       )}
-      <p className="font-display text-xl text-ink">{formatWeddingDate(weddingDate)}</p>
+      <p className="font-display text-xl text-ink">{formatWeddingDate(weddingDate, language)}</p>
       {weddingLocation && (
         <p className="mt-1 text-sm text-foreground/60">{weddingLocation}</p>
       )}

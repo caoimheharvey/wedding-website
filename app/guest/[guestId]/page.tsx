@@ -6,6 +6,7 @@ import {
   rsvpSubmitteesFor,
 } from "@/lib/guests/rsvp-delegates";
 import { getSiteSettings } from "@/lib/rsvp/queries";
+import { headerLabelsOf } from "@/lib/rsvp/header-labels";
 import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { canPreviewGuestView } from "@/lib/guest-preview";
 import { listGuestViewSections, visibleSectionsFor } from "@/lib/guest-view/queries";
@@ -72,7 +73,7 @@ export default async function GuestPreviewPage({
         language={language}
         weddingDate={siteSettings.weddingDate}
         rsvpDeadline={effectiveDeadline}
-        headerLabelOverride={siteSettings.headerLabel}
+        headerLabelOverrides={headerLabelsOf(siteSettings)}
             heroImageUrl={siteSettings.heroImageUrl}
       />
 

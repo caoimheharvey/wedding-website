@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { GuestBackgroundLayer } from "./guest-background-layer";
+import { GuestPhotoBackdrop } from "./guest-photo-backdrop";
 
 const DEFAULT_MAIN_CLASS =
   "relative z-10 mx-auto flex min-h-screen max-w-lg flex-col items-center gap-6 px-6 py-12 text-center";
@@ -15,7 +15,7 @@ export function GuestPageShell({
 }) {
   return (
     <div className="canva-theme relative isolate min-h-screen overflow-x-clip">
-      {backgroundImageUrl && <GuestBackgroundLayer imageUrl={backgroundImageUrl} />}
+      {backgroundImageUrl && <GuestPhotoBackdrop imageUrl={backgroundImageUrl} />}
       <main className={mainClassName}>{children}</main>
     </div>
   );

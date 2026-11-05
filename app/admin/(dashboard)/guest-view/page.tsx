@@ -36,7 +36,12 @@ export default async function GuestViewPage() {
       </div>
 
       <section className="glass-card p-4">
-        <HeaderLabelEditor headerLabel={siteSettings.headerLabel} autoLabel={autoHeaderLabel} />
+        <HeaderLabelEditor
+          headerLabel={siteSettings.headerLabel}
+          headerLabelFr={siteSettings.headerLabelFr}
+          headerLabelZh={siteSettings.headerLabelZh}
+          autoLabel={autoHeaderLabel}
+        />
       </section>
 
       <WebsiteUrlEditor websiteUrl={siteSettings.websiteUrl} />

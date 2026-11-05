@@ -13,6 +13,8 @@ let settings: SiteSettings = {
   heroImageUrl: null,
   websiteUrl: null,
   headerLabel: null,
+  headerLabelFr: null,
+  headerLabelZh: null,
   destination: "Andalucía (Sevilla / Cádiz area)",
 };
 
@@ -50,8 +52,12 @@ export function mockUpdateWebsiteUrl(url: string | null): SiteSettings {
   return settings;
 }
 
-export function mockUpdateHeaderLabel(label: string | null): SiteSettings {
-  settings = { ...settings, headerLabel: label };
+export function mockUpdateHeaderLabel(
+  label: string | null,
+  fr: string | null,
+  zh: string | null,
+): SiteSettings {
+  settings = { ...settings, headerLabel: label, headerLabelFr: fr, headerLabelZh: zh };
   return settings;
 }
 

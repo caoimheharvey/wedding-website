@@ -94,18 +94,24 @@ export async function updateWeddingLocation(
   return {};
 }
 
-export async function updateHeaderLabel(label: string | null): Promise<{ message?: string }> {
+export async function updateHeaderLabel(
+  label: string | null,
+  labelFr: string | null,
+  labelZh: string | null,
+): Promise<{ message?: string }> {
   await requireAdmin();
 
   const value = label?.trim() || null;
+  const valueFr = value ? labelFr?.trim() || null : null;
+  const valueZh = value ? labelZh?.trim() || null : null;
 
   if (isLocalTestMode()) {
-    mockUpdateHeaderLabel(value);
+    mockUpdateHeaderLabel(value, valueFr, valueZh);
   } else {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("site_settings")
-      .update({ header_label: value })
+      .update({ header_label: value, header_label_fr: valueFr, header_label_zh: valueZh })
       .eq("id", 1);
     if (error) return { message: `Could not save: ${error.message}` };
   }

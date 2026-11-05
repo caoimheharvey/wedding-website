@@ -880,3 +880,8 @@ alter table guest_view_sections
   add column bg_color text,
   add column decor jsonb not null default '[]'::jsonb,
   add column fade_in boolean not null default false;
+
+-- >>> 0046_site_settings_header_label_translations.sql
+alter table site_settings
+  add column header_label_fr text,
+  add column header_label_zh text;

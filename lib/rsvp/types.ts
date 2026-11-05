@@ -13,6 +13,9 @@ export interface SiteSettings {
   websiteUrl: string | null;
   /** Overrides the guest site's top header label (e.g. "Save the Date"). Null uses the automatic phase-based label. */
   headerLabel: string | null;
+  /** French / Mandarin versions of the header label override. */
+  headerLabelFr: string | null;
+  headerLabelZh: string | null;
   /** The region the wedding is in (e.g. "Andalucía (Sevilla / Cádiz area)"), shown on Overview. */
   destination: string | null;
 }

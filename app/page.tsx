@@ -6,6 +6,7 @@ import {
   rsvpSubmitteesFor,
 } from "@/lib/guests/rsvp-delegates";
 import { getSiteSettings } from "@/lib/rsvp/queries";
+import { headerLabelsOf } from "@/lib/rsvp/header-labels";
 import { getEffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { isLocalTestMode } from "@/lib/local-test";
 import { canPreviewGuestView } from "@/lib/guest-preview";
@@ -72,7 +73,7 @@ export default async function Home({
             language={language}
             weddingDate={siteSettings.weddingDate}
             rsvpDeadline={effectiveDeadline}
-            headerLabelOverride={siteSettings.headerLabel}
+            headerLabelOverrides={headerLabelsOf(siteSettings)}
             heroImageUrl={siteSettings.heroImageUrl}
           />
 
@@ -148,7 +149,7 @@ export default async function Home({
           delegateFor={persona.delegateFor}
           weddingDate={siteSettings.weddingDate}
           rsvpDeadline={siteSettings.defaultRsvpDeadline}
-          headerLabelOverride={siteSettings.headerLabel}
+          headerLabelOverrides={headerLabelsOf(siteSettings)}
             heroImageUrl={siteSettings.heroImageUrl}
         />
         <GuestViewSections sections={sections} language={language} siteSettings={siteSettings} />
