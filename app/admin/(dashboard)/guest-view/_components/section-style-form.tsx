@@ -3,7 +3,6 @@
 import { useActionState, useEffect, useState } from "react";
 import { updateSectionStyle, type GuestViewSectionActionState } from "@/lib/guest-view/actions";
 import {
-  DECOR_POSITIONS,
   DECOR_SIZES,
   type DecorPosition,
   type DecorSize,
@@ -12,14 +11,22 @@ import {
 
 const initialState: GuestViewSectionActionState = undefined;
 
-const POSITION_LABELS: Record<DecorPosition, string> = {
-  "top-left": "Top left",
-  "top-center": "Top centre",
-  "top-right": "Top right",
-  "bottom-left": "Bottom left",
-  "bottom-center": "Bottom centre",
-  "bottom-right": "Bottom right",
-};
+const VERTICALS = [
+  { value: "top", label: "Top" },
+  { value: "center", label: "Centre" },
+  { value: "bottom", label: "Bottom" },
+] as const;
+const HORIZONTALS = [
+  { value: "left", label: "Left" },
+  { value: "center", label: "Middle" },
+  { value: "right", label: "Right" },
+] as const;
+
+function splitPosition(position: DecorPosition): { vertical: string; horizontal: string } {
+  const [vertical, horizontal] = position.split("-");
+  return { vertical, horizontal };
+}
+
 const SIZE_LABELS: Record<DecorSize, string> = { sm: "Small", md: "Medium", lg: "Large" };
 
 /** Palette taken from the Canva template the guest site is styled after. */
@@ -149,17 +156,39 @@ export function SectionStyleForm({
                 className="text-xs"
               />
             </label>
+            <input type="hidden" name="decorPosition" value={row.position} />
             <label className="flex flex-col gap-1 text-xs text-ink">
-              Position
+              Vertical
               <select
-                name="decorPosition"
-                value={row.position}
-                onChange={(event) => updateRow(index, { position: event.target.value as DecorPosition })}
+                value={splitPosition(row.position).vertical}
+                onChange={(event) =>
+                  updateRow(index, {
+                    position: `${event.target.value}-${splitPosition(row.position).horizontal}` as DecorPosition,
+                  })
+                }
                 className="input w-auto"
               >
-                {DECOR_POSITIONS.map((position) => (
-                  <option key={position} value={position}>
-                    {POSITION_LABELS[position]}
+                {VERTICALS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-ink">
+              Horizontal
+              <select
+                value={splitPosition(row.position).horizontal}
+                onChange={(event) =>
+                  updateRow(index, {
+                    position: `${splitPosition(row.position).vertical}-${event.target.value}` as DecorPosition,
+                  })
+                }
+                className="input w-auto"
+              >
+                {HORIZONTALS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>

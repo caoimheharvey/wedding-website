@@ -4,12 +4,15 @@ import { useEffect, useRef, type ReactNode } from "react";
 import type { SectionDecor, SectionStyle } from "@/lib/guest-view/types";
 
 const POSITION_CLASS: Record<SectionDecor["position"], string> = {
-  "top-left": "top-0 left-0",
-  "top-center": "top-0 left-1/2 -translate-x-1/2",
-  "top-right": "top-0 right-0",
-  "bottom-left": "bottom-0 left-0",
-  "bottom-center": "bottom-0 left-1/2 -translate-x-1/2",
-  "bottom-right": "bottom-0 right-0",
+  "top-left": "top-4 left-4 sm:top-8 sm:left-8",
+  "top-center": "top-4 left-1/2 -translate-x-1/2 sm:top-8",
+  "top-right": "top-4 right-4 sm:top-8 sm:right-8",
+  "center-left": "top-1/2 left-4 -translate-y-1/2 sm:left-8",
+  "center-center": "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+  "center-right": "top-1/2 right-4 -translate-y-1/2 sm:right-8",
+  "bottom-left": "bottom-4 left-4 sm:bottom-8 sm:left-8",
+  "bottom-center": "bottom-4 left-1/2 -translate-x-1/2 sm:bottom-8",
+  "bottom-right": "bottom-4 right-4 sm:bottom-8 sm:right-8",
 };
 
 const SIZE_CLASS: Record<SectionDecor["size"], string> = {
