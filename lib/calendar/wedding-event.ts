@@ -3,6 +3,36 @@ export interface WeddingCalendarEvent {
   dateIso: string;
   location?: string | null;
   description?: string | null;
+  /** Public website for more information (added to the event's URL field). */
+  url?: string | null;
+}
+
+/** Reminders, expressed as a gap before the wedding day. */
+const REMINDERS: { months?: number; days?: number }[] = [
+  { months: 6 },
+  { months: 3 },
+  { days: 14 },
+];
+
+function daysBefore(iso: string, reminder: { months?: number; days?: number }): number {
+  const wedding = parseIsoDate(iso);
+  const target = new Date(wedding);
+  if (reminder.months) target.setMonth(target.getMonth() - reminder.months);
+  if (reminder.days) target.setDate(target.getDate() - reminder.days);
+  return Math.round((wedding.getTime() - target.getTime()) / 86_400_000);
+}
+
+/** ICS durations have no "months", so each reminder is an exact day count. For an all-day
+ *  event the trigger is measured from midnight, so "N days minus 9h" fires at 9am. */
+function reminderAlarm(iso: string, reminder: { months?: number; days?: number }, title: string) {
+  const days = daysBefore(iso, reminder);
+  return [
+    "BEGIN:VALARM",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:${escapeIcsText(title)}`,
+    `TRIGGER:-P${days - 1}DT15H`,
+    "END:VALARM",
+  ];
 }
 
 function parseIsoDate(iso: string): Date {
@@ -45,6 +75,13 @@ export function buildWeddingIcs(event: WeddingCalendarEvent): string {
   }
   if (event.description?.trim()) {
     lines.push(`DESCRIPTION:${escapeIcsText(event.description.trim())}`);
+  }
+
+  if (event.url?.trim()) {
+    lines.push(`URL:${event.url.trim()}`);
+  }
+  for (const reminder of REMINDERS) {
+    lines.push(...reminderAlarm(event.dateIso, reminder, event.title));
   }
 
   lines.push("END:VEVENT", "END:VCALENDAR");

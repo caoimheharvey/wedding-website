@@ -1,10 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  buildGoogleCalendarUrl,
-  DEFAULT_WEDDING_EVENT_TITLE,
-} from "@/lib/calendar/wedding-event";
+import { buildWeddingCalendarEvent, effectiveWeddingLocation } from "@/lib/calendar/build-event";
+import { buildGoogleCalendarUrl } from "@/lib/calendar/wedding-event";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 import { formatWeddingDate, getWeddingCountdown } from "@/lib/planning/countdown";
 import type { PreferredLanguage } from "@/lib/guests/types";
@@ -67,7 +65,7 @@ export function WeddingDateSectionView({
   title: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language].weddingDateSection;
-  const { weddingDate, weddingLocation } = siteSettings;
+  const { weddingDate } = siteSettings;
 
   if (!weddingDate) {
     return (
@@ -82,13 +80,9 @@ export function WeddingDateSectionView({
     );
   }
 
-  const calendarEvent = {
-    title: DEFAULT_WEDDING_EVENT_TITLE,
-    dateIso: weddingDate,
-    location: weddingLocation,
-    description: strings.calendarDescription,
-  };
+  const calendarEvent = buildWeddingCalendarEvent(siteSettings, language)!;
   const googleUrl = buildGoogleCalendarUrl(calendarEvent);
+  const location = effectiveWeddingLocation(siteSettings);
 
   return (
     <section className="glass-card p-4 text-center">
@@ -96,9 +90,7 @@ export function WeddingDateSectionView({
         <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
       )}
       <p className="font-display text-xl text-ink">{formatWeddingDate(weddingDate, language)}</p>
-      {weddingLocation && (
-        <p className="mt-1 text-sm text-foreground/60">{weddingLocation}</p>
-      )}
+      <p className="mt-1 text-sm text-foreground/60">{location}</p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         <a
           href={googleUrl}
@@ -109,7 +101,7 @@ export function WeddingDateSectionView({
           {strings.addToGoogle}
         </a>
         <Link
-          href="/api/calendar/wedding"
+          href={`/api/calendar/wedding?lang=${language}`}
           className="rounded-full bg-aegean px-4 py-1.5 text-sm font-medium text-whitewash transition hover:bg-aegean-dark"
         >
           {strings.downloadIcs}

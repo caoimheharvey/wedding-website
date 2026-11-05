@@ -81,6 +81,8 @@ interface GuestSiteStrings {
     addToGoogle: string;
     downloadIcs: string;
     calendarDescription: string;
+    /** Label before the website link in the calendar event description. */
+    calendarMoreInfo: string;
   };
   dietarySection: {
     heading: string;
@@ -208,6 +210,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       addToGoogle: "Add to Google Calendar",
       downloadIcs: "Add to calendar (.ics)",
       calendarDescription: "Caoimhe & Alexandre's wedding",
+      calendarMoreInfo: "More information",
     },
     dietarySection: {
       heading: "Dietary requirements",
@@ -333,6 +336,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       addToGoogle: "Ajouter à Google Agenda",
       downloadIcs: "Ajouter au calendrier (.ics)",
       calendarDescription: "Mariage de Caoimhe et Alexandre",
+      calendarMoreInfo: "Plus d'informations",
     },
     dietarySection: {
       heading: "Régime alimentaire",
@@ -454,6 +458,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       addToGoogle: "添加到 Google 日历",
       downloadIcs: "添加到日历 (.ics)",
       calendarDescription: "Caoimhe 与 Alexandre 的婚礼",
+      calendarMoreInfo: "更多信息",
     },
     dietarySection: {
       heading: "饮食要求",

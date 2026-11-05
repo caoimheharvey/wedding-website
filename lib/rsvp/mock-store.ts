@@ -8,7 +8,7 @@ import type { SiteSettings } from "./types";
 let settings: SiteSettings = {
   defaultRsvpDeadline: "2027-04-01",
   weddingDate: "2028-07-15",
-  weddingLocation: "Villa Cimbrone, Ravello",
+  weddingLocation: null,
   backgroundImageUrl: null,
   heroImageUrl: null,
   websiteUrl: null,
