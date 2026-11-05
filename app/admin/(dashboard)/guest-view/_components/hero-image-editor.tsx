@@ -17,7 +17,7 @@ export function HeroImageEditor({ imageUrl }: { imageUrl: string | null }) {
         </p>
         <p className="mt-1 text-sm text-foreground/60">
           A designed banner (e.g. exported from Canva) shown full width at the top of the guest site
-          in place of the label and names. Guests\u2019 greeting still appears beneath it. Leave unset to
+          in place of the label and names. The guest&apos;s greeting still appears beneath it. Leave unset to
           use the default text header.
         </p>
       </div>

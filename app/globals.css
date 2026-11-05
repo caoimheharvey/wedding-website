@@ -95,7 +95,7 @@ body {
   .canva-theme .glass-input {
     background: var(--canva-bg);
     border: 1px solid color-mix(in srgb, var(--canva-teal) 40%, transparent);
-    border-radius: 0;
+    border-radius: 0.75rem;
     backdrop-filter: none;
     color: var(--canva-teal);
   }
@@ -106,7 +106,7 @@ body {
   }
   .canva-theme .bg-aegean {
     background: var(--canva-teal);
-    border-radius: 0;
+    border-radius: 9999px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     font-size: 0.75rem;
