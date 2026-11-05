@@ -10,7 +10,10 @@ import { RSVP_STATUS_OPTIONS, type RsvpStatus } from "@/lib/guests/types";
 import {
   mockUpdateBackgroundImage,
   mockUpdateDefaultRsvpDeadline,
+  mockUpdateDestination,
   mockUpdateHeaderLabel,
+  mockUpdateHeroImage,
+  mockUpdateWebsiteUrl,
   mockUpdateWeddingDate,
   mockUpdateWeddingLocation,
 } from "./mock-store";
@@ -112,6 +115,52 @@ export async function updateHeaderLabel(label: string | null): Promise<{ message
   return {};
 }
 
+export async function updateWebsiteUrl(url: string | null): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const trimmed = url?.trim() ?? "";
+  if (trimmed && !z.url({ protocol: /^https?$/ }).safeParse(trimmed).success) {
+    return { message: "Enter a full web address starting with https://" };
+  }
+  const value = trimmed || null;
+
+  if (isLocalTestMode()) {
+    mockUpdateWebsiteUrl(value);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ website_url: value })
+      .eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  revalidatePath("/");
+  revalidatePath("/guest");
+  return {};
+}
+
+export async function updateDestination(destination: string | null): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const value = destination?.trim() || null;
+
+  if (isLocalTestMode()) {
+    mockUpdateDestination(value);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ destination: value })
+      .eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/overview");
+  return {};
+}
+
 /** Translucent backdrop for the guest-facing site — reuses the same storage
  *  bucket as Guest View images, in its own "site-background" folder. */
 export async function updateBackgroundImage(
@@ -168,6 +217,58 @@ export async function removeBackgroundImage(): Promise<{ message?: string }> {
       .from("site_settings")
       .update({ background_image_url: null })
       .eq("id", 1);
+    if (error) return { message: `Could not remove image: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  revalidatePath("/");
+  revalidatePath("/guest");
+  return {};
+}
+
+/** Designed header image for the guest site (e.g. exported from Canva); same bucket
+ *  as the background, in its own "site-hero" folder. */
+export async function updateHeroImage(
+  _prevState: { message?: string } | undefined,
+  formData: FormData,
+): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const file = formData.get("heroImage");
+  if (!(file instanceof File) || file.size === 0) return { message: "Choose an image." };
+
+  let url: string;
+  if (isLocalTestMode()) {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    url = `data:${file.type || "image/jpeg"};base64,${buffer.toString("base64")}`;
+    mockUpdateHeroImage(url);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const extension = file.name.split(".").pop() || "jpg";
+    const path = `site-hero/${crypto.randomUUID()}.${extension}`;
+    const { error: uploadError } = await supabase.storage
+      .from("guest-view-images")
+      .upload(path, file, { contentType: file.type || undefined, upsert: true });
+    if (uploadError) return { message: `Could not upload image: ${uploadError.message}` };
+    url = supabase.storage.from("guest-view-images").getPublicUrl(path).data.publicUrl;
+    const { error } = await supabase.from("site_settings").update({ hero_image_url: url }).eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  revalidatePath("/");
+  revalidatePath("/guest");
+  return { message: "Header image updated." };
+}
+
+export async function removeHeroImage(): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  if (isLocalTestMode()) {
+    mockUpdateHeroImage(null);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from("site_settings").update({ hero_image_url: null }).eq("id", 1);
     if (error) return { message: `Could not remove image: ${error.message}` };
   }
 

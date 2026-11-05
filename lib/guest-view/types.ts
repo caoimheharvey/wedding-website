@@ -15,9 +15,35 @@ export type GuestViewSectionType =
 export type EmbedProvider = "google_maps" | "pinterest" | "other";
 /** "wide" is only modestly wider than "normal" on larger screens — on
  *  phones (the common case) there's no room for it to differ. */
-export type SectionWidth = "normal" | "wide";
+export type SectionWidth = "normal" | "wide" | "full";
 /** Only meaningful for 'text' sections. */
 export type SectionTextAlign = "left" | "center";
+
+export const DECOR_POSITIONS = [
+  "top-left",
+  "top-center",
+  "top-right",
+  "bottom-left",
+  "bottom-center",
+  "bottom-right",
+] as const;
+export type DecorPosition = (typeof DECOR_POSITIONS)[number];
+export const DECOR_SIZES = ["sm", "md", "lg"] as const;
+export type DecorSize = (typeof DECOR_SIZES)[number];
+
+/** Decorative artwork (transparent PNG/SVG, e.g. florals from Canva) pinned to a section edge. */
+export interface SectionDecor {
+  url: string;
+  position: DecorPosition;
+  size: DecorSize;
+}
+
+/** Turns a section into a full-width band; all empty = the plain card look. */
+export interface SectionStyle {
+  bgColor: string | null;
+  decor: SectionDecor[];
+  fadeIn: boolean;
+}
 
 export interface GuestViewEmbed {
   id: string;
@@ -55,6 +81,8 @@ export interface GuestViewSection {
   embeds: GuestViewEmbed[];
   /** Only used by 'image_group' sections. */
   images: GuestViewImage[];
+  /** Optional band styling; absent = plain card. */
+  style?: SectionStyle;
   createdAt: string;
   updatedAt: string;
 }

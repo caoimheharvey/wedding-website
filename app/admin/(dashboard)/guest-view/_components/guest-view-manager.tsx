@@ -22,6 +22,7 @@ import { RsvpSectionForm } from "./rsvp-section-form";
 import { RsvpStatusSectionForm } from "./rsvp-status-section-form";
 import { ContactInfoSectionForm } from "./contact-info-section-form";
 import { SectionListItem } from "./section-list-item";
+import { SectionStyleForm } from "./section-style-form";
 
 type AddingType =
   | "text"
@@ -44,6 +45,7 @@ function sectionExists(sections: GuestViewSection[], type: GuestViewSection["typ
 export function GuestViewManager({ sections }: { sections: GuestViewSection[] }) {
   const [addingType, setAddingType] = useState<AddingType>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [styleId, setStyleId] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -162,7 +164,13 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
       ) : (
         <div className="flex flex-col gap-3">
           {sections.map((section, index) =>
-            editingId === section.id ? (
+            styleId === section.id ? (
+              <SectionStyleForm
+                key={section.id}
+                section={section}
+                onDone={() => setStyleId(null)}
+              />
+            ) : editingId === section.id ? (
               section.type === "text" ? (
                 <TextSectionForm key={section.id} section={section} onDone={() => setEditingId(null)} />
               ) : section.type === "embed_group" ? (
@@ -232,7 +240,14 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
                 section={section}
                 isFirst={index === 0}
                 isLast={index === sections.length - 1}
-                onEdit={() => setEditingId(section.id)}
+                onEdit={() => {
+                  setStyleId(null);
+                  setEditingId(section.id);
+                }}
+                onStyle={() => {
+                  setEditingId(null);
+                  setStyleId(section.id);
+                }}
               />
             ),
           )}

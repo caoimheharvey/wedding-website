@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono, Playfair_Display, Young_Serif } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,6 +14,18 @@ const geistMono = Geist_Mono({
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
+  subsets: ["latin"],
+});
+
+// Guest site: Young Serif for titles, Fraunces for everything else.
+const youngSerif = Young_Serif({
+  variable: "--font-young-serif",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
 });
 
@@ -34,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} h-full antialiased light`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${youngSerif.variable} ${fraunces.variable} h-full antialiased light`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

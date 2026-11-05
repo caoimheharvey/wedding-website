@@ -38,6 +38,83 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Guest-site "designed template" look: flat warm-white page, sage/teal/navy
+     palette, letter-spaced uppercase serif headings. Scoped so the admin app
+     keeps the glass look. Tailwind inlines theme colours, so we override the
+     utilities themselves rather than the variables. */
+  .canva-theme {
+    --canva-bg: #fffefc;
+    --canva-sage: #d2e4b4;
+    --canva-teal: #557c70;
+    --canva-navy: #304254;
+    --canva-cream: #f6f2e7;
+    background: var(--canva-bg);
+    color: var(--canva-teal);
+    font-family: var(--font-fraunces), Georgia, serif;
+  }
+  .canva-theme .font-display {
+    font-family: var(--font-young-serif), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--canva-teal);
+  }
+  /* Scroll fade-in: armed by JS after mount so content is never hidden without it. */
+  .fade-pending {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .fade-pending.fade-visible {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-pending {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+  .canva-theme .text-ink {
+    color: var(--canva-teal);
+  }
+  .canva-theme .text-aegean,
+  .canva-theme .text-foreground\/70,
+  .canva-theme .text-foreground\/60 {
+    color: var(--canva-teal);
+  }
+  .canva-theme .glass-card {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .canva-theme .input,
+  .canva-theme .glass-input {
+    background: var(--canva-bg);
+    border: 1px solid color-mix(in srgb, var(--canva-teal) 40%, transparent);
+    border-radius: 0;
+    backdrop-filter: none;
+    color: var(--canva-teal);
+  }
+  .canva-theme .input:focus,
+  .canva-theme .glass-input:focus {
+    border-color: var(--canva-teal);
+    background: #fff;
+  }
+  .canva-theme .bg-aegean {
+    background: var(--canva-teal);
+    border-radius: 0;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+  .canva-theme .bg-aegean:hover {
+    background: var(--canva-navy);
+  }
+
 @layer components {
   /* "Liquid glass" look, used site-wide (guest site + admin): translucent,
      blurred, with a soft highlight border. */
@@ -61,6 +138,12 @@ body {
      spare room for "wide" to mean anything, so it matches "normal". */
   .section-wide {
     @apply w-full;
+  }
+  /* Edge-to-edge: breaks out of the centred column at every width. */
+  .section-full {
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
   }
   @media (min-width: 640px) {
     .section-wide {

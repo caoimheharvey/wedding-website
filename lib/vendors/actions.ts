@@ -46,16 +46,28 @@ export async function createVendor(
   const parsed = vendorFormSchema.safeParse({ ...Object.fromEntries(formData), category });
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors };
 
+  let vendorId: string;
   if (isLocalTestMode()) {
-    mockInsertVendor(parsed.data);
+    vendorId = mockInsertVendor(parsed.data).id;
   } else {
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("vendors").insert(vendorRowFromForm(parsed.data));
+    const { data, error } = await supabase
+      .from("vendors")
+      .insert(vendorRowFromForm(parsed.data))
+      .select("id")
+      .single();
     if (error) return { message: `Could not save vendor: ${error.message}` };
+    vendorId = data.id as string;
   }
 
   revalidatePath(`/admin/vendors/${category}`);
-  redirect(`/admin/vendors/${category}`);
+  // A new venue goes straight to its edit page, where the reply details
+  // (price, dates, terms, documents) live — they need the vendor to exist.
+  redirect(
+    category === "venue"
+      ? `/admin/vendors/${category}/${vendorId}/edit`
+      : `/admin/vendors/${category}`,
+  );
 }
 
 export async function updateVendor(

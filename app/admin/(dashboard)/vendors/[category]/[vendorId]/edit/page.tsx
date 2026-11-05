@@ -3,7 +3,11 @@ import { notFound } from "next/navigation";
 import { getVendorById } from "@/lib/vendors/queries";
 import { listCategories } from "@/lib/categories/queries";
 import { listDestinations } from "@/lib/destinations/queries";
+import { getVenueDetails, listVenueDocuments, listVenueUpdates } from "@/lib/venues/queries";
 import { VendorForm } from "../../_components/vendor-form";
+import { VenueDetailsEditor } from "../../_components/venue-details-editor";
+import { VenueDocuments } from "../../_components/venue-documents";
+import { VenueHistory } from "../../_components/venue-history";
 
 export default async function EditVendorPage({
   params,
@@ -20,6 +24,15 @@ export default async function EditVendorPage({
   const categoryLabel = categories.find((c) => c.id === category)?.label;
   if (!categoryLabel || !vendor || vendor.category !== category) notFound();
   const selectedDestinationId = destinations.find((d) => d.isSelected)?.id ?? null;
+  const isVenue = category === "venue";
+  const [venueDetails, venueDocuments, venueUpdates] = isVenue
+    ? await Promise.all([
+        getVenueDetails(vendorId),
+        listVenueDocuments(vendorId),
+        listVenueUpdates(vendorId),
+      ])
+    : [null, [], []];
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,6 +48,24 @@ export default async function EditVendorPage({
         destinations={destinations}
         selectedDestinationId={selectedDestinationId}
       />
+      {isVenue && (
+        <>
+          <hr className="border-border" />
+          <VenueDetailsEditor
+            // Remount after each save so "was: …" hints and the update box reset
+            // against the newly saved values.
+            key={`${venueDetails?.updatedAt ?? "new"}-${venueUpdates.length}`}
+            vendorId={vendorId}
+            category={category}
+            details={venueDetails}
+            today={today}
+          />
+          <hr className="border-border" />
+          <VenueHistory updates={venueUpdates} today={today} />
+          <hr className="border-border" />
+          <VenueDocuments vendorId={vendorId} category={category} documents={venueDocuments} />
+        </>
+      )}
     </div>
   );
 }

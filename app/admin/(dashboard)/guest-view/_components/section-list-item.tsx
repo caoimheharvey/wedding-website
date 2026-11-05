@@ -88,11 +88,13 @@ export function SectionListItem({
   isFirst,
   isLast,
   onEdit,
+  onStyle,
 }: {
   section: GuestViewSection;
   isFirst: boolean;
   isLast: boolean;
   onEdit: () => void;
+  onStyle: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -168,6 +170,13 @@ export function SectionListItem({
             className="text-sm font-medium text-aegean hover:underline"
           >
             Edit
+          </button>
+          <button
+            type="button"
+            onClick={onStyle}
+            className="text-sm font-medium text-aegean hover:underline"
+          >
+            Style
           </button>
           <button
             type="button"

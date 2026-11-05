@@ -96,7 +96,7 @@ export function ImageGroupForm({
         <span className="text-xs text-foreground/50">Leave all unchecked to show everyone.</span>
       </fieldset>
 
-      <SectionWidthField defaultValue={section?.width ?? "normal"} />
+      <SectionWidthField defaultValue={section?.width ?? "normal"} allowFull />
 
       <label className="flex flex-col gap-1 text-sm text-ink">
         Columns

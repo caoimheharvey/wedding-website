@@ -22,6 +22,7 @@ import { ContactInfoForm } from "./guest/_components/contact-info-form";
 import { GuestPageShell } from "./guest/_components/guest-page-shell";
 import { GuestSiteView } from "./guest/_components/guest-site-view";
 import { GuestViewSections } from "./guest/_components/guest-view-sections";
+import { WebsiteLink } from "./guest/_components/website-link";
 import { LanguageTabs, isPreferredLanguage } from "./guest/_components/language-tabs";
 
 export default async function Home({
@@ -63,6 +64,7 @@ export default async function Home({
             </button>
           </form>
 
+          <WebsiteLink url={siteSettings.websiteUrl} language={language} />
           <LanguageTabs currentLanguage={language} hrefFor={(code) => `/?lang=${code}`} />
 
           <GuestSiteView
@@ -71,6 +73,7 @@ export default async function Home({
             weddingDate={siteSettings.weddingDate}
             rsvpDeadline={effectiveDeadline}
             headerLabelOverride={siteSettings.headerLabel}
+            heroImageUrl={siteSettings.heroImageUrl}
           />
 
           {needsContactOnboarding ? (
@@ -134,6 +137,7 @@ export default async function Home({
           </Link>
           <span className="text-foreground/50">Previewing as {persona.label}</span>
         </div>
+        <WebsiteLink url={siteSettings.websiteUrl} language={language} />
         <LanguageTabs
           currentLanguage={language}
           hrefFor={(code) => `/?role=${persona.role}&lang=${code}`}
@@ -145,6 +149,7 @@ export default async function Home({
           weddingDate={siteSettings.weddingDate}
           rsvpDeadline={siteSettings.defaultRsvpDeadline}
           headerLabelOverride={siteSettings.headerLabel}
+            heroImageUrl={siteSettings.heroImageUrl}
         />
         <GuestViewSections sections={sections} language={language} siteSettings={siteSettings} />
       </GuestPageShell>
@@ -182,7 +187,7 @@ export default async function Home({
           </p>
         </>
       ) : (
-        <GuestSignInContent language={language} />
+        <GuestSignInContent language={language} websiteUrl={siteSettings.websiteUrl} />
       )}
     </GuestPageShell>
   );

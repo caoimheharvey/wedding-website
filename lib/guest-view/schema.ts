@@ -5,7 +5,7 @@ import { extractEmbedUrl } from "./embed-url";
 const sectionMetaSchema = z.object({
   title: z.string().trim().optional(),
   visibleToRoles: z.array(z.enum(WEDDING_PARTY_ROLES)).default([]),
-  width: z.enum(["normal", "wide"]).default("normal"),
+  width: z.enum(["normal", "wide", "full"]).default("normal"),
 });
 
 export const textSectionFormSchema = z
@@ -14,7 +14,7 @@ export const textSectionFormSchema = z
     titleFr: z.string().trim().optional(),
     titleZh: z.string().trim().optional(),
     visibleToRoles: z.array(z.enum(WEDDING_PARTY_ROLES)).default([]),
-    width: z.enum(["normal", "wide"]).default("normal"),
+    width: z.enum(["normal", "wide", "full"]).default("normal"),
     textAlign: z.enum(["left", "center"]).default("left"),
     columnCount: z.coerce.number().int().min(1).max(4).default(1),
     bodyEn: z.string().trim().optional(),

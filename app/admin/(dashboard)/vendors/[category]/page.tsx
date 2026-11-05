@@ -5,7 +5,9 @@ import { listCategories } from "@/lib/categories/queries";
 import { listDestinations } from "@/lib/destinations/queries";
 import { getCategoryBudgetSummary } from "@/lib/budget/queries";
 import { formatCurrency } from "@/lib/budget/format";
+import { listVenueDetails } from "@/lib/venues/queries";
 import { VendorList } from "./_components/vendor-list";
+import { VenueComparison } from "./_components/venue-comparison";
 
 export default async function VendorCategoryPage({
   params,
@@ -14,12 +16,15 @@ export default async function VendorCategoryPage({
 }) {
   const { category } = await params;
 
-  const [vendors, budget, categories, destinations] = await Promise.all([
+  const isVenue = category === "venue";
+  const [vendors, budget, categories, destinations, venueDetails] = await Promise.all([
     listVendorsByCategory(category),
     getCategoryBudgetSummary(category),
     listCategories(),
     listDestinations(),
+    isVenue ? listVenueDetails() : Promise.resolve([]),
   ]);
+  const detailsByVendorId = Object.fromEntries(venueDetails.map((details) => [details.vendorId, details]));
   const categoryLabel = categories.find((c) => c.id === category)?.label;
   if (!categoryLabel) notFound();
   const selectedDestination = destinations.find((d) => d.isSelected) ?? null;
@@ -77,8 +82,17 @@ export default async function VendorCategoryPage({
         </p>
       )}
 
+      {isVenue && (
+        <VenueComparison
+          venues={vendors}
+          detailsByVendorId={detailsByVendorId}
+          category={category}
+        />
+      )}
+
       <VendorList
         vendors={vendors}
+        venueDetailsByVendorId={detailsByVendorId}
         category={category}
         categoryBudgeted={budget.budgeted}
         destinations={destinations}

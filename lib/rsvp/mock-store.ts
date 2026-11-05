@@ -10,7 +10,10 @@ let settings: SiteSettings = {
   weddingDate: "2028-07-15",
   weddingLocation: "Villa Cimbrone, Ravello",
   backgroundImageUrl: null,
+  heroImageUrl: null,
+  websiteUrl: null,
   headerLabel: null,
+  destination: "Andalucía (Sevilla / Cádiz area)",
 };
 
 export function mockGetSiteSettings(): SiteSettings {
@@ -37,7 +40,22 @@ export function mockUpdateBackgroundImage(url: string | null): SiteSettings {
   return settings;
 }
 
+export function mockUpdateHeroImage(url: string | null): SiteSettings {
+  settings = { ...settings, heroImageUrl: url };
+  return settings;
+}
+
+export function mockUpdateWebsiteUrl(url: string | null): SiteSettings {
+  settings = { ...settings, websiteUrl: url };
+  return settings;
+}
+
 export function mockUpdateHeaderLabel(label: string | null): SiteSettings {
   settings = { ...settings, headerLabel: label };
+  return settings;
+}
+
+export function mockUpdateDestination(destination: string | null): SiteSettings {
+  settings = { ...settings, destination };
   return settings;
 }

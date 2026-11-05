@@ -7,6 +7,7 @@ import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { GuestStats } from "../guests/_components/guest-stats";
 import { CountdownCard } from "./_components/countdown-card";
+import { DestinationEditor } from "./_components/destination-editor";
 import { DietaryRequirementsCard } from "./_components/dietary-requirements-card";
 import { OverviewBudgetCard } from "./_components/overview-budget-card";
 import { PlanningPhaseCard } from "./_components/planning-phase-card";
@@ -44,6 +45,10 @@ export default async function OverviewPage() {
           Your wedding at a glance — countdown, budget, guests, and where you are in planning.
         </p>
       </header>
+
+      <section className="glass-card p-4">
+        <DestinationEditor destination={siteSettings.destination} />
+      </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
         <CountdownCard weddingDate={siteSettings.weddingDate} />

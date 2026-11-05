@@ -3,6 +3,7 @@ import type * as z from "zod";
 import type { Vendor } from "./types";
 import type { bookingStatusFormSchema, vendorFormSchema } from "./schema";
 import { parseOptionalAmount } from "./schema";
+import { SAN_MARCOS_VENDOR_ID } from "@/lib/venues/seed-ids";
 
 /**
  * In-memory vendors used only when LOCAL_TEST_BYPASS_AUTH is set. Resets on
@@ -85,6 +86,15 @@ function seed(): Vendor[] {
       phone: "+39 081 555 0199",
       priceQuote: 8500,
       notes: "Tasting scheduled for next visit. Family-run, does a lot of weddings at the venue.",
+    }),
+    makeVendor({
+      id: SAN_MARCOS_VENDOR_ID,
+      category: "venue",
+      name: "Castillo de San Marcos",
+      contactName: "Paula González",
+      email: "visitas@castillodesanmarcoos.es",
+      phone: "627569335",
+      notes: "Medieval fortress with a 10th-century mosque in the centre of the city.",
     }),
     makeVendor({
       category: "venue",

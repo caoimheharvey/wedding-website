@@ -2,12 +2,20 @@ import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 import type { PreferredLanguage } from "@/lib/guests/types";
 import { QuickSignInForm } from "../sign-in/_components/quick-sign-in-form";
 import { LanguageTabs } from "./language-tabs";
+import { WebsiteLink } from "./website-link";
 
-export function GuestSignInContent({ language }: { language: PreferredLanguage }) {
+export function GuestSignInContent({
+  language,
+  websiteUrl = null,
+}: {
+  language: PreferredLanguage;
+  websiteUrl?: string | null;
+}) {
   const strings = GUEST_SITE_STRINGS[language].guestSignIn;
 
   return (
     <>
+      <WebsiteLink url={websiteUrl} language={language} />
       <LanguageTabs currentLanguage={language} hrefFor={(code) => `/?lang=${code}`} />
 
       <p className="text-sm tracking-[0.3em] text-aegean uppercase">Guests</p>

@@ -1,7 +1,7 @@
 import "server-only";
 import type * as z from "zod";
 import type { PreferredLanguage } from "@/lib/guests/types";
-import type { GuestViewImage, GuestViewSection } from "./types";
+import type { GuestViewImage, GuestViewSection, SectionStyle } from "./types";
 import type {
   contactInfoSectionFormSchema,
   embedGroupFormSchema,
@@ -89,6 +89,7 @@ function seed(): GuestViewSection[] {
       columnCount: null,
       embeds: [],
       images: [],
+      style: { bgColor: "#d2e4b4", decor: [], fadeIn: false },
       createdAt: now,
       updatedAt: now,
     },
@@ -451,6 +452,10 @@ export function mockUpdateBuiltinSection(
         }
       : section,
   );
+}
+
+export function mockUpdateSectionStyle(id: string, style: SectionStyle): void {
+  sections = sections.map((section) => (section.id === id ? { ...section, style } : section));
 }
 
 export function mockDeleteGuestViewSection(id: string): void {

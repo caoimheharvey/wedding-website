@@ -10,6 +10,7 @@ export function GuestSiteView({
   weddingDate = null,
   rsvpDeadline = null,
   headerLabelOverride = null,
+  heroImageUrl = null,
 }: {
   greetingNames: string[];
   language: PreferredLanguage;
@@ -19,6 +20,8 @@ export function GuestSiteView({
   rsvpDeadline?: string | null;
   /** Admin-set override — used verbatim instead of the automatic label when set. */
   headerLabelOverride?: string | null;
+  /** Designed banner that replaces the label and names. */
+  heroImageUrl?: string | null;
 }) {
   const strings = GUEST_SITE_STRINGS[language];
   const phase = sitePhase(weddingDate, rsvpDeadline);
@@ -27,8 +30,18 @@ export function GuestSiteView({
 
   return (
     <>
-      <p className="text-sm tracking-[0.3em] text-aegean uppercase">{headerLabel}</p>
-      <h1 className="font-display text-5xl text-ink">Caoimhe &amp; Alexandre</h1>
+      {heroImageUrl ? (
+        <div className="section-full -mt-12">
+          <h1 className="sr-only">Caoimhe &amp; Alexandre</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary uploaded/hosted image */}
+          <img src={heroImageUrl} alt={headerLabel} className="block h-auto w-full" />
+        </div>
+      ) : (
+        <>
+          <p className="text-xs tracking-[0.35em] text-aegean uppercase">{headerLabel}</p>
+          <h1 className="font-display text-xl text-ink sm:text-2xl">Caoimhe &amp; Alexandre</h1>
+        </>
+      )}
       <p className="text-lg text-ink">{strings.greeting(greetingNames)}</p>
 
       {delegateFor && delegateFor.length > 0 && (

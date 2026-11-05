@@ -14,8 +14,8 @@ export function GuestPageShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative isolate min-h-screen">
-      <GuestBackgroundLayer imageUrl={backgroundImageUrl} />
+    <div className="canva-theme relative isolate min-h-screen overflow-x-clip">
+      {backgroundImageUrl && <GuestBackgroundLayer imageUrl={backgroundImageUrl} />}
       <main className={mainClassName}>{children}</main>
     </div>
   );

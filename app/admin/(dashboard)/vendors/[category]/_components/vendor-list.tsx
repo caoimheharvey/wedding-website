@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Vendor } from "@/lib/vendors/types";
 import type { Destination } from "@/lib/destinations/types";
 import { getBudgetFit } from "@/lib/vendors/budget-fit";
+import type { VenueDetails } from "@/lib/venues/types";
 import { VendorCard } from "./vendor-card";
 
 function fmtMoney(amount: number | null): string {
@@ -76,12 +77,14 @@ export function VendorList({
   categoryBudgeted,
   destinations,
   selectedDestination,
+  venueDetailsByVendorId = {},
 }: {
   vendors: Vendor[];
   category: string;
   categoryBudgeted: number;
   destinations: Destination[];
   selectedDestination: Destination | null;
+  venueDetailsByVendorId?: Record<string, VenueDetails>;
 }) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
@@ -103,7 +106,7 @@ export function VendorList({
 
   return (
     <div className="flex flex-col gap-4">
-      {compareVendors.length === 2 && (
+      {category !== "venue" && compareVendors.length === 2 && (
         <CompareTable a={compareVendors[0]} b={compareVendors[1]} categoryBudgeted={categoryBudgeted} />
       )}
 
@@ -118,6 +121,7 @@ export function VendorList({
             compareDisabled={compareIds.length >= 2 && !compareIds.includes(vendor.id)}
             onToggleCompare={() => toggleCompare(vendor.id)}
             selectedDestination={selectedDestination}
+            venueDetails={venueDetailsByVendorId[vendor.id] ?? null}
             vendorDestinationName={
               vendor.destinationId
                 ? (destinations.find((d) => d.id === vendor.destinationId)?.name ?? null)

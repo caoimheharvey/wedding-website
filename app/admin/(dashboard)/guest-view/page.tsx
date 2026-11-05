@@ -4,6 +4,8 @@ import { getSiteSettings } from "@/lib/rsvp/queries";
 import { sitePhase } from "@/lib/guest-site/phase";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
 import { formatWeddingDate } from "@/lib/planning/countdown";
+import { WebsiteUrlEditor } from "./_components/website-url-editor";
+import { HeroImageEditor } from "./_components/hero-image-editor";
 import { BackgroundImageEditor } from "./_components/background-image-editor";
 import { GuestViewManager } from "./_components/guest-view-manager";
 import { HeaderLabelEditor } from "./_components/header-label-editor";
@@ -37,6 +39,8 @@ export default async function GuestViewPage() {
         <HeaderLabelEditor headerLabel={siteSettings.headerLabel} autoLabel={autoHeaderLabel} />
       </section>
 
+      <WebsiteUrlEditor websiteUrl={siteSettings.websiteUrl} />
+      <HeroImageEditor imageUrl={siteSettings.heroImageUrl} />
       <BackgroundImageEditor imageUrl={siteSettings.backgroundImageUrl} />
 
       <PreviewPicker guests={guests} />

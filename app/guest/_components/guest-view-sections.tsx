@@ -10,6 +10,7 @@ import { localizedSectionTitle } from "@/lib/guest-view/section-title";
 import { groupItemsByColumn, textSectionColumns } from "@/lib/guest-view/columns";
 import { toGoogleMapsEmbedUrl } from "@/lib/guest-view/google-maps-embed";
 import { GUEST_SITE_STRINGS } from "@/lib/guest-site/i18n";
+import { SectionFrame } from "./section-frame";
 import { RsvpForm } from "./rsvp-form";
 import { RsvpStatusDisplay } from "./rsvp-status-display";
 import { ContactInfoForm } from "./contact-info-form";
@@ -36,6 +37,7 @@ const TEXT_COLS: Record<number, string> = {
 /** "wide" is noticeably wider than "normal", but only once there's room for
  *  it — on phones (where most guests will be) it looks identical. */
 function sectionWidthClass(width: GuestViewSection["width"]): string {
+  if (width === "full") return "section-full";
   return width === "wide" ? "section-wide" : "w-full";
 }
 
@@ -162,9 +164,13 @@ export function GuestViewSections({
 
         if (!content) return null;
         return (
-          <div key={section.id} className={sectionWidthClass(section.width)}>
+          <SectionFrame
+            key={section.id}
+            style={section.style}
+            widthClass={sectionWidthClass(section.width)}
+          >
             {content}
-          </div>
+          </SectionFrame>
         );
       })}
     </div>
@@ -205,6 +211,17 @@ function ImageGroupView({ section, title }: { section: GuestViewSection; title: 
   const columnCount = section.columnCount ?? 2;
   const gridClass = GRID_COLS[columnCount] ?? GRID_COLS[2];
   const columns = groupItemsByColumn(section.images, columnCount);
+
+  if (section.width === "full") {
+    return (
+      <div className={`grid ${gridClass}`}>
+        {section.images.map((image) => (
+          // eslint-disable-next-line @next/next/no-img-element -- arbitrary uploaded/hosted images, not a known-optimizable set
+          <img key={image.id} src={image.url} alt={image.caption ?? ""} className="block h-auto w-full" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="glass-card p-4">

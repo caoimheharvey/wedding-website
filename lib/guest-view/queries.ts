@@ -3,7 +3,25 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import type { WeddingPartyRole } from "@/lib/guests/types";
 import { mockListGuestViewSections } from "./mock-store";
-import type { EmbedProvider, GuestViewImage, GuestViewSection } from "./types";
+import {
+  DECOR_POSITIONS,
+  DECOR_SIZES,
+  type EmbedProvider,
+  type GuestViewImage,
+  type GuestViewSection,
+  type SectionDecor,
+} from "./types";
+
+function parseDecor(value: unknown): SectionDecor[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (entry): entry is SectionDecor =>
+      !!entry &&
+      typeof entry.url === "string" &&
+      DECOR_POSITIONS.includes(entry.position) &&
+      DECOR_SIZES.includes(entry.size),
+  );
+}
 
 function parseBodyColumns(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
@@ -28,6 +46,9 @@ interface SectionRow {
   body_fr_columns: unknown;
   body_zh_columns: unknown;
   column_count: number | null;
+  bg_color: string | null;
+  decor: unknown;
+  fade_in: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -115,6 +136,7 @@ export async function listGuestViewSections(): Promise<GuestViewSection[]> {
     columnCount: row.column_count,
     embeds: embedsBySection.get(row.id) ?? [],
     images: imagesBySection.get(row.id) ?? [],
+    style: { bgColor: row.bg_color, decor: parseDecor(row.decor), fadeIn: row.fade_in ?? false },
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }));

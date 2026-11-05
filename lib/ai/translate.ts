@@ -11,7 +11,7 @@ function getClient(): Anthropic {
   return new Anthropic({ apiKey });
 }
 
-async function complete(prompt: string, maxTokens = 1024): Promise<string> {
+export async function complete(prompt: string, maxTokens = 1024): Promise<string> {
   const client = getClient();
   const message = await client.messages.create({
     model: MODEL,

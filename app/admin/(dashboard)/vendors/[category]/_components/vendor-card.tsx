@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { deleteVendor, setVendorSelected } from "@/lib/vendors/actions";
 import { getBudgetFit } from "@/lib/vendors/budget-fit";
+import { hireInclVat } from "@/lib/venues/pricing";
+import { OUTREACH_STATUS_LABELS, type VenueDetails } from "@/lib/venues/types";
 import type { Vendor } from "@/lib/vendors/types";
 import type { Destination } from "@/lib/destinations/types";
 import { BookingStatusForm } from "./booking-status-form";
@@ -17,6 +19,7 @@ export function VendorCard({
   compareDisabled,
   selectedDestination,
   vendorDestinationName,
+  venueDetails = null,
 }: {
   vendor: Vendor;
   category: string;
@@ -27,6 +30,8 @@ export function VendorCard({
   /** The destination that's been chosen, if any — used to grey out vendors tied elsewhere. */
   selectedDestination?: Destination | null;
   vendorDestinationName?: string | null;
+  /** Reply details, for venue-category cards only. */
+  venueDetails?: VenueDetails | null;
 }) {
   const budgetFit = getBudgetFit(vendor.priceQuote, categoryBudgeted);
   const [isPending, startTransition] = useTransition();
@@ -116,6 +121,21 @@ export function VendorCard({
             )}
           </div>
         )}
+        {venueDetails && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="rounded-full bg-sand px-2 py-0.5 text-xs font-medium text-foreground/70">
+              {OUTREACH_STATUS_LABELS[venueDetails.outreachStatus]}
+            </span>
+            {hireInclVat(venueDetails) !== null && (
+              <span className="font-medium text-ink">
+                €{Math.round(hireInclVat(venueDetails)!).toLocaleString()} hire incl. VAT
+              </span>
+            )}
+            {venueDetails.maxCapacity !== null && (
+              <span className="text-xs">up to {venueDetails.maxCapacity} guests</span>
+            )}
+          </div>
+        )}
         {vendor.notes && <div className="text-foreground/60 italic">{vendor.notes}</div>}
       </dl>
 
@@ -130,18 +150,20 @@ export function VendorCard({
           />
           Selected vendor
         </label>
-        <label
-          className={`flex items-center gap-2 text-sm ${compareDisabled ? "text-foreground/30" : "text-ink"}`}
-        >
-          <input
-            type="checkbox"
-            checked={isComparing}
-            onChange={onToggleCompare}
-            disabled={compareDisabled}
-            className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean disabled:opacity-50"
-          />
-          Compare
-        </label>
+        {category !== "venue" && (
+          <label
+            className={`flex items-center gap-2 text-sm ${compareDisabled ? "text-foreground/30" : "text-ink"}`}
+          >
+            <input
+              type="checkbox"
+              checked={isComparing}
+              onChange={onToggleCompare}
+              disabled={compareDisabled}
+              className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean disabled:opacity-50"
+            />
+            Compare
+          </label>
+        )}
       </div>
 
       {vendor.isSelected && <BookingStatusForm vendor={vendor} category={category} />}

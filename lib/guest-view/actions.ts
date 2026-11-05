@@ -21,6 +21,7 @@ import {
   mockUpdateImageGroupSection,
   mockUpdateRsvpSection,
   mockUpdateRsvpStatusSection,
+  mockUpdateSectionStyle,
   mockUpdateTextSection,
   type MockImageInput,
 } from "./mock-store";
@@ -36,7 +37,12 @@ import {
   builtinSectionFormSchema,
 } from "./schema";
 import { textSectionDbFields } from "./text-section-persist";
-import type { GuestViewSectionType } from "./types";
+import {
+  DECOR_POSITIONS,
+  DECOR_SIZES,
+  type GuestViewSectionType,
+  type SectionDecor,
+} from "./types";
 
 export type GuestViewSectionActionState =
   | { errors: Record<string, string[] | undefined>; message?: string }
@@ -646,6 +652,78 @@ export async function updateEmbedGroupSection(
 
   revalidatePath("/admin/guest-view");
   return { message: "Section updated." };
+}
+
+const styleFormSchema = z.object({
+  bgColor: z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #fffefc." }), z.literal("")]),
+  fadeIn: z.boolean(),
+});
+
+/** Saves a section's band look: background colour, edge artwork (uploaded to the same
+ *  bucket as Guest View images) and fade-in. Works on every section type. */
+export async function updateSectionStyle(
+  sectionId: string,
+  _prevState: GuestViewSectionActionState,
+  formData: FormData,
+): Promise<GuestViewSectionActionState> {
+  await requireAdmin();
+
+  const parsed = styleFormSchema.safeParse({
+    bgColor: String(formData.get("bgColor") ?? ""),
+    fadeIn: formData.get("fadeIn") === "on",
+  });
+  if (!parsed.success) {
+    return { message: z.flattenError(parsed.error).fieldErrors.bgColor?.[0] ?? "Invalid style." };
+  }
+
+  const existingUrls = formData.getAll("decorExistingUrl").map(String);
+  const files = formData.getAll("decorFile");
+  const positions = formData.getAll("decorPosition").map(String);
+  const sizes = formData.getAll("decorSize").map(String);
+  const decor: SectionDecor[] = [];
+
+  for (let i = 0; i < positions.length; i++) {
+    const position = positions[i] as SectionDecor["position"];
+    const size = sizes[i] as SectionDecor["size"];
+    if (!DECOR_POSITIONS.includes(position) || !DECOR_SIZES.includes(size)) continue;
+
+    const file = files[i];
+    let url = existingUrls[i] ?? "";
+    if (file instanceof File && file.size > 0) {
+      if (isLocalTestMode()) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        url = `data:${file.type || "image/png"};base64,${buffer.toString("base64")}`;
+      } else {
+        const supabase = getSupabaseAdmin();
+        const extension = file.name.split(".").pop() || "png";
+        const path = `section-decor/${crypto.randomUUID()}.${extension}`;
+        const { error } = await supabase.storage
+          .from("guest-view-images")
+          .upload(path, file, { contentType: file.type || undefined, upsert: true });
+        if (error) return { message: `Could not upload artwork: ${error.message}` };
+        url = supabase.storage.from("guest-view-images").getPublicUrl(path).data.publicUrl;
+      }
+    }
+    if (url) decor.push({ url, position, size });
+  }
+
+  const style = { bgColor: parsed.data.bgColor || null, decor, fadeIn: parsed.data.fadeIn };
+
+  if (isLocalTestMode()) {
+    mockUpdateSectionStyle(sectionId, style);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("guest_view_sections")
+      .update({ bg_color: style.bgColor, decor: style.decor, fade_in: style.fadeIn })
+      .eq("id", sectionId);
+    if (error) return { message: `Could not save style: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  revalidatePath("/");
+  revalidatePath("/guest");
+  return { message: "Style updated." };
 }
 
 export async function deleteGuestViewSection(sectionId: string): Promise<{ message?: string }> {

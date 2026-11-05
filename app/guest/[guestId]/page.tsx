@@ -14,6 +14,7 @@ import { listChildrenForGuest } from "@/lib/children/queries";
 import { GuestPageShell } from "../_components/guest-page-shell";
 import { GuestSiteView } from "../_components/guest-site-view";
 import { GuestViewSections } from "../_components/guest-view-sections";
+import { WebsiteLink } from "../_components/website-link";
 import { LanguageTabs, isPreferredLanguage } from "../_components/language-tabs";
 
 export default async function GuestPreviewPage({
@@ -60,6 +61,7 @@ export default async function GuestPreviewPage({
         </span>
       </div>
 
+      <WebsiteLink url={siteSettings.websiteUrl} language={language} />
       <LanguageTabs
         currentLanguage={language}
         hrefFor={(code) => `/guest/${guest.id}?lang=${code}`}
@@ -71,6 +73,7 @@ export default async function GuestPreviewPage({
         weddingDate={siteSettings.weddingDate}
         rsvpDeadline={effectiveDeadline}
         headerLabelOverride={siteSettings.headerLabel}
+            heroImageUrl={siteSettings.heroImageUrl}
       />
 
       <GuestViewSections
