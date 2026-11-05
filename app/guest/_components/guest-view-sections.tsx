@@ -41,6 +41,46 @@ function sectionWidthClass(width: GuestViewSection["width"]): string {
   return width === "wide" ? "section-wide" : "w-full";
 }
 
+const GUEST_SPECIFIC_TYPES: GuestViewSection["type"][] = [
+  "rsvp",
+  "rsvp_status",
+  "contact_info",
+  "dietary_restrictions",
+  "plus_one",
+  "children",
+];
+
+function previewPlaceholderLabel(type: GuestViewSection["type"]): string {
+  switch (type) {
+    case "rsvp":
+      return "RSVP form";
+    case "rsvp_status":
+      return "RSVP status";
+    case "contact_info":
+      return "Contact info";
+    case "dietary_restrictions":
+      return "Dietary requirements";
+    case "plus_one":
+      return "Add your plus-one (only for guests granted one)";
+    case "children":
+      return "Children (only for guests granted them)";
+    default:
+      return "Guest section";
+  }
+}
+
+/** Admin-only stand-in shown in role previews; real guests never see it. */
+function PreviewPlaceholder({ label }: { label: string }) {
+  return (
+    <div className="rounded-md border border-dashed border-aegean/50 p-4 text-center text-xs text-aegean">
+      <p className="font-medium tracking-wide uppercase">{label}</p>
+      <p className="mt-1 text-foreground/60">
+        Shown to real guests here. Use &quot;Preview as specific guest&quot; to see and try the form.
+      </p>
+    </div>
+  );
+}
+
 export interface RsvpSectionContext {
   guest: Guest;
   allGuests: Guest[];
@@ -160,6 +200,12 @@ export function GuestViewSections({
               />
             );
           }
+        }
+
+        // Role-only previews have no real guest, so interactive sections can't render —
+        // say so rather than leaving a silent gap.
+        if (!content && !rsvp && GUEST_SPECIFIC_TYPES.includes(section.type)) {
+          content = <PreviewPlaceholder label={previewPlaceholderLabel(section.type)} />;
         }
 
         if (!content) return null;
