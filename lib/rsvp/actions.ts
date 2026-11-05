@@ -16,6 +16,7 @@ import {
   mockUpdateWebsiteUrl,
   mockUpdateWeddingDate,
   mockUpdateWeddingLocation,
+  mockUpdateWeddingVenue,
 } from "./mock-store";
 
 const deadlineSchema = z.union([z.iso.date(), z.literal("")]).optional();
@@ -85,6 +86,36 @@ export async function updateWeddingLocation(
     const { error } = await supabase
       .from("site_settings")
       .update({ wedding_location: value })
+      .eq("id", 1);
+    if (error) return { message: `Could not save: ${error.message}` };
+  }
+
+  revalidatePath("/admin/overview");
+  revalidatePath("/");
+  return {};
+}
+
+export async function updateWeddingVenue(
+  venue: string | null,
+  venueUrl: string | null,
+): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const name = venue?.trim() || null;
+  const trimmedUrl = venueUrl?.trim() ?? "";
+  if (trimmedUrl && !z.url({ protocol: /^https?$/ }).safeParse(trimmedUrl).success) {
+    return { message: "Enter the venue link as a full web address starting with https://" };
+  }
+  // A link with no venue name has nothing to attach to.
+  const url = name ? trimmedUrl || null : null;
+
+  if (isLocalTestMode()) {
+    mockUpdateWeddingVenue(name, url);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ wedding_venue: name, wedding_venue_url: url })
       .eq("id", 1);
     if (error) return { message: `Could not save: ${error.message}` };
   }

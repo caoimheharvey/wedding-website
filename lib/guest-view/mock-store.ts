@@ -12,6 +12,7 @@ import type {
   textSectionFormSchema,
   builtinSectionFormSchema,
 } from "./schema";
+import { STARTER_SECTIONS } from "./starter-sections";
 import { textSectionMockBody } from "./text-section-persist";
 import type { GuestViewSectionType } from "./types";
 
@@ -113,7 +114,29 @@ function seed(): GuestViewSection[] {
       createdAt: now,
       updatedAt: now,
     },
+    ...starterSections(now, 4),
   ];
+}
+
+/** Seeded locally so the practical-info sections can be previewed; real data only gets them
+ *  through the admin's "Add starter sections" button. */
+function starterSections(now: string, firstOrderIndex: number): GuestViewSection[] {
+  return STARTER_SECTIONS.map((starter, index) => ({
+    id: crypto.randomUUID(),
+    type: "text" as const,
+    titles: starter.title,
+    orderIndex: firstOrderIndex + index,
+    visibleToRoles: [],
+    width: "normal" as const,
+    textAlign: "left" as const,
+    body: starter.body,
+    bodyColumns: { en: null, fr: null, zh: null },
+    columnCount: null,
+    embeds: [],
+    images: [],
+    createdAt: now,
+    updatedAt: now,
+  }));
 }
 
 export function mockListGuestViewSections(): GuestViewSection[] {

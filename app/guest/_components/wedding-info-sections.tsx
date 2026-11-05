@@ -83,14 +83,32 @@ export function WeddingDateSectionView({
   const calendarEvent = buildWeddingCalendarEvent(siteSettings, language)!;
   const googleUrl = buildGoogleCalendarUrl(calendarEvent);
   const location = effectiveWeddingLocation(siteSettings);
+  const venue = siteSettings.weddingVenue?.trim() || null;
+  const venueUrl = venue ? siteSettings.weddingVenueUrl?.trim() || null : null;
 
   return (
     <section className="glass-card p-4 text-center">
       {title ? <h2 className="mb-2 font-display text-lg font-bold text-ink">{title}</h2> : (
         <h2 className="mb-2 font-display text-lg font-bold text-ink">{strings.heading}</h2>
       )}
-      <p className="font-display text-xl text-ink">{formatWeddingDate(weddingDate, language)}</p>
-      <p className="mt-1 text-sm text-foreground/60">{location}</p>
+      <p className="date-emphasis text-2xl text-ink sm:text-3xl">{formatWeddingDate(weddingDate, language)}</p>
+      {venue && (
+        <>
+          <p className="my-2 text-sm tracking-[0.3em] text-aegean uppercase">{strings.atVenue}</p>
+          <p className="date-emphasis text-2xl text-ink sm:text-3xl">
+            {venueUrl ? (
+              <a href={venueUrl} target="_blank" rel="noopener noreferrer" className="italic">
+                {venue}
+              </a>
+            ) : (
+              venue
+            )}
+          </p>
+        </>
+      )}
+      <p className={`date-emphasis text-[17px] text-ink sm:text-[21px] ${venue ? "mt-1" : "mt-2"}`}>
+        {location}
+      </p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         <a
           href={googleUrl}

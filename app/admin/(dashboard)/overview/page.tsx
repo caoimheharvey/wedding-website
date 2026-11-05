@@ -56,6 +56,8 @@ export default async function OverviewPage() {
           <WeddingDateEditor
             weddingDate={siteSettings.weddingDate}
             weddingLocation={siteSettings.weddingLocation}
+            weddingVenue={siteSettings.weddingVenue}
+            weddingVenueUrl={siteSettings.weddingVenueUrl}
           />
         </section>
       </section>

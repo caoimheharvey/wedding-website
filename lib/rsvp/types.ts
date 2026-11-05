@@ -3,8 +3,11 @@ export interface SiteSettings {
   defaultRsvpDeadline: string | null;
   /** ISO date (YYYY-MM-DD). The wedding day — used for countdown and planning phases. */
   weddingDate: string | null;
-  /** Venue or city shown on the guest site and calendar download. */
+  /** City shown on the guest site and calendar download. */
   weddingLocation: string | null;
+  /** Venue name shown above the city, optionally linked to the venue's website. */
+  weddingVenue: string | null;
+  weddingVenueUrl: string | null;
   /** Translucent backdrop shown behind the guest-facing site. Null falls back to a decorative pattern. */
   backgroundImageUrl: string | null;
   /** Designed header image (e.g. from Canva) that replaces the label and names at the top of the guest site. */

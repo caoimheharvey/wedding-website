@@ -885,3 +885,8 @@ alter table guest_view_sections
 alter table site_settings
   add column header_label_fr text,
   add column header_label_zh text;
+
+-- >>> 0047_site_settings_wedding_venue.sql
+alter table site_settings
+  add column wedding_venue text,
+  add column wedding_venue_url text;

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
+  addStarterSections,
   createChildrenSection,
   createCountdownSection,
   createDietaryRestrictionsSection,
@@ -13,6 +14,7 @@ import {
   updatePlusOneSection,
   updateWeddingDateSection,
 } from "@/lib/guest-view/actions";
+import { STARTER_SECTIONS } from "@/lib/guest-view/starter-sections";
 import type { GuestViewSection } from "@/lib/guest-view/types";
 import { BuiltinGuestViewSectionForm } from "./builtin-section-form";
 import { TextSectionForm } from "./text-section-form";
@@ -46,6 +48,11 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
   const [addingType, setAddingType] = useState<AddingType>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [styleId, setStyleId] = useState<string | null>(null);
+  const [starterMessage, setStarterMessage] = useState<string | null>(null);
+  const [isAddingStarters, startStarterTransition] = useTransition();
+  const hasMissingStarters = STARTER_SECTIONS.some(
+    (starter) => !sections.some((section) => section.titles.en === starter.title.en),
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -156,8 +163,24 @@ export function GuestViewManager({ sections }: { sections: GuestViewSection[] })
               + Children section
             </button>
           )}
+          {hasMissingStarters && (
+            <button
+              type="button"
+              disabled={isAddingStarters}
+              onClick={() =>
+                startStarterTransition(async () => {
+                  const result = await addStarterSections();
+                  setStarterMessage(result.message ?? null);
+                })
+              }
+              className="rounded-full border border-aegean px-4 py-1.5 text-sm font-medium text-aegean transition hover:bg-aegean/5 disabled:opacity-50"
+            >
+              {isAddingStarters ? "Adding…" : "+ Starter sections (travel, lodging, schedule…)"}
+            </button>
+          )}
         </div>
       )}
+      {starterMessage && <p className="text-sm text-foreground/60">{starterMessage}</p>}
 
       {sections.length === 0 ? (
         <p className="text-sm text-foreground/60">No sections yet. Add one above.</p>

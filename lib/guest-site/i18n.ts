@@ -83,6 +83,8 @@ interface GuestSiteStrings {
     calendarDescription: string;
     /** Label before the website link in the calendar event description. */
     calendarMoreInfo: string;
+    /** Joins the date and the venue ("Saturday 15 July 2028 — at — Venue"). */
+    atVenue: string;
   };
   dietarySection: {
     heading: string;
@@ -211,6 +213,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       downloadIcs: "Add to calendar (.ics)",
       calendarDescription: "Caoimhe & Alexandre's wedding",
       calendarMoreInfo: "More information",
+      atVenue: "at",
     },
     dietarySection: {
       heading: "Dietary requirements",
@@ -337,6 +340,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       downloadIcs: "Ajouter au calendrier (.ics)",
       calendarDescription: "Mariage de Caoimhe et Alexandre",
       calendarMoreInfo: "Plus d'informations",
+      atVenue: "à",
     },
     dietarySection: {
       heading: "Régime alimentaire",
@@ -459,6 +463,7 @@ export const GUEST_SITE_STRINGS: Record<PreferredLanguage, GuestSiteStrings> = {
       downloadIcs: "添加到日历 (.ics)",
       calendarDescription: "Caoimhe 与 Alexandre 的婚礼",
       calendarMoreInfo: "更多信息",
+      atVenue: "于",
     },
     dietarySection: {
       heading: "饮食要求",

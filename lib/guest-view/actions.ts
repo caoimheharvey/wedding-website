@@ -36,6 +36,7 @@ import {
   textSectionFormSchema,
   builtinSectionFormSchema,
 } from "./schema";
+import { STARTER_SECTIONS } from "./starter-sections";
 import { textSectionDbFields } from "./text-section-persist";
 import {
   DECOR_POSITIONS,
@@ -313,6 +314,57 @@ export async function createTextSection(
 
   revalidatePath("/admin/guest-view");
   return { message: "Section added." };
+}
+
+/** Adds any practical-info starter sections (travel, lodging, schedule…) that aren't there yet,
+ *  as ordinary editable text sections visible to everyone. */
+export async function addStarterSections(): Promise<{ message?: string }> {
+  await requireAdmin();
+
+  const existing = await listGuestViewSections();
+  const have = new Set(existing.map((section) => section.titles.en));
+  const missing = STARTER_SECTIONS.filter((starter) => !have.has(starter.title.en));
+  if (missing.length === 0) return { message: "All starter sections are already there." };
+
+  const rows = missing.map((starter, index) => {
+    const data = {
+      titleEn: starter.title.en,
+      titleFr: starter.title.fr,
+      titleZh: starter.title.zh,
+      visibleToRoles: [] as z.infer<typeof textSectionFormSchema>["visibleToRoles"],
+      width: "normal" as const,
+      textAlign: "left" as const,
+      columnCount: 1,
+      bodyEn: starter.body.en,
+      bodyFr: starter.body.fr,
+      bodyZh: starter.body.zh,
+    };
+    return { data, orderIndex: existing.length + index };
+  });
+
+  if (isLocalTestMode()) {
+    for (const { data, orderIndex } of rows) mockCreateTextSection(data, orderIndex);
+  } else {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from("guest_view_sections").insert(
+      rows.map(({ data, orderIndex }) => ({
+        type: "text",
+        title: data.titleEn,
+        title_fr: data.titleFr,
+        title_zh: data.titleZh,
+        order_index: orderIndex,
+        visible_to_roles: data.visibleToRoles,
+        width: data.width,
+        ...textSectionDbFields(data),
+        text_align: data.textAlign,
+        column_count: data.columnCount,
+      })),
+    );
+    if (error) return { message: `Could not add sections: ${error.message}` };
+  }
+
+  revalidatePath("/admin/guest-view");
+  return { message: `Added ${missing.length} section(s).` };
 }
 
 export async function updateTextSection(
