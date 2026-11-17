@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { deleteVendor, setVendorSelected } from "@/lib/vendors/actions";
 import { getBudgetFit } from "@/lib/vendors/budget-fit";
 import { hireInclVat } from "@/lib/venues/pricing";
+import { describeDogPolicy, type VenueProfile } from "@/lib/venues/analysis/types";
 import { OUTREACH_STATUS_LABELS, type VenueDetails } from "@/lib/venues/types";
 import type { Vendor } from "@/lib/vendors/types";
 import type { Destination } from "@/lib/destinations/types";
@@ -20,6 +21,7 @@ export function VendorCard({
   selectedDestination,
   vendorDestinationName,
   venueDetails = null,
+  venueProfile = null,
 }: {
   vendor: Vendor;
   category: string;
@@ -32,6 +34,8 @@ export function VendorCard({
   vendorDestinationName?: string | null;
   /** Reply details, for venue-category cards only. */
   venueDetails?: VenueDetails | null;
+  /** Structured venue facts (location, dog policy…), for venue-category cards only. */
+  venueProfile?: VenueProfile | null;
 }) {
   const budgetFit = getBudgetFit(vendor.priceQuote, categoryBudgeted);
   const [isPending, startTransition] = useTransition();
@@ -128,7 +132,8 @@ export function VendorCard({
             </span>
             {hireInclVat(venueDetails) !== null && (
               <span className="font-medium text-ink">
-                €{Math.round(hireInclVat(venueDetails)!).toLocaleString()} hire incl. VAT
+                €{Math.round(hireInclVat(venueDetails)!).toLocaleString()}{" "}
+                {venueDetails.feeIncludesVat === null ? "hire (VAT not stated)" : "hire incl. VAT"}
               </span>
             )}
             {venueDetails.maxCapacity !== null && (
@@ -136,7 +141,25 @@ export function VendorCard({
             )}
           </div>
         )}
-        {vendor.notes && <div className="text-foreground/60 italic">{vendor.notes}</div>}
+        {venueProfile && (
+          <div className="flex flex-col gap-0.5 text-xs text-foreground/70">
+            {(venueProfile.address ?? venueProfile.location) && (
+              <div>
+                <span className="font-medium text-ink">Location:</span> {venueProfile.address ?? venueProfile.location}
+              </div>
+            )}
+            <div>
+              <span className="font-medium text-ink">Dogs:</span>{" "}
+              {describeDogPolicy({ policy: venueProfile.dogPolicy, accommodation: venueProfile.dogAccommodation })}
+            </div>
+          </div>
+        )}
+        {vendor.notes && (
+          // The full notes are on the edit page; the card only needs a taste.
+          <div className="line-clamp-3 text-foreground/60 italic" title={vendor.notes}>
+            {vendor.notes}
+          </div>
+        )}
       </dl>
 
       <div className="flex flex-wrap items-center gap-4 border-t border-border pt-3">

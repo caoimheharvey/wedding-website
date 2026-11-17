@@ -34,7 +34,7 @@ const FIELDS: { field: keyof VenueDetailsFields; label: string; format: Format }
   {
     field: "feeIncludesVat",
     label: "Fee includes VAT",
-    format: (f) => (f.feeIncludesVat ? "Yes" : "No"),
+    format: yesNo("feeIncludesVat"),
   },
   { field: "vatPercent", label: "VAT %", format: num("vatPercent") },
   { field: "pricePerPerson", label: "Price per person", format: money("pricePerPerson") },
@@ -81,8 +81,8 @@ export function diffVenueFields(
     // except the two defaults that always have a value.
     const from = previous ? format(previous) : null;
     if (from === to) continue;
-    if (!previous && (field === "outreachStatus" || field === "feeIncludesVat" || field === "vatPercent")) {
-      if (to === "Not contacted" || to === "No" || to === "21") continue;
+    if (!previous && (field === "outreachStatus" || field === "vatPercent")) {
+      if (to === "Not contacted" || to === "21") continue;
     }
     changes.push({ field, label, from, to });
   }

@@ -39,7 +39,8 @@ import {
   patchVendorRecord,
   selectVendor,
 } from "@/lib/vendors/service";
-import { getVenueDetails, listVenueUpdates } from "@/lib/venues/queries";
+import { loadVenueRecord } from "@/lib/venues/record";
+import { listVendorsByCategory } from "@/lib/vendors/queries";
 import { patchVenueDetails } from "@/lib/venues/service";
 import { CATERING_TYPES, COORDINATION_TYPES, OUTREACH_STATUSES, UPDATE_KINDS } from "@/lib/venues/types";
 
@@ -78,7 +79,7 @@ const venueFields = z.object({
   maxCapacity: z.number().int().min(0).nullable(),
   hireHours: nullableText,
   rentalFeeSaturday: nullableAmount,
-  feeIncludesVat: z.boolean().describe("false means vatPercent is added on top of the fee"),
+  feeIncludesVat: z.boolean().nullable().describe("true = fee includes VAT, false = vatPercent is added on top, null = the venue did not say"),
   vatPercent: z.number().min(0),
   pricePerPerson: nullableAmount,
   minSpend: nullableAmount,
@@ -125,14 +126,14 @@ export const MCP_TOOLS: McpTool[] = [
   }),
   tool({
     name: "get_vendor",
-    description: "Get one vendor. For venues this also returns the reply details and the update history.",
+    description:
+      "Get one vendor. For a venue this returns the complete structured record: venue details, profile (address, dog policy, English support…), cost lines, services, ratings, history, and any data-integrity findings. Read it before changing a venue.",
     input: z.object({ vendorId: z.uuid() }),
     run: async ({ vendorId }) => {
       const vendor = await getVendorById(vendorId);
       if (!vendor) throw new Error("Vendor not found.");
       if (vendor.category !== "venue") return { vendor };
-      const [venueDetails, history] = await Promise.all([getVenueDetails(vendorId), listVenueUpdates(vendorId)]);
-      return { vendor, venueDetails, history };
+      return loadVenueRecord(vendorId);
     },
   }),
   tool({
@@ -147,7 +148,8 @@ export const MCP_TOOLS: McpTool[] = [
   }),
   tool({
     name: "update_vendor",
-    description: "Update a vendor's details. Only the fields you send change; send null to clear one.",
+    description:
+      "Update a vendor's contact details, website, price quote or free-text notes. Only the fields you send change; send null to clear one. Notes are for explanations only: for a venue's dog policy, address, capacity, VAT or prices use update_venue_profile / update_venue_details / update_venue_costs, because those structured fields are what the website shows (notes are not read).",
     input: z.object({ vendorId: z.uuid(), category: z.string().optional(), ...vendorFields }),
     run: async ({ vendorId, ...patch }) => patchVendorRecord(vendorId, defined(patch)),
   }),
@@ -159,7 +161,8 @@ export const MCP_TOOLS: McpTool[] = [
   }),
   tool({
     name: "update_booking_status",
-    description: "Record deposit / full payment for a vendor. Only the fields you send change.",
+    description:
+      "Record the deposit and full payment actually PAID to a vendor. Only the fields you send change. (The deposit a venue REQUIRES is venue details' depositAmount, a different field.)",
     input: z.object({
       vendorId: z.uuid(),
       depositPaid: z.boolean().optional(),
@@ -174,7 +177,7 @@ export const MCP_TOOLS: McpTool[] = [
   tool({
     name: "update_venue_details",
     description:
-      "Update a venue's reply details (price, dates, terms, catering, etc.). Only the fields in `fields` change; null means not stated. A history entry is logged, optionally with the original text of the reply.",
+      "Update a venue's reply details (dates, capacity, minimums, hire fee and VAT, price per person, catering, coordination, curfew, deposit required…). Only the fields in `fields` change; null means not stated. The hire fee, per-person price, extra bar hour and coordination cost are mirrored onto the matching cost lines automatically. A history entry is logged, optionally with the original text of the reply.",
     input: z.object({
       vendorId: z.uuid(),
       fields: venueFields.partial(),
@@ -413,6 +416,29 @@ const requireVenue = async (vendorId: string) => {
 
 const VENUE_TOOLS: McpTool[] = [
   tool({
+    name: "get_venue_record",
+    description:
+      "The canonical website record for one venue: vendor contact details, venue details, profile (address, dog policy…), cost lines, services, ratings, history, a plain-English dogPolicySummary, and auditFindings listing any drift. Anything mirrored elsewhere (Notion, notes) should match this.",
+    input: z.object({ vendorId: z.string() }),
+    run: async ({ vendorId }) => {
+      await requireVenue(vendorId);
+      return loadVenueRecord(vendorId);
+    },
+  }),
+  tool({
+    name: "audit_venue_data",
+    description:
+      "Data-integrity check across venues (or one): facts that exist only in notes (dog policy, address, contact), the same price stored twice with different values, VAT contradictions, and structured fields that contradict the services checklist. Reports only; fix with the update_venue_* tools.",
+    input: z.object({ vendorId: z.string().optional() }),
+    run: async ({ vendorId }) => {
+      const ids = vendorId ? [vendorId] : (await listVendorsByCategory("venue")).map((vendor) => vendor.id);
+      const records = await Promise.all(ids.map((id) => loadVenueRecord(id)));
+      return records.flatMap((record) =>
+        record ? [{ vendorId: record.vendor.id, name: record.vendor.name, findings: record.auditFindings }] : [],
+      );
+    },
+  }),
+  tool({
     name: "list_venue_catalogue",
     description:
       "The valid keys for venue cost lines, services and rating criteria, with each cost line's default basis. Call this before update_venue_costs / update_venue_services / rate_venue.",
@@ -479,7 +505,7 @@ const VENUE_TOOLS: McpTool[] = [
   tool({
     name: "update_venue_profile",
     description:
-      "Update a venue's extra facts: location, capacities, dog policy, direct flight from Amsterdam, English support, outstanding questions (one per line), and per-field confidence (fieldMeta). Only the fields you send change.",
+      "Update a venue's structured facts: address, location, capacities, dog policy at the wedding (dogPolicy: welcome | limited | not_allowed | unknown) and in the accommodation (dogAccommodation), direct flight from Amsterdam, English support, outstanding questions (one per line), and per-field confidence (fieldMeta). Only the fields you send change. Put the policy here, NOT in notes; use dogNotes for the qualifications (e.g. 'ceremony and photos only'). If only the hotel's pet policy is known, set dogAccommodation and leave dogPolicy unknown.",
     input: z.object({ vendorId: z.string(), ...profilePatchSchema.shape }),
     run: async ({ vendorId, ...patch }) => {
       await requireVenue(vendorId);

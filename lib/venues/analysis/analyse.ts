@@ -174,7 +174,13 @@ function buildQuestions(input: VenueAnalysisInput, exclusions: Exclusions): Ques
   }
 
   const profile = input.profile;
-  if (!profile || profile.dogPolicy === "unknown") auto.push("Are dogs allowed at the ceremony and through the wedding day?");
+  if (!profile || profile.dogPolicy === "unknown") {
+    auto.push(
+      profile && profile.dogAccommodation !== "unknown"
+        ? "Are dogs allowed at the ceremony and through the wedding day? (Accommodation is covered; the event itself is unconfirmed.)"
+        : "Are dogs allowed at the ceremony and through the wedding day?",
+    );
+  }
   if (!profile || profile.englishSupport === "unknown") auto.push("Is planning support and day-of staff available in English?");
   if (!profile || profile.directFlightAmsterdam === "unknown") auto.push("Is there a direct flight from Amsterdam to the nearest airport?");
 

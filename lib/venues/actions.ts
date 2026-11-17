@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/dal";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import { applyCostPatches } from "./costs/service";
 import { diffVenueFields } from "./changes";
+import { costPatchesFromLegacyChange } from "./sync";
 import {
   mockAddVenueDocument,
   mockAddVenueUpdate,
@@ -73,6 +75,18 @@ export async function saveVenueDetails(
       changes: entry.changes,
     });
     if (updateError) return { message: `Saved details, but not the history entry: ${updateError.message}` };
+  }
+
+  // The flat price fields duplicate cost lines: keep the canonical lines in step.
+  try {
+    await applyCostPatches(
+      vendorId,
+      costPatchesFromLegacyChange(previous, fields, { kind: entry.kind, date: entry.occurredOn }),
+      { kind: entry.kind, date: entry.occurredOn },
+      { syncLegacy: false, log: false },
+    );
+  } catch (error) {
+    return { message: `Saved, but couldn't update the matching cost lines: ${error instanceof Error ? error.message : "error"}` };
   }
 
   revalidateVenue(category, vendorId);

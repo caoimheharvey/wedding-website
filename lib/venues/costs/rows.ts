@@ -1,3 +1,4 @@
+import { normalizeDogPolicy } from "@/lib/venues/analysis/types";
 import type {
   Confidence,
   CostBasis,
@@ -115,11 +116,13 @@ export const serviceToRow = (entry: ServiceEntry) => ({
 export interface ProfileRow {
   vendor_id: string;
   location: string | null;
+  address: string | null;
   ceremony_capacity: number | null;
   reception_capacity: number | null;
   party_capacity: number | null;
   space_notes: string | null;
-  dog_policy: DogPolicy;
+  dog_policy: DogPolicy | string;
+  dog_accommodation: DogPolicy | string | null;
   dog_notes: string | null;
   direct_flight_amsterdam: TriState;
   logistics_notes: string | null;
@@ -132,11 +135,13 @@ export interface ProfileRow {
 export const mapProfileRow = (row: ProfileRow): VenueProfile => ({
   vendorId: row.vendor_id,
   location: row.location,
+  address: row.address ?? null,
   ceremonyCapacity: row.ceremony_capacity,
   receptionCapacity: row.reception_capacity,
   partyCapacity: row.party_capacity,
   spaceNotes: row.space_notes,
-  dogPolicy: row.dog_policy,
+  dogPolicy: normalizeDogPolicy(row.dog_policy),
+  dogAccommodation: normalizeDogPolicy(row.dog_accommodation),
   dogNotes: row.dog_notes,
   directFlightAmsterdam: row.direct_flight_amsterdam,
   logisticsNotes: row.logistics_notes,
@@ -149,11 +154,13 @@ export const mapProfileRow = (row: ProfileRow): VenueProfile => ({
 export const profileToRow = (profile: VenueProfile) => ({
   vendor_id: profile.vendorId,
   location: profile.location,
+  address: profile.address,
   ceremony_capacity: profile.ceremonyCapacity,
   reception_capacity: profile.receptionCapacity,
   party_capacity: profile.partyCapacity,
   space_notes: profile.spaceNotes,
   dog_policy: profile.dogPolicy,
+  dog_accommodation: profile.dogAccommodation,
   dog_notes: profile.dogNotes,
   direct_flight_amsterdam: profile.directFlightAmsterdam,
   logistics_notes: profile.logisticsNotes,

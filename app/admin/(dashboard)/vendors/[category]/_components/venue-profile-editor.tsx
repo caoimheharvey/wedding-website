@@ -61,11 +61,13 @@ export function VenueProfileEditor({
 }) {
   const [form, setForm] = useState({
     location: profile.location ?? "",
+    address: profile.address ?? "",
     ceremonyCapacity: str(profile.ceremonyCapacity),
     receptionCapacity: str(profile.receptionCapacity),
     partyCapacity: str(profile.partyCapacity),
     spaceNotes: profile.spaceNotes ?? "",
     dogPolicy: profile.dogPolicy,
+    dogAccommodation: profile.dogAccommodation,
     dogNotes: profile.dogNotes ?? "",
     directFlightAmsterdam: profile.directFlightAmsterdam,
     logisticsNotes: profile.logisticsNotes ?? "",
@@ -95,11 +97,13 @@ export function VenueProfileEditor({
     startTransition(async () => {
       const patch: ProfilePatch = {
         location: toText(form.location),
+        address: toText(form.address),
         ceremonyCapacity: toInt(form.ceremonyCapacity),
         receptionCapacity: toInt(form.receptionCapacity),
         partyCapacity: toInt(form.partyCapacity),
         spaceNotes: toText(form.spaceNotes),
         dogPolicy: form.dogPolicy,
+        dogAccommodation: form.dogAccommodation,
         dogNotes: toText(form.dogNotes),
         directFlightAmsterdam: form.directFlightAmsterdam,
         logisticsNotes: toText(form.logisticsNotes),
@@ -119,6 +123,9 @@ export function VenueProfileEditor({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Location">
             <input value={form.location} onChange={(e) => set("location", e.target.value)} className="input" placeholder="Town / area" />
+          </Field>
+          <Field label="Full address">
+            <input value={form.address} onChange={(e) => set("address", e.target.value)} className="input" placeholder="Street, postcode, town" />
           </Field>
           <Field label="Ceremony capacity">
             <input type="number" min="0" value={form.ceremonyCapacity} onChange={(e) => set("ceremonyCapacity", e.target.value)} className="input" />
@@ -164,9 +171,9 @@ export function VenueProfileEditor({
 
       <fieldset id="s11" className="flex flex-col gap-3 rounded-lg border border-border p-4">
         <legend className="px-1 text-xs font-medium tracking-wide text-foreground/50 uppercase">Dog policy</legend>
-        <div className="grid gap-3 sm:grid-cols-[14rem_1fr]">
+        <div className="grid gap-3 sm:grid-cols-[12rem_12rem_1fr]">
           <Field label="Dogs at the wedding">
-            <select value={form.dogPolicy} onChange={(e) => set("dogPolicy", e.target.value as DogPolicy)} className="input">
+            <select aria-label="Dogs at the wedding" value={form.dogPolicy} onChange={(e) => set("dogPolicy", e.target.value as DogPolicy)} className="input">
               {DOG_POLICIES.map((value) => (
                 <option key={value} value={value}>
                   {DOG_POLICY_LABELS[value]}
@@ -174,8 +181,17 @@ export function VenueProfileEditor({
               ))}
             </select>
           </Field>
-          <Field label="Conditions">
-            <input value={form.dogNotes} onChange={(e) => set("dogNotes", e.target.value)} className="input" placeholder="Leash rules, areas, extra fee…" />
+          <Field label="Dogs in accommodation">
+            <select aria-label="Dogs in accommodation" value={form.dogAccommodation} onChange={(e) => set("dogAccommodation", e.target.value as DogPolicy)} className="input">
+              {DOG_POLICIES.map((value) => (
+                <option key={value} value={value}>
+                  {DOG_POLICY_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Conditions and what's confirmed">
+            <input value={form.dogNotes} onChange={(e) => set("dogNotes", e.target.value)} className="input" placeholder="e.g. ceremony and photos only; €30 per night; aperitif not confirmed" />
           </Field>
         </div>
       </fieldset>

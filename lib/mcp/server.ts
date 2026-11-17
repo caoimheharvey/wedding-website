@@ -1,5 +1,6 @@
 import "server-only";
 import * as z from "zod";
+import { refreshAfterWrite } from "./revalidate";
 import { MCP_TOOLS } from "./tools";
 
 const PROTOCOL_VERSION = "2025-03-26";
@@ -34,6 +35,7 @@ async function callTool(params: Record<string, unknown> | undefined) {
 
   try {
     const result = await tool.run(parsed.data as never);
+    refreshAfterWrite(tool.name, parsed.data, result);
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Tool failed.";

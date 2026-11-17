@@ -72,7 +72,8 @@ export interface VenueDetails {
 
   rentalFeeSaturday: number | null;
   /** When false, `vatPercent` is added on top of the rental fee. */
-  feeIncludesVat: boolean;
+  /** True = fee includes VAT, false = VAT is added on top, null = the venue hasn't said. */
+  feeIncludesVat: boolean | null;
   vatPercent: number;
   pricePerPerson: number | null;
   minSpend: number | null;

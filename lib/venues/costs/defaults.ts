@@ -41,11 +41,13 @@ export function defaultProfile(vendorId: string): VenueProfile {
   return {
     vendorId,
     location: null,
+    address: null,
     ceremonyCapacity: null,
     receptionCapacity: null,
     partyCapacity: null,
     spaceNotes: null,
     dogPolicy: "unknown",
+    dogAccommodation: "unknown",
     dogNotes: null,
     directFlightAmsterdam: "unknown",
     logisticsNotes: null,

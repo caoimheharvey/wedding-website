@@ -268,6 +268,7 @@ export function VenueDetailsEditor({
             onChange={(event) => set("feeIncludesVat", event.target.value)}
             className="input"
           >
+            <option value="">Not stated by the venue</option>
             <option value="no">No — VAT added on top</option>
             <option value="yes">Yes — VAT included</option>
           </select>

@@ -3,7 +3,11 @@ import * as z from "zod";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import type { CostItem, ServiceEntry, VenueProfile } from "@/lib/venues/analysis/types";
-import { mockAddVenueUpdate } from "@/lib/venues/mock-store";
+import { mockAddVenueUpdate, mockSaveVenueDetails } from "@/lib/venues/mock-store";
+import { getVenueDetails } from "@/lib/venues/queries";
+import { venueFieldsToRow } from "@/lib/venues/rows";
+import { emptyVenueFields } from "@/lib/venues/schema";
+import { legacyPatchFromCostItems } from "@/lib/venues/sync";
 import type { VenueFieldChange } from "@/lib/venues/types";
 import { diffCostItems, diffServices } from "./changes";
 import { defaultCostItem, defaultProfile, defaultService } from "./defaults";
@@ -55,10 +59,40 @@ async function logHistory(vendorId: string, entry: HistoryEntry, changes: VenueF
   if (error) throw new Error(`Saved, but not the history entry: ${error.message}`);
 }
 
+/**
+ * Keeps the original flat price columns equal to the canonical cost lines
+ * they duplicate (hire fee + VAT, per-person price, extra bar hour,
+ * coordinator). Only those columns are touched.
+ */
+async function syncLegacyFromCostLines(vendorId: string, items: CostItem[]): Promise<void> {
+  const patch = legacyPatchFromCostItems(items);
+  if (Object.keys(patch).length === 0) return;
+
+  const existing = await getVenueDetails(vendorId);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { vendorId: _vendorId, updatedAt: _updatedAt, ...fields } = existing ?? { vendorId, updatedAt: "", ...emptyVenueFields() };
+  const next = { ...fields, ...patch };
+
+  if (isLocalTestMode()) {
+    mockSaveVenueDetails(vendorId, next);
+    return;
+  }
+  const { error } = await getSupabaseAdmin().from("venue_details").upsert(venueFieldsToRow(vendorId, next));
+  if (error) throw new Error(`Saved the cost lines, but not the matching venue details: ${error.message}`);
+}
+
+export interface CostWriteOptions {
+  /** Update the original flat price columns too (default). Off when the change came from them. */
+  syncLegacy?: boolean;
+  /** Write a history entry for this change (default). */
+  log?: boolean;
+}
+
 export async function applyCostPatches(
   vendorId: string,
   patches: CostPatch[],
   entry: HistoryEntry,
+  { syncLegacy = true, log = true }: CostWriteOptions = {},
 ): Promise<{ changed: string[] }> {
   const parsed = z.array(costPatchSchema).safeParse(patches);
   if (!parsed.success) throw new Error(describe(parsed.error));
@@ -76,7 +110,11 @@ export async function applyCostPatches(
   });
 
   const changes = diffCostItems(before, next);
-  if (changes.length === 0 && !entry.text?.trim()) return { changed: [] };
+  if (changes.length === 0 && !entry.text?.trim()) {
+    // Nothing moved on the cost lines, but a re-save still realigns the flat columns.
+    if (syncLegacy) await syncLegacyFromCostLines(vendorId, next);
+    return { changed: [] };
+  }
 
   if (isLocalTestMode()) {
     mockUpsertCostItems(next);
@@ -86,7 +124,8 @@ export async function applyCostPatches(
       .upsert(next.map(costToRow), { onConflict: "vendor_id,item_key" });
     if (error) throw new Error(`Could not save costs: ${error.message}`);
   }
-  await logHistory(vendorId, entry, changes);
+  if (syncLegacy) await syncLegacyFromCostLines(vendorId, next);
+  if (log) await logHistory(vendorId, entry, changes);
   return { changed: changes.map((change) => change.label) };
 }
 

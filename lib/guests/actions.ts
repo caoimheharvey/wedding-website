@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/dal";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import { toGuestFormFields } from "./form-fields";
 import { guestFormSchema } from "./schema";
 import { countLinkedPlusOnes, getGuestById } from "./queries";
 import { mockDeleteGuest, mockInsertGuest, mockSetGuestRsvpDelegates, mockUpdateGuest } from "./mock-store";
@@ -48,26 +49,7 @@ function toGuestRow(values: z.infer<typeof guestFormSchema>) {
 function toGuestFields(
   values: z.infer<typeof guestFormSchema>,
 ): Omit<Guest, "id" | "createdAt" | "updatedAt" | "seatingTableId"> {
-  return {
-    firstName: values.firstName?.trim() || null,
-    lastName: values.lastName?.trim() || null,
-    email: values.email || null,
-    phone: values.phone || null,
-    wechatHandle: values.wechatHandle?.trim() || null,
-    relationshipPriority: values.relationshipPriority as Guest["relationshipPriority"],
-    preferredLanguage: values.preferredLanguage,
-    partyRoles: values.partyRoles,
-    isPlusOneOf: values.isPlusOneOf || null,
-    plusOneStatus: null,
-    plusOneRequestedRelationship: null,
-    plusOneAllowed: values.plusOneAllowed,
-    childrenAllowed: values.childrenAllowed,
-    invitedBy: values.invitedBy,
-    rsvpDeadlineOverride: values.rsvpDeadlineOverride || null,
-    rsvpStatus: values.rsvpStatus,
-    notes: values.notes || null,
-    dietaryRestrictions: values.dietaryRestrictions || null,
-  };
+  return { ...toGuestFormFields(values), plusOneStatus: null, plusOneRequestedRelationship: null };
 }
 
 async function validateLinkedGuest(guestId: string | undefined, label: string) {
@@ -181,7 +163,7 @@ export async function updateGuest(
   if (delegateError) return { message: delegateError };
 
   if (isLocalTestMode()) {
-    mockUpdateGuest(guestId, toGuestFields(parsed.data));
+    mockUpdateGuest(guestId, toGuestFormFields(parsed.data));
     mockSetGuestRsvpDelegates(guestId, parsed.data.rsvpDelegateIds);
   } else {
     const supabase = getSupabaseAdmin();

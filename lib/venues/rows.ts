@@ -8,7 +8,7 @@ export interface VenueDetailsRow {
   max_capacity: number | null;
   hire_hours: string | null;
   rental_fee_saturday: number | null;
-  fee_includes_vat: boolean;
+  fee_includes_vat: boolean | null;
   vat_percent: number;
   price_per_person: number | null;
   min_spend: number | null;

@@ -10,6 +10,7 @@ import {
   OUTREACH_STATUS_LABELS,
   type VenueDetails,
 } from "@/lib/venues/types";
+import { describeDogPolicy, type VenueProfile } from "@/lib/venues/analysis/types";
 import type { Vendor } from "@/lib/vendors/types";
 
 const DASH = "—";
@@ -20,7 +21,7 @@ const plain = (value: string | number | null) => (value === null || value === ""
 
 interface Row {
   label: string;
-  value: (details: VenueDetails, guestCount: number) => string;
+  value: (details: VenueDetails, guestCount: number, profile: VenueProfile | null) => string;
 }
 
 interface Section {
@@ -29,6 +30,17 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
+  {
+    title: "Location & dogs",
+    rows: [
+      { label: "Address", value: (_d, _g, p) => plain(p?.address ?? p?.location ?? null) },
+      {
+        label: "Dog policy",
+        value: (_d, _g, p) =>
+          describeDogPolicy({ policy: p?.dogPolicy ?? "unknown", accommodation: p?.dogAccommodation ?? "unknown" }),
+      },
+    ],
+  },
   {
     title: "Availability & space",
     rows: [
@@ -46,9 +58,17 @@ const SECTIONS: Section[] = [
         value: (d) =>
           d.rentalFeeSaturday === null
             ? DASH
-            : `${formatCurrency(d.rentalFeeSaturday)} ${d.feeIncludesVat ? "incl. VAT" : `+ ${d.vatPercent}% VAT`}`,
+            : `${formatCurrency(d.rentalFeeSaturday)} ${
+                d.feeIncludesVat === null ? "(VAT not stated)" : d.feeIncludesVat ? "incl. VAT" : `+ ${d.vatPercent}% VAT`
+              }`,
       },
-      { label: "Hire incl. VAT", value: (d) => money(hireInclVat(d)) },
+      {
+        label: "Hire incl. VAT",
+        value: (d) =>
+          d.feeIncludesVat === null && d.rentalFeeSaturday !== null
+            ? `${money(d.rentalFeeSaturday)} as quoted; VAT not stated`
+            : money(hireInclVat(d)),
+      },
       { label: "Price per person", value: (d) => money(d.pricePerPerson) },
       { label: "Minimum spend", value: (d) => money(d.minSpend) },
       { label: "Minimum guests", value: (d) => plain(d.minGuests) },
@@ -93,10 +113,12 @@ const SECTIONS: Section[] = [
 export function VenueComparison({
   venues,
   detailsByVendorId,
+  profilesByVendorId = {},
   category,
 }: {
   venues: Vendor[];
   detailsByVendorId: Record<string, VenueDetails>;
+  profilesByVendorId?: Record<string, VenueProfile>;
   category: string;
 }) {
   const [guestCount, setGuestCount] = useState(100);
@@ -213,6 +235,7 @@ export function VenueComparison({
                   section={section}
                   columns={columns}
                   guestCount={guestCount}
+                  profilesByVendorId={profilesByVendorId}
                 />
               ))}
             </tbody>
@@ -231,10 +254,12 @@ function SectionRows({
   section,
   columns,
   guestCount,
+  profilesByVendorId,
 }: {
   section: Section;
   columns: { vendor: Vendor; details: VenueDetails }[];
   guestCount: number;
+  profilesByVendorId: Record<string, VenueProfile>;
 }) {
   return (
     <>
@@ -251,7 +276,7 @@ function SectionRows({
           <td className="py-2 pr-4 font-medium text-ink">{row.label}</td>
           {columns.map(({ vendor, details }) => (
             <td key={vendor.id} className="py-2 pr-4 text-foreground/70">
-              {row.value(details, guestCount)}
+              {row.value(details, guestCount, profilesByVendorId[vendor.id] ?? null)}
             </td>
           ))}
         </tr>

@@ -5,12 +5,16 @@ type PricingInputs = Pick<
   "rentalFeeSaturday" | "feeIncludesVat" | "vatPercent" | "pricePerPerson" | "minSpend"
 >;
 
-/** Saturday hire fee with VAT added when the quote was given ex-VAT. */
+/**
+ * Saturday hire fee with VAT added only when the venue said the quote is
+ * ex-VAT. When VAT treatment isn't stated the fee is returned as quoted:
+ * adding VAT would be an assumption.
+ */
 export function hireInclVat(details: PricingInputs): number | null {
   if (details.rentalFeeSaturday === null) return null;
-  return details.feeIncludesVat
-    ? details.rentalFeeSaturday
-    : details.rentalFeeSaturday * (1 + details.vatPercent / 100);
+  return details.feeIncludesVat === false
+    ? details.rentalFeeSaturday * (1 + details.vatPercent / 100)
+    : details.rentalFeeSaturday;
 }
 
 /**

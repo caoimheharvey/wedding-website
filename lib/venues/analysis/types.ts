@@ -135,14 +135,49 @@ export interface ServiceEntry {
   notes: string | null;
 }
 
-export const DOG_POLICIES = ["allowed_all_day", "ceremony_only", "not_allowed", "unknown"] as const;
+/**
+ * Dog policy vocabulary, shared by the database, API, forms and displays.
+ * It is used twice per venue: for the wedding itself (`dogPolicy`) and for the
+ * accommodation (`dogAccommodation`), since a pet-friendly hotel says nothing
+ * about the ceremony. Notes explain; this field decides.
+ */
+export const DOG_POLICIES = ["welcome", "limited", "not_allowed", "unknown"] as const;
 export type DogPolicy = (typeof DOG_POLICIES)[number];
 export const DOG_POLICY_LABELS: Record<DogPolicy, string> = {
-  allowed_all_day: "Allowed all day",
-  ceremony_only: "Ceremony only",
+  welcome: "Welcome",
+  limited: "Limited",
   not_allowed: "Not allowed",
   unknown: "Unknown",
 };
+
+/** Maps anything stored under the earlier vocabulary onto the current one. */
+export function normalizeDogPolicy(value: string | null | undefined): DogPolicy {
+  if (value === "allowed_all_day") return "welcome";
+  if (value === "ceremony_only") return "limited";
+  return (DOG_POLICIES as readonly string[]).includes(value ?? "") ? (value as DogPolicy) : "unknown";
+}
+
+/**
+ * The one place that turns the two structured dog fields into words, so a
+ * pet-friendly hotel is never presented as permission to bring a dog to the
+ * wedding, and "Unknown" only appears when nothing is known.
+ */
+export function describeDogPolicy({
+  policy,
+  accommodation = "unknown",
+}: {
+  policy: DogPolicy;
+  accommodation?: DogPolicy;
+}): string {
+  // Normalised so a value stored under the earlier vocabulary can't blank or crash a page.
+  policy = normalizeDogPolicy(policy);
+  accommodation = normalizeDogPolicy(accommodation);
+  const label = DOG_POLICY_LABELS[policy];
+  if (accommodation === "unknown") return label;
+  const stay = `${DOG_POLICY_LABELS[accommodation]} for accommodation`;
+  if (policy === "unknown") return `${stay}; wedding-event access unconfirmed`;
+  return `${label} at the wedding; ${stay.charAt(0).toLowerCase()}${stay.slice(1)}`;
+}
 
 export const TRI_STATES = ["yes", "no", "unknown"] as const;
 export type TriState = (typeof TRI_STATES)[number];
@@ -169,7 +204,11 @@ export interface VenueProfile {
   receptionCapacity: number | null;
   partyCapacity: number | null;
   spaceNotes: string | null;
+  address: string | null;
+  /** Dogs at the wedding itself. */
   dogPolicy: DogPolicy;
+  /** Dogs in the venue's accommodation, a separate question. */
+  dogAccommodation: DogPolicy;
   dogNotes: string | null;
   directFlightAmsterdam: TriState;
   logisticsNotes: string | null;

@@ -9,7 +9,7 @@ import {
 } from "./catalogue";
 import type { Range } from "./scenarios";
 import type { VenueAnalysis } from "./analyse";
-import type { ServiceEntry, ServiceStatus, VenueProfile, VenueRating } from "./types";
+import { DOG_POLICY_LABELS, normalizeDogPolicy, type ServiceEntry, type ServiceStatus, type VenueProfile, type VenueRating } from "./types";
 import { formatCurrency } from "@/lib/budget/format";
 
 // Three separate rankings. Every criterion keeps its parts and evidence so the
@@ -245,11 +245,12 @@ function fitCriteria(ctx: Context): CriterionResult[] {
     profile && profile.englishSupport !== "unknown"
       ? single({ confirmed: 5, partial: 3, no: 0.5 }[profile.englishSupport], `English support: ${profile.englishSupport}`)
       : null;
+  const dogPolicy = normalizeDogPolicy(profile?.dogPolicy);
   const dog =
-    profile && profile.dogPolicy !== "unknown"
+    dogPolicy !== "unknown"
       ? single(
-          { allowed_all_day: 5, ceremony_only: 3.5, not_allowed: 0 }[profile.dogPolicy],
-          `Dog policy: ${profile.dogPolicy.replace(/_/g, " ")}`,
+          { welcome: 5, limited: 3.5, not_allowed: 0 }[dogPolicy],
+          `Dogs at the wedding: ${DOG_POLICY_LABELS[dogPolicy].toLowerCase()}`,
         )
       : null;
 

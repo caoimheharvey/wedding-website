@@ -62,11 +62,13 @@ const fieldMetaSchema = z.object({
 
 export const profilePatchSchema = z.object({
   location: text.optional(),
+  address: text.optional(),
   ceremonyCapacity: z.number().int().min(0).nullable().optional(),
   receptionCapacity: z.number().int().min(0).nullable().optional(),
   partyCapacity: z.number().int().min(0).nullable().optional(),
   spaceNotes: text.optional(),
   dogPolicy: z.enum(DOG_POLICIES).optional(),
+  dogAccommodation: z.enum(DOG_POLICIES).optional(),
   dogNotes: text.optional(),
   directFlightAmsterdam: z.enum(TRI_STATES).optional(),
   logisticsNotes: text.optional(),

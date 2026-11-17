@@ -1,7 +1,7 @@
 import type { VenueDetails } from "../types";
 import { analyseVenue, type VenueAnalysis } from "./analyse";
 import { rankVenues, type Rankings, type RankInput } from "./rankings";
-import type { CostItem, ServiceEntry, VenueProfile, VenueRating } from "./types";
+import { describeDogPolicy, type CostItem, type DogPolicy, type ServiceEntry, type VenueProfile, type VenueRating } from "./types";
 
 /** Everything known about one venue, as plain data (safe to pass to client components). */
 export interface VenueDecisionInput {
@@ -18,7 +18,11 @@ export interface VenueFacts {
   location: string | null;
   availability: string | null;
   coordination: string | null;
-  dogPolicy: string;
+  dogPolicy: DogPolicy;
+  dogAccommodation: DogPolicy;
+  /** Ready-to-show words for the two dog fields. */
+  dogSummary: string;
+  address: string | null;
   accommodation: string;
 }
 
@@ -41,12 +45,17 @@ export function buildDecisionData(venues: VenueDecisionInput[], adults: number):
 
   const facts: Record<string, VenueFacts> = {};
   for (const venue of venues) {
+    const dogPolicy = venue.profile?.dogPolicy ?? "unknown";
+    const dogAccommodation = venue.profile?.dogAccommodation ?? "unknown";
     const accommodation = venue.services.find((entry) => entry.serviceKey === "accommodation")?.status;
     facts[venue.vendorId] = {
       location: venue.profile?.location ?? null,
       availability: venue.details?.availableDates ?? null,
       coordination: venue.details?.coordination ?? null,
-      dogPolicy: venue.profile?.dogPolicy ?? "unknown",
+      dogPolicy,
+      dogAccommodation,
+      dogSummary: describeDogPolicy({ policy: dogPolicy, accommodation: dogAccommodation }),
+      address: venue.profile?.address ?? null,
       accommodation: venue.details?.onsiteAccommodation ? "on site" : (accommodation ?? "unknown"),
     };
   }

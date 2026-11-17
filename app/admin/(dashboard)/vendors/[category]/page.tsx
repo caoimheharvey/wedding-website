@@ -6,6 +6,7 @@ import { listDestinations } from "@/lib/destinations/queries";
 import { getCategoryBudgetSummary } from "@/lib/budget/queries";
 import { formatCurrency } from "@/lib/budget/format";
 import { listVenueDetails } from "@/lib/venues/queries";
+import { listVenueProfiles } from "@/lib/venues/costs/queries";
 import { VendorList } from "./_components/vendor-list";
 import { loadVenueDecisionInputs } from "@/lib/venues/analysis/load";
 import { VenueComparison } from "./_components/venue-comparison";
@@ -19,15 +20,17 @@ export default async function VendorCategoryPage({
   const { category } = await params;
 
   const isVenue = category === "venue";
-  const [vendors, budget, categories, destinations, venueDetails, decisionInputs] = await Promise.all([
+  const [vendors, budget, categories, destinations, venueDetails, decisionInputs, venueProfiles] = await Promise.all([
     listVendorsByCategory(category),
     getCategoryBudgetSummary(category),
     listCategories(),
     listDestinations(),
     isVenue ? listVenueDetails() : Promise.resolve([]),
     isVenue ? loadVenueDecisionInputs() : Promise.resolve([]),
+    isVenue ? listVenueProfiles() : Promise.resolve([]),
   ]);
   const detailsByVendorId = Object.fromEntries(venueDetails.map((details) => [details.vendorId, details]));
+  const profilesByVendorId = Object.fromEntries(venueProfiles.map((profile) => [profile.vendorId, profile]));
   const categoryLabel = categories.find((c) => c.id === category)?.label;
   if (!categoryLabel) notFound();
   const selectedDestination = destinations.find((d) => d.isSelected) ?? null;
@@ -91,6 +94,7 @@ export default async function VendorCategoryPage({
         <VenueComparison
           venues={vendors}
           detailsByVendorId={detailsByVendorId}
+          profilesByVendorId={profilesByVendorId}
           category={category}
         />
       )}
@@ -98,6 +102,7 @@ export default async function VendorCategoryPage({
       <VendorList
         vendors={vendors}
         venueDetailsByVendorId={detailsByVendorId}
+        venueProfilesByVendorId={profilesByVendorId}
         category={category}
         categoryBudgeted={budget.budgeted}
         destinations={destinations}

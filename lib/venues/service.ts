@@ -2,7 +2,9 @@ import "server-only";
 import * as z from "zod";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
+import { applyCostPatches } from "./costs/service";
 import { diffVenueFields } from "./changes";
+import { costPatchesFromLegacyChange } from "./sync";
 import { mockAddVenueUpdate, mockSaveVenueDetails } from "./mock-store";
 import { getVenueDetails } from "./queries";
 import { venueFieldsToRow } from "./rows";
@@ -75,6 +77,14 @@ export async function patchVenueDetails(
       if (logError) throw new Error(`Saved details, but not the history entry: ${logError.message}`);
     }
   }
+
+  // The flat price fields duplicate cost lines: keep the canonical lines in step.
+  await applyCostPatches(
+    vendorId,
+    costPatchesFromLegacyChange(previous, fields, { kind: meta.data.updateKind, date: meta.data.updateDate }),
+    { kind: meta.data.updateKind, date: meta.data.updateDate },
+    { syncLegacy: false, log: false },
+  );
 
   return {
     changed: changes.map((change) => change.label),

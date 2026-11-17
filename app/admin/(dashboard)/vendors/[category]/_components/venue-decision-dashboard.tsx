@@ -5,11 +5,11 @@ import { useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/budget/format";
 import { ASSUMPTIONS, MIN_COMPLETENESS_TO_RANK, MIN_COVERAGE_TO_RANK } from "@/lib/venues/analysis/assumptions";
 import type { VenueAnalysis } from "@/lib/venues/analysis/analyse";
-import { buildDecisionData, type VenueDecisionInput } from "@/lib/venues/analysis/decision";
+import { buildDecisionData, type VenueDecisionInput, type VenueFacts } from "@/lib/venues/analysis/decision";
 import type { Range } from "@/lib/venues/analysis/scenarios";
 import type { ScoreEntry } from "@/lib/venues/analysis/rankings";
 import { ALL_AROUND_WEIGHTS, FIT_WEIGHTS } from "@/lib/venues/analysis/rankings";
-import { DOG_POLICY_LABELS, type DogPolicy } from "@/lib/venues/analysis/types";
+import { DOG_POLICIES, DOG_POLICY_LABELS, type DogPolicy } from "@/lib/venues/analysis/types";
 import { COORDINATION_LABELS, type CoordinationType } from "@/lib/venues/types";
 
 const DASH = "—";
@@ -23,6 +23,15 @@ const SORTS = [
   { id: "confidence", label: "Highest information confidence" },
 ] as const;
 type SortId = (typeof SORTS)[number]["id"];
+
+/** Filters on the structured dog fields (never on notes text). */
+export type DogFilter = "any" | DogPolicy | "pet_friendly_stay";
+
+export function matchesDogFilter(facts: Pick<VenueFacts, "dogPolicy" | "dogAccommodation"> | undefined, filter: DogFilter): boolean {
+  if (filter === "any") return true;
+  if (filter === "pet_friendly_stay") return facts?.dogAccommodation === "welcome";
+  return (facts?.dogPolicy ?? "unknown") === filter;
+}
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
 
@@ -68,13 +77,14 @@ export function VenueDecisionDashboard({
 }) {
   const [adults, setAdults] = useState<number>(ASSUMPTIONS.adults);
   const [sort, setSort] = useState<SortId>("cheapest");
+  const [dogFilter, setDogFilter] = useState<DogFilter>("any");
   const data = useMemo(() => buildDecisionData(venues, adults), [venues, adults]);
 
   const cheapestRank = new Map(data.rankings.cheapest.map((entry) => [entry.vendorId, entry.rank]));
   const allAround = new Map(data.rankings.allAround.map((entry) => [entry.vendorId, entry]));
   const fit = new Map(data.rankings.fit.map((entry) => [entry.vendorId, entry]));
 
-  const rows = [...data.analyses].sort((a, b) => {
+  const rows = data.analyses.filter((analysis) => matchesDogFilter(data.facts[analysis.vendorId], dogFilter)).sort((a, b) => {
     const byName = a.name.localeCompare(b.name);
     switch (sort) {
       case "cheapest":
@@ -117,6 +127,23 @@ export function VenueDecisionDashboard({
               />
             </label>
             <label className="flex items-center gap-2 text-ink">
+              Dogs
+              <select
+                aria-label="Filter by dog policy"
+                value={dogFilter}
+                onChange={(event) => setDogFilter(event.target.value as DogFilter)}
+                className="input w-auto"
+              >
+                <option value="any">Any</option>
+                {DOG_POLICIES.map((policy) => (
+                  <option key={policy} value={policy}>
+                    {DOG_POLICY_LABELS[policy]} at the wedding
+                  </option>
+                ))}
+                <option value="pet_friendly_stay">Dog-friendly accommodation</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-ink">
               Sort by
               <select value={sort} onChange={(event) => setSort(event.target.value as SortId)} className="input w-auto">
                 {SORTS.map((option) => (
@@ -130,7 +157,11 @@ export function VenueDecisionDashboard({
         </div>
 
         {rows.length === 0 ? (
-          <p className="text-sm text-foreground/60">No venues yet. Add one to start comparing.</p>
+          <p className="text-sm text-foreground/60">
+            {data.analyses.length === 0
+              ? "No venues yet. Add one to start comparing."
+              : "No venues match this dog-policy filter. Choose \u201cAny\u201d to see them all."}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1500px] text-left text-sm">
@@ -215,7 +246,7 @@ function Row({
 }: {
   analysis: VenueAnalysis;
   category: string;
-  facts: { location: string | null; availability: string | null; coordination: string | null; dogPolicy: string; accommodation: string };
+  facts: VenueFacts;
   cheapestRank: number | null;
   allAround: ScoreEntry | undefined;
   fit: ScoreEntry | undefined;
@@ -235,7 +266,9 @@ function Row({
         </Link>
         <div className="text-xs text-foreground/50">{pct(analysis.infoConfidence)} confirmed info</div>
       </td>
-      <td className="py-3 pr-4 text-foreground/70">{facts.location ?? DASH}</td>
+      <td className="max-w-[12rem] py-3 pr-4 text-foreground/70" title={facts.address ?? undefined}>
+        {facts.location ?? facts.address ?? DASH}
+      </td>
       <td className="max-w-[12rem] py-3 pr-4 text-foreground/70">{facts.availability ?? DASH}</td>
       <td className="py-3 pr-4">
         <Money range={a.total} unpriced={a.unpriced.length} />
@@ -263,7 +296,7 @@ function Row({
         {facts.coordination ? COORDINATION_LABELS[facts.coordination as CoordinationType] : DASH}
       </td>
       <td className="py-3 pr-4 text-foreground/70">{facts.accommodation.replace("_", " ")}</td>
-      <td className="py-3 pr-4 text-foreground/70">{DOG_POLICY_LABELS[facts.dogPolicy as DogPolicy]}</td>
+      <td className="max-w-[14rem] py-3 pr-4 text-foreground/70">{facts.dogSummary}</td>
       <td className="py-3 pr-4">
         <Score entry={allAround} />
       </td>

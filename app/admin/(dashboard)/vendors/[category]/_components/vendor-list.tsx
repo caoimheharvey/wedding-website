@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Vendor } from "@/lib/vendors/types";
 import type { Destination } from "@/lib/destinations/types";
 import { getBudgetFit } from "@/lib/vendors/budget-fit";
+import type { VenueProfile } from "@/lib/venues/analysis/types";
 import type { VenueDetails } from "@/lib/venues/types";
 import { VendorCard } from "./vendor-card";
 
@@ -78,6 +79,7 @@ export function VendorList({
   destinations,
   selectedDestination,
   venueDetailsByVendorId = {},
+  venueProfilesByVendorId = {},
 }: {
   vendors: Vendor[];
   category: string;
@@ -85,6 +87,7 @@ export function VendorList({
   destinations: Destination[];
   selectedDestination: Destination | null;
   venueDetailsByVendorId?: Record<string, VenueDetails>;
+  venueProfilesByVendorId?: Record<string, VenueProfile>;
 }) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
@@ -122,6 +125,7 @@ export function VendorList({
             onToggleCompare={() => toggleCompare(vendor.id)}
             selectedDestination={selectedDestination}
             venueDetails={venueDetailsByVendorId[vendor.id] ?? null}
+            venueProfile={venueProfilesByVendorId[vendor.id] ?? null}
             vendorDestinationName={
               vendor.destinationId
                 ? (destinations.find((d) => d.id === vendor.destinationId)?.name ?? null)
