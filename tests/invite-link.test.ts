@@ -2,7 +2,12 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/i/[token]/route";
 import { getGuestSession } from "@/lib/guest-auth/session";
 import { createAndSendCampaign } from "@/lib/messaging/actions";
-import { fillLinkPlaceholder, hasLinkPlaceholder } from "@/lib/messaging/personalize";
+import {
+  fillFirstNamePlaceholder,
+  fillLinkPlaceholder,
+  hasFirstNamePlaceholder,
+  hasLinkPlaceholder,
+} from "@/lib/messaging/personalize";
 import { db, withTestDatabase } from "./helpers/harness";
 
 const cookieJar = new Map<string, string>();
@@ -167,5 +172,60 @@ describe("opening a personal link", () => {
     await db.query("delete from guests where id = $1", [guest]);
     const { rows } = await db.query("select 1 from guest_invite_links where guest_id = $1", [guest]);
     expect(rows).toHaveLength(0);
+  });
+});
+
+describe("the {{first_name}} placeholder", () => {
+  it("is found however it is spaced or cased, and filled with the name", () => {
+    for (const written of ["{{first_name}}", "{{ first_name }}", "{{FIRST_NAME}}"]) {
+      expect(hasFirstNamePlaceholder(`Hi ${written}`)).toBe(true);
+      expect(fillFirstNamePlaceholder(`Hi ${written}, ${written}!`, "Ada", { language: "en", html: false })).toBe("Hi Ada, Ada!");
+    }
+    expect(hasFirstNamePlaceholder("Hi there")).toBe(false);
+  });
+
+  it("escapes the name in HTML only, and reads sensibly when there is no first name", () => {
+    expect(fillFirstNamePlaceholder("<p>{{first_name}}</p>", "Tom & <Jerry>", { language: "en", html: true })).toBe(
+      "<p>Tom &amp; &lt;Jerry&gt;</p>",
+    );
+    expect(fillFirstNamePlaceholder("{{first_name}}", "Tom & Jerry", { language: "en", html: false })).toBe("Tom & Jerry");
+    expect(fillFirstNamePlaceholder("Hi {{first_name}},", null, { language: "en", html: false })).toBe("Hi there,");
+    expect(fillFirstNamePlaceholder("Bonjour {{first_name}},", "  ", { language: "fr", html: false })).toBe("Bonjour à vous,");
+  });
+});
+
+describe("first names in a blast", () => {
+  it("greets each guest by name in an email, including the subject, with HTML safely escaped", async () => {
+    const ada = await newGuest("Ada", { email: "ada.name@example.com" });
+    const tom = await newGuest("Tom & Jerry", { email: "tom.name@example.com" });
+    const { rows } = await db.query<{ id: string }>(
+      `insert into guests (relationship_priority, preferred_language, invited_by, email)
+       values (2, 'fr', 'caoimhe', 'nameless@example.com') returning id`,
+    );
+
+    await createAndSendCampaign(
+      undefined,
+      form({ channel: "email", subjectEn: "Hello {{first_name}}", htmlEn: "<p>Hi {{first_name}}!</p>" }, [ada, tom, rows[0].id]),
+    );
+
+    const byEmail = Object.fromEntries(sentEmails.map((mail) => [mail.email, mail]));
+    expect(byEmail["ada.name@example.com"]).toMatchObject({ subject: "Hello Ada", html: "<p>Hi Ada!</p>" });
+    expect(byEmail["tom.name@example.com"]).toMatchObject({ subject: "Hello Tom & Jerry", html: "<p>Hi Tom &amp; Jerry!</p>" });
+    // No first name on file: the placeholder never reaches the guest.
+    expect(byEmail["nameless@example.com"].html).toBe("<p>Hi à vous!</p>");
+  });
+
+  it("greets each guest by name in a text, next to their personal link", async () => {
+    const bodies: Record<string, string> = {};
+    vi.stubGlobal("fetch", async (_url: string, init: { body: URLSearchParams }) => {
+      bodies[init.body.get("To")!] = init.body.get("Body")!;
+      return new Response(JSON.stringify({ sid: `SM${Object.keys(bodies).length}` }), { status: 201 });
+    });
+    const sam = await newGuest("Sam", { phone: "+353(87)8880001" });
+
+    await createAndSendCampaign(undefined, form({ channel: "sms", bodyEn: "Hi {{first_name}}, RSVP: {{link}}" }, [sam]));
+    vi.unstubAllGlobals();
+
+    expect(bodies["+353878880001"]).toMatch(/^Hi Sam, RSVP: https:\/\/wedding\.example\/i\/[A-Za-z0-9_-]{12}$/);
   });
 });

@@ -62,6 +62,7 @@ stores, in one call) and `audit_venue_data` (where the record contradicts itself
 | Text content | `body_en / body_fr / body_zh` | required (English) for `sms` campaigns |
 | Reached at | `message_recipients.email` or `.phone` | phone is stored as E.164 at send time (guests keep their own formatting) |
 | Personal sign-in link | `guest_invite_links.token` (one per guest) | created the first time a message with `{{link}}` is sent; URL is `<site>/i/<token>`; delete the row to revoke |
+| Message merge fields | `{{first_name}}`, `{{link}}` | filled per guest at send time in email (HTML and subject) and text; the saved campaign keeps the placeholders |
 | Provider id | `resend_email_id` (email) / `provider_message_id` (Twilio SID) | used to match delivery webhooks |
 
 ## Known limitations

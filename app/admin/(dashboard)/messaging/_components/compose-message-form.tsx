@@ -7,7 +7,7 @@ import { createAndSendCampaign, type ComposeMessageState } from "@/lib/messaging
 import { aiTranslateCampaign, aiTranslateSms } from "@/lib/messaging/ai-actions";
 import { CHANNEL_LABELS, type MessageChannel } from "@/lib/messaging/types";
 import { smsLength } from "@/lib/sms/segments";
-import { hasLinkPlaceholder, LINK_PLACEHOLDER } from "@/lib/messaging/personalize";
+import { FIRST_NAME_PLACEHOLDER, hasLinkPlaceholder, LINK_PLACEHOLDER } from "@/lib/messaging/personalize";
 import { RecipientPicker } from "./recipient-picker";
 
 const initialState: ComposeMessageState = undefined;
@@ -82,7 +82,7 @@ export function ComposeMessageForm({
     zh: { body: bodyZh, setBody: setBodyZh },
   };
   const activeBody = bodyByTab[activeTab];
-  const activeLength = smsLength(activeBody.body.replaceAll(LINK_PLACEHOLDER, "x".repeat(linkLength)));
+  const activeLength = smsLength(activeBody.body.replaceAll(LINK_PLACEHOLDER, "x".repeat(linkLength)).replaceAll(FIRST_NAME_PLACEHOLDER, "x".repeat(8)));
   const missingLink = isSms ? !hasLinkPlaceholder(bodyEn) : !hasLinkPlaceholder(htmlEn);
 
   function switchChannel(next: MessageChannel) {
@@ -206,13 +206,22 @@ export function ComposeMessageForm({
             {activeLength.segments} message{activeLength.segments === 1 ? "" : "s"} per recipient
             {activeLength.gsm ? "" : " (non-standard characters, so fewer fit in each)"}
           </p>
-          <button
-            type="button"
-            onClick={() => activeBody.setBody(`${activeBody.body}${activeBody.body && !activeBody.body.endsWith(" ") ? " " : ""}${LINK_PLACEHOLDER}`)}
-            className="self-start text-xs font-medium text-aegean hover:underline"
-          >
-            Add each guest&apos;s personal link ({LINK_PLACEHOLDER})
-          </button>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {[FIRST_NAME_PLACEHOLDER, LINK_PLACEHOLDER].map((placeholder) => (
+              <button
+                key={placeholder}
+                type="button"
+                onClick={() =>
+                  activeBody.setBody(
+                    `${activeBody.body}${activeBody.body && !activeBody.body.endsWith(" ") ? " " : ""}${placeholder}`,
+                  )
+                }
+                className="text-xs font-medium text-aegean hover:underline"
+              >
+                Add {placeholder === LINK_PLACEHOLDER ? "each guest's personal link" : "the guest's first name"} ({placeholder})
+              </button>
+            ))}
+          </div>
         </div>
       ) : (
         <>
@@ -247,7 +256,8 @@ export function ComposeMessageForm({
           />
           <p className="text-xs text-foreground/50">
             Use <code>{LINK_PLACEHOLDER}</code> as a button&apos;s or link&apos;s address and each guest gets their own
-            link, which signs them in when they open it.
+            link, which signs them in when they open it. <code>{FIRST_NAME_PLACEHOLDER}</code> becomes the guest&apos;s
+            first name.
           </p>
         </div>
 

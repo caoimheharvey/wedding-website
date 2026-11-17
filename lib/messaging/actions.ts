@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/dal";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { isLocalTestMode } from "@/lib/local-test";
 import { listGuests } from "@/lib/guests/queries";
+import type { PreferredLanguage } from "@/lib/guests/types";
 import { guestDisplayName } from "@/lib/guest-site/party-names";
 import { cancelScheduledEmails, sendCampaignEmails } from "@/lib/email/resend";
 import {
@@ -18,7 +19,7 @@ import {
 import { toE164 } from "@/lib/sms/phone";
 import { configuredSiteOrigin } from "@/lib/site-url";
 import { ensureInviteTokens, inviteOrigin, inviteUrl } from "@/lib/guest-auth/invite";
-import { fillLinkPlaceholder, hasLinkPlaceholder } from "./personalize";
+import { fillFirstNamePlaceholder, fillLinkPlaceholder, hasLinkPlaceholder } from "./personalize";
 import { mockCancelCampaign, mockCreateCampaignAndSend } from "./mock-store";
 import { composeMessageFormSchema, composeSmsFormSchema } from "./schema";
 import {
@@ -150,14 +151,21 @@ async function sendEmailCampaign(formData: FormData): Promise<ComposeMessageStat
   let sendResults;
   try {
     const emailRows = recipientRows as { id: string; guest_id: string; email: string; language: "en" | "fr" | "zh" }[];
-    const linkFor = await personalLinkResolver(
+    const personalize = await personalizer(
       [content.htmlEn, content.htmlFr, content.htmlZh],
+      guestById,
       emailRows.map((row) => row.guest_id),
+      { html: true },
     );
     sendResults = await sendCampaignEmails(
       emailRows.map((row) => {
         const { subject, html } = contentForLanguage(content, row.language);
-        return { id: row.id, email: row.email, subject, html: linkFor(row.guest_id, html) };
+        return {
+          id: row.id,
+          email: row.email,
+          subject: personalize(row.guest_id, row.language, subject, false),
+          html: personalize(row.guest_id, row.language, html),
+        };
       }),
       fromEmail,
       scheduledAtIso ?? undefined,
@@ -212,18 +220,23 @@ async function sendEmailCampaign(formData: FormData): Promise<ComposeMessageStat
 }
 
 /**
- * Fills {{link}} with each guest's own sign-in link. Tokens are only created
- * when a message actually uses the placeholder.
+ * Fills {{first_name}} and {{link}} for each guest. Personal links are only
+ * created when a message actually uses {{link}}.
  */
-async function personalLinkResolver(
+async function personalizer(
   texts: (string | null)[],
+  guests: Map<string, { firstName: string | null }>,
   guestIds: string[],
-): Promise<(guestId: string, text: string) => string> {
-  if (!texts.some(hasLinkPlaceholder)) return (_guestId, text) => text;
-  const [tokens, origin] = await Promise.all([ensureInviteTokens(guestIds), personalLinkOrigin()]);
-  return (guestId, text) => {
+  options: { html: boolean },
+): Promise<(guestId: string, language: PreferredLanguage, text: string, html?: boolean) => string> {
+  const usesLink = texts.some(hasLinkPlaceholder);
+  const [tokens, origin] = usesLink
+    ? await Promise.all([ensureInviteTokens(guestIds), personalLinkOrigin()])
+    : [new Map<string, string>(), ""];
+  return (guestId, language, text, html = options.html) => {
+    const named = fillFirstNamePlaceholder(text, guests.get(guestId)?.firstName, { language, html });
     const token = tokens.get(guestId);
-    return token ? fillLinkPlaceholder(text, inviteUrl(origin, token)) : text;
+    return token ? fillLinkPlaceholder(named, inviteUrl(origin, token)) : named;
   };
 }
 
@@ -341,15 +354,17 @@ async function sendSmsCampaign(formData: FormData): Promise<ComposeMessageState>
   let sendResults;
   try {
     const smsRows = recipientRows as { id: string; guest_id: string; phone: string; language: "en" | "fr" | "zh" }[];
-    const linkFor = await personalLinkResolver(
+    const personalize = await personalizer(
       [content.bodyEn, content.bodyFr, content.bodyZh],
+      guestById,
       smsRows.map((row) => row.guest_id),
+      { html: false },
     );
     sendResults = await sendCampaignSms(
       smsRows.map((row) => ({
         id: row.id,
         phone: row.phone,
-        body: linkFor(row.guest_id, smsBodyForLanguage(content, row.language)),
+        body: personalize(row.guest_id, row.language, smsBodyForLanguage(content, row.language)),
       })),
       await smsStatusCallbackUrl(),
       scheduledAtIso ?? undefined,
