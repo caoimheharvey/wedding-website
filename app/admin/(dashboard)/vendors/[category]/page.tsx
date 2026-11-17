@@ -7,7 +7,9 @@ import { getCategoryBudgetSummary } from "@/lib/budget/queries";
 import { formatCurrency } from "@/lib/budget/format";
 import { listVenueDetails } from "@/lib/venues/queries";
 import { VendorList } from "./_components/vendor-list";
+import { loadVenueDecisionInputs } from "@/lib/venues/analysis/load";
 import { VenueComparison } from "./_components/venue-comparison";
+import { VenueDecisionDashboard } from "./_components/venue-decision-dashboard";
 
 export default async function VendorCategoryPage({
   params,
@@ -17,12 +19,13 @@ export default async function VendorCategoryPage({
   const { category } = await params;
 
   const isVenue = category === "venue";
-  const [vendors, budget, categories, destinations, venueDetails] = await Promise.all([
+  const [vendors, budget, categories, destinations, venueDetails, decisionInputs] = await Promise.all([
     listVendorsByCategory(category),
     getCategoryBudgetSummary(category),
     listCategories(),
     listDestinations(),
     isVenue ? listVenueDetails() : Promise.resolve([]),
+    isVenue ? loadVenueDecisionInputs() : Promise.resolve([]),
   ]);
   const detailsByVendorId = Object.fromEntries(venueDetails.map((details) => [details.vendorId, details]));
   const categoryLabel = categories.find((c) => c.id === category)?.label;
@@ -81,6 +84,8 @@ export default async function VendorCategoryPage({
           to track spend here.
         </p>
       )}
+
+      {isVenue && <VenueDecisionDashboard venues={decisionInputs} category={category} />}
 
       {isVenue && (
         <VenueComparison

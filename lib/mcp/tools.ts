@@ -11,6 +11,22 @@ import { getBudgetSummary, listBudgetItems, listContributions } from "@/lib/budg
 import { getGuestById, listGuests } from "@/lib/guests/queries";
 import { RSVP_STATUS_OPTIONS, INVITED_BY_OPTIONS } from "@/lib/guests/types";
 import type { Guest } from "@/lib/guests/types";
+import { buildDecisionData } from "@/lib/venues/analysis/decision";
+import { loadVenueDecisionInputs } from "@/lib/venues/analysis/load";
+import { ASSUMPTIONS } from "@/lib/venues/analysis/assumptions";
+import { COST_CATALOGUE, RATING_CRITERIA, SERVICE_CATALOGUE } from "@/lib/venues/analysis/catalogue";
+import {
+  applyCostPatches,
+  applyProfilePatch,
+  applyRatings,
+  applyServicePatches,
+} from "@/lib/venues/costs/service";
+import {
+  costPatchSchema,
+  profilePatchSchema,
+  ratingPatchSchema,
+  servicePatchSchema,
+} from "@/lib/venues/costs/schema";
 import { listCategories } from "@/lib/categories/queries";
 import { listChecklistItems } from "@/lib/planning/queries";
 import { addChecklistItem, patchChecklistItem } from "@/lib/planning/service";
@@ -378,3 +394,108 @@ const MORE_TOOLS: McpTool[] = [
   }),
 ];
 MCP_TOOLS.push(...MORE_TOOLS);
+
+const historyInput = {
+  updateKind: z.enum(UPDATE_KINDS).default("note"),
+  updateDate: isoDate.optional().describe("Date of the reply/visit/call; defaults to today"),
+  sourceText: z.string().optional().describe("Original email or quote text to keep in the history"),
+};
+const entryFrom = (input: { updateKind: (typeof UPDATE_KINDS)[number]; updateDate?: string; sourceText?: string }) => ({
+  kind: input.updateKind,
+  date: input.updateDate ?? today(),
+  text: input.sourceText ?? null,
+});
+const requireVenue = async (vendorId: string) => {
+  const vendor = await getVendorById(vendorId);
+  if (!vendor) throw new Error("Vendor not found.");
+  if (vendor.category !== "venue") throw new Error("This only applies to vendors in the venue category.");
+};
+
+const VENUE_TOOLS: McpTool[] = [
+  tool({
+    name: "list_venue_catalogue",
+    description:
+      "The valid keys for venue cost lines, services and rating criteria, with each cost line's default basis. Call this before update_venue_costs / update_venue_services / rate_venue.",
+    input: z.object({}),
+    run: async () => ({
+      costItems: COST_CATALOGUE.map(({ key, label, group, basis, level, serviceKey }) => ({ key, label, group, basis, defaultScenarioLevel: level, linkedService: serviceKey ?? null })),
+      services: SERVICE_CATALOGUE.map(({ key, label, group, defaultCostKey }) => ({ key, label, group, defaultCostKey: defaultCostKey ?? null })),
+      ratingCriteria: RATING_CRITERIA,
+      planningAssumptions: ASSUMPTIONS,
+    }),
+  }),
+  tool({
+    name: "get_venue_comparison",
+    description:
+      "Compare every venue on the same assumptions: scenario A/B/C totals (low/mid/high), cost per adult, completeness, information confidence, service counts, the three rankings with their reasoning, and outstanding questions. Pass vendorId for one venue's full detail (scenario lines, exclusions).",
+    input: z.object({ adults: z.number().int().min(1).optional(), vendorId: z.string().optional() }),
+    run: async ({ adults, vendorId }) => {
+      const data = buildDecisionData(await loadVenueDecisionInputs(), adults ?? ASSUMPTIONS.adults);
+      const rank = (list: { vendorId: string; rank: number | null }[], id: string) => list.find((e) => e.vendorId === id)?.rank ?? null;
+      const summary = data.analyses.map((a) => ({
+        vendorId: a.vendorId,
+        name: a.name,
+        scenarioA: a.scenarios.A.total,
+        scenarioB: a.scenarios.B.total,
+        scenarioC: a.scenarios.C.total,
+        perAdultB: a.scenarios.B.perAdult.mid,
+        completeness: Math.round(a.completeness * 100),
+        infoConfidence: Math.round(a.infoConfidence * 100),
+        serviceCounts: a.counts,
+        unpricedRequired: a.unpricedRequired,
+        ranks: {
+          cheapest: rank(data.rankings.cheapest, a.vendorId),
+          allAround: rank(data.rankings.allAround, a.vendorId),
+          fit: rank(data.rankings.fit, a.vendorId),
+        },
+        questions: a.questions.map((q) => q.text),
+      }));
+      if (!vendorId) return { adults: data.adults, venues: summary, rankings: data.rankings };
+      const analysis = data.analyses.find((a) => a.vendorId === vendorId);
+      if (!analysis) throw new Error("Venue not found.");
+      return { adults: data.adults, analysis, facts: data.facts[vendorId] };
+    },
+  }),
+  tool({
+    name: "update_venue_costs",
+    description:
+      "Set or revise a venue's individually priced cost lines (see list_venue_catalogue for keys). Only the fields you send change on each line; a line you don't send is untouched. Never invent a price: leave amount null for 'not priced'. Set vat to included/excluded only if the venue said so, otherwise unknown. Logs a history entry with the original text.",
+    input: z.object({ vendorId: z.string(), items: z.array(costPatchSchema).min(1), ...historyInput }),
+    run: async ({ vendorId, items, ...rest }) => {
+      await requireVenue(vendorId);
+      return applyCostPatches(vendorId, items, entryFrom(rest));
+    },
+  }),
+  tool({
+    name: "update_venue_services",
+    description:
+      "Set what the venue provides: status per service (included, additional, not_provided, not_permitted, not_applicable, unknown). Use unknown unless the venue actually said; never mark something included that wasn't confirmed. Only the services you send change.",
+    input: z.object({ vendorId: z.string(), services: z.array(servicePatchSchema).min(1), ...historyInput }),
+    run: async ({ vendorId, services, ...rest }) => {
+      await requireVenue(vendorId);
+      return applyServicePatches(vendorId, services, entryFrom(rest));
+    },
+  }),
+  tool({
+    name: "update_venue_profile",
+    description:
+      "Update a venue's extra facts: location, capacities, dog policy, direct flight from Amsterdam, English support, outstanding questions (one per line), and per-field confidence (fieldMeta). Only the fields you send change.",
+    input: z.object({ vendorId: z.string(), ...profilePatchSchema.shape }),
+    run: async ({ vendorId, ...patch }) => {
+      await requireVenue(vendorId);
+      return applyProfilePatch(vendorId, defined(patch));
+    },
+  }),
+  tool({
+    name: "rate_venue",
+    description:
+      "Record our own 0-5 rating (with reasoning) for subjective criteria such as atmosphere or setting. Only rate what we actually have a view on; score null removes a rating. Unrated criteria are left out of the rankings, not defaulted.",
+    input: z.object({ vendorId: z.string(), ratings: z.array(ratingPatchSchema).min(1) }),
+    run: async ({ vendorId, ratings }) => {
+      await requireVenue(vendorId);
+      await applyRatings(vendorId, ratings);
+      return { saved: ratings.length };
+    },
+  }),
+];
+MCP_TOOLS.push(...VENUE_TOOLS);

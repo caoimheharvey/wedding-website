@@ -131,9 +131,9 @@ export function VenueComparison({
     <div className="flex flex-col gap-3 glass-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl text-ink">Compare venues</h2>
+          <h2 className="font-display text-xl text-ink">Quoted facts side by side</h2>
           <p className="text-sm text-foreground/60">
-            {showAll ? "All venues with details" : "Venues that have replied"}, side by side.
+            {showAll ? "All venues with details" : "Venues that have replied"}, exactly as the venue stated them (the original comparison).
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-sm">
