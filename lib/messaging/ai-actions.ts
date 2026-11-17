@@ -30,3 +30,18 @@ export async function aiTranslateCampaign(
     return { message: error instanceof Error ? error.message : "Translation failed." };
   }
 }
+
+export async function aiTranslateSms(
+  body: string,
+  targetLanguage: "fr" | "zh",
+): Promise<{ body?: string; message?: string }> {
+  await requireAdmin();
+
+  if (!body.trim()) return { message: "Write the English text first." };
+
+  try {
+    return { body: await translateText(body, targetLanguage) };
+  } catch (error) {
+    return { message: error instanceof Error ? error.message : "Translation failed." };
+  }
+}

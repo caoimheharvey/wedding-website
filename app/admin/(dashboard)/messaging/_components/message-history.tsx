@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { MessageCampaignSummary } from "@/lib/messaging/types";
+import { campaignTitle, CHANNEL_LABELS, type MessageCampaignSummary } from "@/lib/messaging/types";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString(undefined, {
@@ -10,7 +10,7 @@ function formatDate(iso: string): string {
 
 export function MessageHistory({ campaigns }: { campaigns: MessageCampaignSummary[] }) {
   if (campaigns.length === 0) {
-    return <p className="text-sm text-foreground/60">No emails sent yet.</p>;
+    return <p className="text-sm text-foreground/60">No messages sent yet.</p>;
   }
 
   return (
@@ -26,7 +26,12 @@ export function MessageHistory({ campaigns }: { campaigns: MessageCampaignSummar
             className="glass-card flex flex-col gap-1 p-4 transition hover:bg-sand/40"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-medium text-ink">{campaign.subjectEn}</span>
+              <span className="font-medium text-ink">
+                <span className="mr-2 rounded-full bg-aegean/10 px-2 py-0.5 text-xs font-normal text-aegean">
+                  {CHANNEL_LABELS[campaign.channel]}
+                </span>
+                {campaignTitle(campaign)}
+              </span>
               <span className="text-xs text-foreground/50">
                 {isScheduled
                   ? `Scheduled for ${formatDate(campaign.scheduledAt!)}`

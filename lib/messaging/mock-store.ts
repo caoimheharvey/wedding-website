@@ -1,11 +1,17 @@
 import "server-only";
 import type { PreferredLanguage } from "@/lib/guests/types";
-import type { MessageCampaign, MessageCampaignDetail, MessageRecipient, RecipientStatus } from "./types";
+import type {
+  MessageCampaign,
+  MessageCampaignDetail,
+  MessageChannel,
+  MessageRecipient,
+  RecipientStatus,
+} from "./types";
 
 /**
  * In-memory messaging data used only when LOCAL_TEST_BYPASS_AUTH is set.
  * Resets on every dev server restart — intentional, no persistence needed.
- * Sending is fully simulated here: no real Resend call is ever made in
+ * Sending is fully simulated here: no real Resend or Twilio call is ever made in
  * local test mode, matching how every other mock-store fully replaces the
  * external side of a feature, not just the database. Scheduled sends are
  * simulated the same way — accepted immediately rather than actually
@@ -32,17 +38,22 @@ export function mockListRecipientsForCampaign(campaignId: string): MessageRecipi
 }
 
 export function mockCreateCampaignAndSend(input: {
+  channel: MessageChannel;
   subjectEn: string;
   htmlEn: string;
   subjectFr: string | null;
   htmlFr: string | null;
   subjectZh: string | null;
   htmlZh: string | null;
+  bodyEn: string | null;
+  bodyFr: string | null;
+  bodyZh: string | null;
   fromEmail: string;
   scheduledAt: string | null;
   recipients: {
     guestId: string;
-    email: string;
+    email: string | null;
+    phone: string | null;
     guestName: string | null;
     language: PreferredLanguage;
   }[];
@@ -51,12 +62,16 @@ export function mockCreateCampaignAndSend(input: {
   const isScheduled = Boolean(input.scheduledAt);
   const campaign: MessageCampaign = {
     id: crypto.randomUUID(),
+    channel: input.channel,
     subjectEn: input.subjectEn,
     htmlEn: input.htmlEn,
     subjectFr: input.subjectFr,
     htmlFr: input.htmlFr,
     subjectZh: input.subjectZh,
     htmlZh: input.htmlZh,
+    bodyEn: input.bodyEn,
+    bodyFr: input.bodyFr,
+    bodyZh: input.bodyZh,
     fromEmail: input.fromEmail,
     status: isScheduled ? "scheduled" : "sent",
     createdAt: now,
@@ -71,9 +86,11 @@ export function mockCreateCampaignAndSend(input: {
     campaignId: campaign.id,
     guestId: recipient.guestId,
     email: recipient.email,
+    phone: recipient.phone,
     guestName: recipient.guestName,
     language: recipient.language,
-    resendEmailId: `local-test-${crypto.randomUUID()}`,
+    resendEmailId: input.channel === "email" ? `local-test-${crypto.randomUUID()}` : null,
+    providerMessageId: input.channel === "sms" ? `local-test-${crypto.randomUUID()}` : null,
     status,
     statusDetail: null,
     sentAt: isScheduled ? null : now,

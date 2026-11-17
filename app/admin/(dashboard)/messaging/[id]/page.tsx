@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCampaignWithRecipients } from "@/lib/messaging/queries";
-import { RECIPIENT_STATUS_LABELS } from "@/lib/messaging/types";
+import { campaignTitle, recipientContact, RECIPIENT_STATUS_LABELS } from "@/lib/messaging/types";
 import { PREFERRED_LANGUAGE_LABELS } from "@/lib/guests/types";
 import { CampaignStatusPoller } from "../_components/campaign-status-poller";
 import { CancelCampaignButton } from "../_components/cancel-campaign-button";
@@ -20,6 +20,8 @@ export default async function CampaignDetailPage({
   const { id } = await params;
   const campaign = await getCampaignWithRecipients(id);
   if (!campaign) notFound();
+  const isSms = campaign.channel === "sms";
+  const sender = isSms ? "" : ` from ${campaign.fromEmail}`;
 
   return (
     <div className="flex flex-col gap-6">
@@ -30,13 +32,13 @@ export default async function CampaignDetailPage({
           <Link href="/admin/messaging" className="text-xs font-medium text-aegean hover:underline">
             ← Back to messaging
           </Link>
-          <h1 className="font-display text-2xl text-ink">{campaign.subjectEn}</h1>
+          <h1 className="font-display text-2xl text-ink">{campaignTitle(campaign)}</h1>
           <p className="mt-1 text-sm text-foreground/60">
             {campaign.status === "scheduled"
-              ? `Scheduled to send ${formatDate(campaign.scheduledAt)} from ${campaign.fromEmail}`
+              ? `Scheduled to send ${formatDate(campaign.scheduledAt)}${sender}`
               : campaign.status === "canceled"
-                ? `Canceled — was scheduled for ${formatDate(campaign.scheduledAt)} from ${campaign.fromEmail}`
-                : `Sent ${formatDate(campaign.sentAt)} from ${campaign.fromEmail}`}
+                ? `Canceled — was scheduled for ${formatDate(campaign.scheduledAt)}${sender}`
+                : `Sent ${formatDate(campaign.sentAt)}${sender}`}
           </p>
         </div>
         {campaign.status === "scheduled" && <CancelCampaignButton campaignId={campaign.id} />}
@@ -49,7 +51,7 @@ export default async function CampaignDetailPage({
           <thead className="border-b border-border text-xs tracking-wide text-foreground/50 uppercase">
             <tr>
               <th className="py-2 pr-4 font-medium">Name</th>
-              <th className="py-2 pr-4 font-medium">Email</th>
+              <th className="py-2 pr-4 font-medium">{isSms ? "Phone" : "Email"}</th>
               <th className="py-2 pr-4 font-medium">Language</th>
               <th className="py-2 pr-4 font-medium">Status</th>
               <th className="py-2 pr-4 font-medium">Detail</th>
@@ -59,7 +61,7 @@ export default async function CampaignDetailPage({
             {campaign.recipients.map((recipient) => (
               <tr key={recipient.id} className="border-b border-border/60 last:border-0">
                 <td className="py-2 pr-4">{recipient.guestName || "—"}</td>
-                <td className="py-2 pr-4 text-foreground/70">{recipient.email}</td>
+                <td className="py-2 pr-4 text-foreground/70">{recipientContact(recipient)}</td>
                 <td className="py-2 pr-4 text-foreground/70">
                   {PREFERRED_LANGUAGE_LABELS[recipient.language]}
                 </td>

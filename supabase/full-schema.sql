@@ -1145,3 +1145,51 @@ alter table venue_details alter column fee_includes_vat drop default;
 
 -- With no hire fee there is nothing for the flag to describe.
 update venue_details set fee_includes_vat = null where rental_fee_saturday is null;
+
+
+-- >>> 0050_sms_messaging.sql
+-- A campaign is now either an email or a text message.
+alter table message_campaigns
+  add column channel text not null default 'email' check (channel in ('email', 'sms')),
+  add column body_en text,
+  add column body_fr text,
+  add column body_zh text;
+
+-- Texts have no subject, HTML or sender address.
+alter table message_campaigns alter column subject_en drop not null;
+alter table message_campaigns alter column html_en drop not null;
+alter table message_campaigns alter column from_email drop not null;
+
+alter table message_campaigns
+  add constraint message_campaigns_content_check check (
+    (channel = 'email' and subject_en is not null and html_en is not null and from_email is not null)
+    or (channel = 'sms' and body_en is not null)
+  );
+
+-- A recipient is reached by email or by phone, depending on the campaign.
+alter table message_recipients alter column email drop not null;
+alter table message_recipients
+  add column phone text,
+  add column provider_message_id text;
+
+alter table message_recipients
+  add constraint message_recipients_contact_check check (email is not null or phone is not null);
+
+create index message_recipients_provider_message_id_idx on message_recipients (provider_message_id);
+
+
+-- >>> 0051_guest_invite_links.sql
+-- One personal sign-in link per guest. The token is what goes in the emailed
+-- or texted URL (/i/<token>), so it is short enough for an SMS. Deleting a
+-- guest's row (or the whole table) revokes their link; the next send makes a
+-- new one. Kept apart from `guests` so tokens never travel with guest lists.
+create table guest_invite_links (
+  guest_id uuid primary key references guests(id) on delete cascade,
+  token text not null unique,
+  created_at timestamptz not null default now()
+);
+
+alter table guest_invite_links enable row level security;
+
+-- All access goes through the server-side service-role client, so no policies
+-- grant access to the anon/authenticated roles.

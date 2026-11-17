@@ -4,7 +4,10 @@ import { useActionState, useState, useTransition } from "react";
 import type { Guest } from "@/lib/guests/types";
 import type { EffectiveRsvpStatus } from "@/lib/rsvp/status";
 import { createAndSendCampaign, type ComposeMessageState } from "@/lib/messaging/actions";
-import { aiTranslateCampaign } from "@/lib/messaging/ai-actions";
+import { aiTranslateCampaign, aiTranslateSms } from "@/lib/messaging/ai-actions";
+import { CHANNEL_LABELS, type MessageChannel } from "@/lib/messaging/types";
+import { smsLength } from "@/lib/sms/segments";
+import { hasLinkPlaceholder, LINK_PLACEHOLDER } from "@/lib/messaging/personalize";
 import { RecipientPicker } from "./recipient-picker";
 
 const initialState: ComposeMessageState = undefined;
@@ -23,7 +26,10 @@ function toLocalDateTimeInputMin(): string {
 export function ComposeMessageForm({
   guests,
   effectiveStatusById,
+  linkLength,
 }: {
+  /** How long a guest's personal link will be, so the text counter can allow for it. */
+  linkLength: number;
   guests: Guest[];
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
 }) {
@@ -34,6 +40,10 @@ export function ComposeMessageForm({
   const [htmlFr, setHtmlFr] = useState("");
   const [subjectZh, setSubjectZh] = useState("");
   const [htmlZh, setHtmlZh] = useState("");
+  const [channel, setChannel] = useState<MessageChannel>("email");
+  const [bodyEn, setBodyEn] = useState("");
+  const [bodyFr, setBodyFr] = useState("");
+  const [bodyZh, setBodyZh] = useState("");
   const [activeTab, setActiveTab] = useState<LanguageTab>("en");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [scheduledAtLocal, setScheduledAtLocal] = useState("");
@@ -53,13 +63,36 @@ export function ComposeMessageForm({
       setHtmlFr("");
       setSubjectZh("");
       setHtmlZh("");
+      setBodyEn("");
+      setBodyFr("");
+      setBodyZh("");
       setSelected(new Set());
       setScheduledAtLocal("");
     }
   }
 
   const scheduledAtIso = scheduledAtLocal ? new Date(scheduledAtLocal).toISOString() : "";
-  const canReview = subjectEn.trim().length > 0 && htmlEn.trim().length > 0 && selected.size > 0;
+  const isSms = channel === "sms";
+  const canReview =
+    selected.size > 0 && (isSms ? bodyEn.trim().length > 0 : subjectEn.trim().length > 0 && htmlEn.trim().length > 0);
+
+  const bodyByTab: Record<LanguageTab, { body: string; setBody: (v: string) => void }> = {
+    en: { body: bodyEn, setBody: setBodyEn },
+    fr: { body: bodyFr, setBody: setBodyFr },
+    zh: { body: bodyZh, setBody: setBodyZh },
+  };
+  const activeBody = bodyByTab[activeTab];
+  const activeLength = smsLength(activeBody.body.replaceAll(LINK_PLACEHOLDER, "x".repeat(linkLength)));
+  const missingLink = isSms ? !hasLinkPlaceholder(bodyEn) : !hasLinkPlaceholder(htmlEn);
+
+  function switchChannel(next: MessageChannel) {
+    if (next === channel) return;
+    setChannel(next);
+    // Each channel can reach a different set of guests, so start the selection afresh.
+    setSelected(new Set());
+    setConfirming(false);
+    setTranslateMessage(null);
+  }
 
   const fieldsByTab: Record<LanguageTab, { subject: string; setSubject: (v: string) => void; html: string; setHtml: (v: string) => void }> = {
     en: { subject: subjectEn, setSubject: setSubjectEn, html: htmlEn, setHtml: setHtmlEn },
@@ -69,6 +102,23 @@ export function ComposeMessageForm({
   const active = fieldsByTab[activeTab];
 
   function handleTranslate() {
+    if (isSms) {
+      if (!bodyEn.trim()) {
+        setTranslateMessage("Write the English text first.");
+        return;
+      }
+      startTranslating(async () => {
+        const [frResult, zhResult] = await Promise.all([
+          aiTranslateSms(bodyEn, "fr"),
+          aiTranslateSms(bodyEn, "zh"),
+        ]);
+        if (frResult.body) setBodyFr(frResult.body);
+        if (zhResult.body) setBodyZh(zhResult.body);
+        const failures = [frResult.message, zhResult.message].filter(Boolean);
+        setTranslateMessage(failures.length > 0 ? failures.join(" ") : null);
+      });
+      return;
+    }
     if (!subjectEn.trim() || !htmlEn.trim()) {
       setTranslateMessage("Write the English subject and HTML first.");
       return;
@@ -93,11 +143,31 @@ export function ComposeMessageForm({
       className="glass-card flex flex-col gap-5 p-4"
       onSubmit={() => setConfirming(false)}
     >
+      <input type="hidden" name="channel" value={channel} />
+      <div className="flex gap-2">
+        {(Object.keys(CHANNEL_LABELS) as MessageChannel[]).map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => switchChannel(option)}
+            aria-pressed={channel === option}
+            className={
+              channel === option
+                ? "rounded-full bg-aegean px-4 py-1.5 text-sm font-medium text-whitewash"
+                : "rounded-full border border-aegean px-4 py-1.5 text-sm font-medium text-aegean hover:bg-aegean/5"
+            }
+          >
+            {CHANNEL_LABELS[option]}
+          </button>
+        ))}
+      </div>
+
       <div>
-        <p className="text-sm font-medium text-ink">Email content</p>
+        <p className="text-sm font-medium text-ink">{isSms ? "Text message" : "Email content"}</p>
         <p className="text-xs text-foreground/60">
-          English is required. French and Mandarin are optional — a recipient without a translated
-          version gets the English email instead.
+          {isSms
+            ? "English is required. French and Mandarin are optional — a recipient without a translated version gets the English text instead."
+            : "English is required. French and Mandarin are optional — a recipient without a translated version gets the English email instead."}
         </p>
       </div>
 
@@ -114,11 +184,38 @@ export function ComposeMessageForm({
             }
           >
             {LANGUAGE_TAB_LABELS[tab]}
-            {tab !== "en" && (fieldsByTab[tab].subject || fieldsByTab[tab].html) ? " ✓" : ""}
+            {tab !== "en" && (isSms ? bodyByTab[tab].body : fieldsByTab[tab].subject || fieldsByTab[tab].html) ? " ✓" : ""}
           </button>
         ))}
       </div>
 
+      {isSms ? (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="body-active" className="text-sm font-medium text-ink">
+            Text — {LANGUAGE_TAB_LABELS[activeTab]}
+          </label>
+          <textarea
+            id="body-active"
+            value={activeBody.body}
+            onChange={(event) => activeBody.setBody(event.target.value)}
+            className="input h-40"
+            placeholder="Write the text message…"
+          />
+          <p className="text-xs text-foreground/50">
+            {activeLength.units} character{activeLength.units === 1 ? "" : "s"} ·{" "}
+            {activeLength.segments} message{activeLength.segments === 1 ? "" : "s"} per recipient
+            {activeLength.gsm ? "" : " (non-standard characters, so fewer fit in each)"}
+          </p>
+          <button
+            type="button"
+            onClick={() => activeBody.setBody(`${activeBody.body}${activeBody.body && !activeBody.body.endsWith(" ") ? " " : ""}${LINK_PLACEHOLDER}`)}
+            className="self-start text-xs font-medium text-aegean hover:underline"
+          >
+            Add each guest&apos;s personal link ({LINK_PLACEHOLDER})
+          </button>
+        </div>
+      ) : (
+        <>
       <div className="flex flex-col gap-1">
         <label htmlFor="subject-active" className="text-sm font-medium text-ink">
           Subject — {LANGUAGE_TAB_LABELS[activeTab]}
@@ -148,6 +245,10 @@ export function ComposeMessageForm({
             className="input h-64 font-mono text-xs"
             placeholder="Paste the HTML exported from Canva here…"
           />
+          <p className="text-xs text-foreground/50">
+            Use <code>{LINK_PLACEHOLDER}</code> as a button&apos;s or link&apos;s address and each guest gets their own
+            link, which signs them in when they open it.
+          </p>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -169,6 +270,15 @@ export function ComposeMessageForm({
       <input type="hidden" name="htmlEn" value={htmlEn} />
       <input type="hidden" name="htmlFr" value={htmlFr} />
       <input type="hidden" name="htmlZh" value={htmlZh} />
+        </>
+      )}
+      {isSms && (
+        <>
+          <input type="hidden" name="bodyEn" value={bodyEn} />
+          <input type="hidden" name="bodyFr" value={bodyFr} />
+          <input type="hidden" name="bodyZh" value={bodyZh} />
+        </>
+      )}
 
       <div>
         <button
@@ -183,11 +293,19 @@ export function ComposeMessageForm({
       </div>
 
       <RecipientPicker
+        channel={channel}
         guests={guests}
         effectiveStatusById={effectiveStatusById}
         selected={selected}
         onChange={setSelected}
       />
+
+      {missingLink && (
+        <p className="rounded-md bg-terracotta/10 px-3 py-2 text-xs text-terracotta">
+          There&apos;s no <code>{LINK_PLACEHOLDER}</code> in the English {isSms ? "text" : "email"}, so guests won&apos;t
+          get a personal sign-in link and will have to sign in with their name.
+        </p>
+      )}
 
       <div className="flex flex-col gap-1">
         <label htmlFor="scheduledAtLocal" className="text-sm font-medium text-ink">
@@ -214,6 +332,7 @@ export function ComposeMessageForm({
         </div>
         <p className="text-xs text-foreground/50">
           Leave blank to send as soon as you confirm.
+          {isSms && " Texts can be scheduled from 15 minutes to 35 days ahead."}
         </p>
         <input type="hidden" name="scheduledAt" value={scheduledAtIso} />
       </div>
@@ -231,8 +350,8 @@ export function ComposeMessageForm({
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-sand/40 px-4 py-3">
           <span className="text-sm font-medium text-ink">
             {scheduledAtLocal
-              ? `Schedule "${subjectEn}" to send to ${selected.size} recipient${selected.size === 1 ? "" : "s"} at ${new Date(scheduledAtIso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}?`
-              : `Send "${subjectEn}" to ${selected.size} recipient${selected.size === 1 ? "" : "s"}?`}
+              ? `Schedule ${isSms ? "this text" : `"${subjectEn}"`} to send to ${selected.size} recipient${selected.size === 1 ? "" : "s"} at ${new Date(scheduledAtIso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}?`
+              : `Send ${isSms ? "this text" : `"${subjectEn}"`} to ${selected.size} recipient${selected.size === 1 ? "" : "s"}?`}
           </span>
           <button
             type="submit"

@@ -7,7 +7,7 @@ import { applyMigration, createDatabase, migrationFiles } from "./helpers/db";
 describe("migration 0049 preserves existing venue data", () => {
   it("maps dog policy values, keeps VAT answers, and loses nothing", async () => {
     const db = await createDatabase("0048");
-    expect(migrationFiles().at(-1)).toMatch(/^0049/);
+    expect(migrationFiles("0049").at(-1)).toMatch(/^0049/);
 
     const venue = async (name: string, details: string, profile: string) => {
       const { rows } = await db.query<{ id: string }>("insert into vendors (category, name, notes) values ('venue', $1, $2) returning id", [name, `notes for ${name}`]);
@@ -24,7 +24,7 @@ describe("migration 0049 preserves existing venue data", () => {
     const d = await venue("nothing known", "max_capacity|80", "'unknown', null, null");
 
     const before = await db.query("select * from venue_details order by vendor_id");
-    await applyMigration(db, migrationFiles().at(-1)!);
+    await applyMigration(db, migrationFiles("0049").at(-1)!);
 
     const profile = async (id: string) =>
       (await db.query<Record<string, unknown>>("select dog_policy, dog_accommodation, address, location, dog_notes from venue_profile where vendor_id = $1", [id])).rows[0];

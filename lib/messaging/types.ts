@@ -1,5 +1,9 @@
 import type { PreferredLanguage } from "@/lib/guests/types";
 
+export type MessageChannel = "email" | "sms";
+
+export const CHANNEL_LABELS: Record<MessageChannel, string> = { email: "Email", sms: "Text" };
+
 export type CampaignStatus = "sending" | "scheduled" | "sent" | "failed" | "canceled";
 
 export type RecipientStatus =
@@ -29,11 +33,16 @@ export interface MessageRecipient {
   id: string;
   campaignId: string;
   guestId: string | null;
-  email: string;
+  /** Set for email campaigns; null for texts. */
+  email: string | null;
+  /** Set for text campaigns; null for emails. */
+  phone: string | null;
   guestName: string | null;
   /** The language variant actually sent to this recipient, snapshotted at send time. */
   language: PreferredLanguage;
   resendEmailId: string | null;
+  /** Twilio message SID for texts. */
+  providerMessageId: string | null;
   status: RecipientStatus;
   statusDetail: string | null;
   sentAt: string | null;
@@ -66,8 +75,20 @@ export interface MessageCampaignContent {
   htmlZh: string | null;
 }
 
+/** Plain-text bodies for a text campaign, one per supported guest language. */
+export interface SmsCampaignContent {
+  bodyEn: string;
+  bodyFr: string | null;
+  bodyZh: string | null;
+}
+
 export interface MessageCampaign extends MessageCampaignContent {
   id: string;
+  channel: MessageChannel;
+  bodyEn: string | null;
+  bodyFr: string | null;
+  bodyZh: string | null;
+  /** Empty for text campaigns. */
   fromEmail: string;
   status: CampaignStatus;
   createdAt: string;
@@ -95,4 +116,22 @@ export function contentForLanguage(
     return { subject: campaign.subjectZh, html: campaign.htmlZh };
   }
   return { subject: campaign.subjectEn, html: campaign.htmlEn };
+}
+
+export function smsBodyForLanguage(campaign: SmsCampaignContent, language: PreferredLanguage): string {
+  if (language === "fr" && campaign.bodyFr) return campaign.bodyFr;
+  if (language === "zh" && campaign.bodyZh) return campaign.bodyZh;
+  return campaign.bodyEn;
+}
+
+/** What to show as a campaign's headline: the email subject, or the start of the text. */
+export function campaignTitle(campaign: Pick<MessageCampaign, "channel" | "subjectEn" | "bodyEn">): string {
+  if (campaign.channel === "email") return campaign.subjectEn;
+  const body = campaign.bodyEn ?? "";
+  return body.length > 70 ? `${body.slice(0, 70)}…` : body;
+}
+
+/** Where a recipient was reached: their email address or phone number. */
+export function recipientContact(recipient: Pick<MessageRecipient, "email" | "phone">): string {
+  return recipient.email ?? recipient.phone ?? "";
 }

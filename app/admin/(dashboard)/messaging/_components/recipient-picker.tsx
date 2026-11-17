@@ -11,20 +11,24 @@ import {
   type RsvpFilter,
 } from "../../guests/_components/guests-filters";
 import { GuestsSearch } from "../../guests/_components/guests-search";
+import type { MessageChannel } from "@/lib/messaging/types";
+import { toE164 } from "@/lib/sms/phone";
 
 function matchesSearch(guest: Guest, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  const haystack = [guestDisplayName(guest), guest.email].filter(Boolean).join(" ").toLowerCase();
+  const haystack = [guestDisplayName(guest), guest.email, guest.phone].filter(Boolean).join(" ").toLowerCase();
   return haystack.includes(q);
 }
 
 export function RecipientPicker({
+  channel,
   guests,
   effectiveStatusById,
   selected,
   onChange,
 }: {
+  channel: MessageChannel;
   guests: Guest[];
   effectiveStatusById: Record<string, EffectiveRsvpStatus>;
   selected: Set<string>;
@@ -35,7 +39,10 @@ export function RecipientPicker({
   const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const emailable = useMemo(() => guests.filter((guest) => guest.email?.trim()), [guests]);
+  const emailable = useMemo(
+    () => guests.filter((guest) => (channel === "sms" ? toE164(guest.phone) : guest.email?.trim())),
+    [guests, channel],
+  );
   const excludedCount = guests.length - emailable.length;
 
   const filtered = useMemo(() => {
@@ -82,7 +89,10 @@ export function RecipientPicker({
 
       {excludedCount > 0 && (
         <p className="text-xs text-foreground/50">
-          {excludedCount} guest{excludedCount === 1 ? "" : "s"} have no email on file and are excluded.
+          {excludedCount} guest{excludedCount === 1 ? "" : "s"}{" "}
+          {channel === "sms"
+            ? "have no phone number with a country code on file and are excluded."
+            : "have no email on file and are excluded."}
         </p>
       )}
 
@@ -121,7 +131,7 @@ export function RecipientPicker({
                 className="h-4 w-4 rounded border-border text-aegean focus:ring-aegean"
               />
               <span className="text-ink">{guestDisplayName(guest) || "Unnamed guest"}</span>
-              <span className="text-foreground/50">{guest.email}</span>
+              <span className="text-foreground/50">{channel === "sms" ? guest.phone : guest.email}</span>
               <span className="ml-auto text-xs text-foreground/40">
                 {PREFERRED_LANGUAGE_LABELS[guest.preferredLanguage]}
               </span>

@@ -54,11 +54,22 @@ stores, in one call) and `audit_venue_data` (where the record contradicts itself
 | hire fee, per-person price, extra bar hour, coordination cost: `venue_details` flat columns ↔ cost lines | **Synchronised both ways** (`lib/venues/sync.ts`). Cost lines are canonical; saving either side updates the other. |
 | `onsite_accommodation` ↔ services `accommodation`; `setup_teardown_included` ↔ `setup`/`breakdown`; `catering_type` ↔ `catering`; `bar_hours_included` ↔ `open_bar` | **Reported, not merged**: `audit_venue_data` flags contradictions. The services checklist is the richer, preferred record. |
 
+## Messaging
+| Attribute | Canonical field | Notes |
+|---|---|---|
+| Channel | `message_campaigns.channel` | `email` (Resend) or `sms` (Twilio); a campaign is one or the other |
+| Email content | `subject_*`, `html_*`, `from_email` | required for `email` campaigns, null for `sms` (CHECK) |
+| Text content | `body_en / body_fr / body_zh` | required (English) for `sms` campaigns |
+| Reached at | `message_recipients.email` or `.phone` | phone is stored as E.164 at send time (guests keep their own formatting) |
+| Personal sign-in link | `guest_invite_links.token` (one per guest) | created the first time a message with `{{link}}` is sent; URL is `<site>/i/<token>`; delete the row to revoke |
+| Provider id | `resend_email_id` (email) / `provider_message_id` (Twilio SID) | used to match delivery webhooks |
+
 ## Known limitations
 - There is no Notion integration in the code: Notion ↔ website consistency is maintained by assistants via MCP,
   with the website authoritative. `get_venue_record` is the value a Notion page should match.
 - `guests.plus_one_status` and `guests.plus_one_requested_relationship` are leftovers of an earlier plus-one
   request flow: nothing writes or shows them (always null).
+- Texts: no opt-out tracking. Twilio blocks replies of STOP at the carrier level, but the app does not record them or skip those guests next time. Guests need a phone number with a country code.
 - Checklist items can be completed and created in the admin UI, but edited only through MCP.
 
 ## Guard rails (tests)

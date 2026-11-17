@@ -5,6 +5,7 @@ import type { PreferredLanguage } from "@/lib/guests/types";
 import { mockGetCampaignWithRecipients, mockListCampaigns, mockListRecipientsForCampaign } from "./mock-store";
 import type {
   CampaignStatus,
+  MessageChannel,
   MessageCampaign,
   MessageCampaignDetail,
   MessageCampaignSummary,
@@ -15,13 +16,17 @@ import type {
 
 interface CampaignRow {
   id: string;
-  subject_en: string;
-  html_en: string;
+  channel: MessageChannel;
+  subject_en: string | null;
+  html_en: string | null;
+  body_en: string | null;
+  body_fr: string | null;
+  body_zh: string | null;
   subject_fr: string | null;
   html_fr: string | null;
   subject_zh: string | null;
   html_zh: string | null;
-  from_email: string;
+  from_email: string | null;
   status: CampaignStatus;
   created_at: string;
   sent_at: string | null;
@@ -32,10 +37,12 @@ interface RecipientRow {
   id: string;
   campaign_id: string;
   guest_id: string | null;
-  email: string;
+  email: string | null;
+  phone: string | null;
   guest_name: string | null;
   language: PreferredLanguage;
   resend_email_id: string | null;
+  provider_message_id: string | null;
   status: RecipientStatus;
   status_detail: string | null;
   sent_at: string | null;
@@ -48,13 +55,17 @@ interface RecipientRow {
 function mapCampaignRow(row: CampaignRow): MessageCampaign {
   return {
     id: row.id,
-    subjectEn: row.subject_en,
-    htmlEn: row.html_en,
+    channel: row.channel,
+    subjectEn: row.subject_en ?? "",
+    htmlEn: row.html_en ?? "",
+    bodyEn: row.body_en,
+    bodyFr: row.body_fr,
+    bodyZh: row.body_zh,
     subjectFr: row.subject_fr,
     htmlFr: row.html_fr,
     subjectZh: row.subject_zh,
     htmlZh: row.html_zh,
-    fromEmail: row.from_email,
+    fromEmail: row.from_email ?? "",
     status: row.status,
     createdAt: row.created_at,
     sentAt: row.sent_at,
@@ -68,9 +79,11 @@ function mapRecipientRow(row: RecipientRow): MessageRecipient {
     campaignId: row.campaign_id,
     guestId: row.guest_id,
     email: row.email,
+    phone: row.phone,
     guestName: row.guest_name,
     language: row.language,
     resendEmailId: row.resend_email_id,
+    providerMessageId: row.provider_message_id,
     status: row.status,
     statusDetail: row.status_detail,
     sentAt: row.sent_at,

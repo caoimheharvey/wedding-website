@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { jwtVerify, SignJWT } from "jose";
+import { configuredSiteOrigin } from "@/lib/site-url";
 
 /**
  * Minimal stateless OAuth 2.1 for the MCP endpoint, so clients that can only
@@ -33,17 +34,7 @@ export function oauthConfigured(): boolean {
 
 /** Public origin of this site, used for issuer / audience / metadata URLs. */
 export function siteOrigin(request: Request): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (configured) {
-    // Tolerate a bare host ("example.com"): new URL() would throw on it.
-    const withScheme = /^https?:\/\//i.test(configured) ? configured : `https://${configured}`;
-    try {
-      return new URL(withScheme).origin;
-    } catch {
-      // fall through to the request's own origin
-    }
-  }
-  return new URL(request.url).origin;
+  return configuredSiteOrigin() ?? new URL(request.url).origin;
 }
 
 export const resourceUrl = (origin: string) => `${origin}/api/mcp`;

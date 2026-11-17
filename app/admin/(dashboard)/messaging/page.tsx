@@ -2,6 +2,7 @@ import { listGuests } from "@/lib/guests/queries";
 import { listCampaigns } from "@/lib/messaging/queries";
 import { getSiteSettings } from "@/lib/rsvp/queries";
 import { getEffectiveRsvpStatus, type EffectiveRsvpStatus } from "@/lib/rsvp/status";
+import { configuredSiteOrigin } from "@/lib/site-url";
 import { ComposeMessageForm } from "./_components/compose-message-form";
 import { MessageHistory } from "./_components/message-history";
 
@@ -25,11 +26,15 @@ export default async function MessagingPage() {
       <div>
         <h1 className="font-display text-2xl text-ink">Messaging</h1>
         <p className="text-sm text-foreground/60">
-          Compose an email, pick who receives it, and keep a record of what&apos;s been sent.
+          Compose an email or a text, pick who receives it, and keep a record of what&apos;s been sent.
         </p>
       </div>
 
-      <ComposeMessageForm guests={guests} effectiveStatusById={effectiveStatusById} />
+      <ComposeMessageForm
+        guests={guests}
+        effectiveStatusById={effectiveStatusById}
+        linkLength={(configuredSiteOrigin() ?? "https://example.com").length + "/i/".length + 12}
+      />
 
       <div className="flex flex-col gap-3">
         <h2 className="font-display text-lg text-ink">History</h2>
