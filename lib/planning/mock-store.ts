@@ -235,3 +235,31 @@ export function mockInsertChecklistItem(data: {
   items.push(item);
   return item;
 }
+
+export function mockUpdateChecklistItem(
+  itemId: string,
+  patch: {
+    title?: string;
+    description?: string | null;
+    phaseId?: PlanningPhaseId;
+    isComplete?: boolean;
+  },
+): PlanningChecklistItem | null {
+  const index = items.findIndex((item) => item.id === itemId);
+  if (index === -1) return null;
+
+  const current = items[index];
+  let orderIndex = current.orderIndex;
+  if (patch.phaseId && patch.phaseId !== current.phaseId) {
+    const target = items.filter((item) => item.phaseId === patch.phaseId);
+    orderIndex = target.length > 0 ? Math.max(...target.map((item) => item.orderIndex)) + 1 : 1;
+  }
+
+  items[index] = {
+    ...current,
+    ...patch,
+    orderIndex,
+    updatedAt: new Date().toISOString(),
+  };
+  return items[index];
+}
